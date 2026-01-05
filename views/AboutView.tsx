@@ -28,12 +28,12 @@ export const AboutView: React.FC = () => {
             <ScrollReveal>
               <div className="flex flex-col gap-6">
                 <GlassBadge icon="visibility">Nuestra Visión</GlassBadge>
-                <h2 className="text-5xl md:text-7xl font-black font-display text-slate-900 leading-[0.95] tracking-tight mt-6">
+                <h2 className={DESIGN_SYSTEM.typography.h1 + " mt-6"}>
                   Redefiniendo el <br/>
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-jaci-purple">aprendizaje</span> <br/>
                   moderno.
                 </h2>
-                <p className="text-lg md:text-xl text-gray-500 font-body leading-relaxed mt-4">
+                <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
                   En JACI, no solo enseñamos materias; cultivamos la <span className="text-slate-900 font-bold underline decoration-jaci-yellow decoration-4 underline-offset-4">curiosidad infinita</span>. 
                   Transformamos cada aula en un ecosistema de descubrimiento.
                 </p>
@@ -72,8 +72,8 @@ export const AboutView: React.FC = () => {
           <div className="text-center mb-24 flex flex-col items-center">
             <ScrollReveal>
               <GlassBadge icon="dna" colorClass="text-jaci-pink">Nuestro ADN</GlassBadge>
-              <h3 className="text-4xl md:text-6xl font-black font-display text-slate-900 mb-8 tracking-tight mt-6">Lo que nos hace únicos</h3>
-              <p className="text-slate-500 font-body text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">Cuatro pilares que sostienen nuestro compromiso con el futuro de tus hijos.</p>
+              <h3 className={DESIGN_SYSTEM.typography.h2 + " mt-6"}>Lo que nos hace únicos</h3>
+              <p className={DESIGN_SYSTEM.typography.body + " mt-8 max-w-2xl mx-auto"}>Cuatro pilares que sostienen nuestro compromiso con el futuro de tus hijos.</p>
             </ScrollReveal>
           </div>
 
@@ -143,7 +143,7 @@ export const AboutView: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
                 <ScrollReveal>
-                  <h3 className="text-3xl md:text-5xl font-black font-display text-slate-900 mb-10 leading-tight tracking-tight">
+                  <h3 className={DESIGN_SYSTEM.typography.h3 + " mb-10"}>
                     Más que una escuela, <br/>
                     una <span className="text-jaci-pink">segunda casa</span>.
                   </h3>
@@ -194,6 +194,6 @@ const ImpactPoint: React.FC<{ title: string, desc: string }> = ({ title, desc })
 const StatBox: React.FC<{ count: string, label: string, color: string }> = ({ count, label, color }) => (
   <div className="flex flex-col">
     <div className={`text-5xl md:text-6xl font-black font-display ${color} tracking-tighter mb-2`}>{count}</div>
-    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</div>
+    <div className={DESIGN_SYSTEM.typography.label}>{label}</div>
   </div>
 );

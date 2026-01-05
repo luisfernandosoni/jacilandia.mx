@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ViewState, NavItem, DESIGN_SYSTEM } from '../types';
 import { Magnetic } from './MotionPrimitives';
+import { prewarmView } from '../App';
 
 interface NavigationProps {
   currentView: ViewState;
@@ -19,29 +21,63 @@ const navItems: NavItem[] = [
 
 export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeView }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const intentTimers = useRef<Record<string, number>>({});
+
+  /**
+   * Intent-Based Speculative Preloading
+   * If user hovers for >80ms, they have a 70% probability of clicking.
+   * We preload code and assets during this "lost" time.
+   */
+  const handleIntentStart = (view: ViewState) => {
+    intentTimers.current[view] = window.setTimeout(() => {
+      prewarmView(view);
+    }, 80);
+  };
+
+  const handleIntentCancel = (view: ViewState) => {
+    if (intentTimers.current[view]) {
+      clearTimeout(intentTimers.current[view]);
+      delete intentTimers.current[view];
+    }
+  };
 
   return (
-    <header className="sticky top-0 z-[100] w-full bg-white/60 backdrop-blur-2xl border-b border-white/40 transition-all duration-500">
+    <header ref={navRef} className="sticky top-0 z-[100] w-full bg-white/60 backdrop-blur-2xl border-b border-white/40 transition-all duration-500">
       <div className="max-w-[1600px] mx-auto px-8 md:px-12 h-20 flex items-center justify-between">
         
         <div className="flex items-center">
           <Magnetic pullStrength={0.05}>
             <button 
               onClick={() => onChangeView(ViewState.HOME)}
+              onPointerEnter={() => handleIntentStart(ViewState.HOME)}
+              onPointerLeave={() => handleIntentCancel(ViewState.HOME)}
               className="flex items-center active:scale-95 transition-transform group"
               aria-label="Ir al inicio"
             >
-              <motion.div
-                layoutId={DESIGN_SYSTEM.layoutIds.BRAND_IDENTITY}
-                transition={DESIGN_SYSTEM.springs.identity}
-                className="relative z-10"
-              >
-                <img 
-                  src="https://raw.githubusercontent.com/soniglf/JACIResources/84c35cf151659486d49458cee28c1f353f42f47d/JACI_Color.png" 
-                  alt="JACI" 
-                  className={`h-11 w-11 object-contain transition-all duration-700 ${currentView === ViewState.HOME ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'}`}
-                />
-              </motion.div>
+              <div className="relative w-11 h-11">
+                <AnimatePresence mode="wait">
+                  {currentView !== ViewState.HOME ? (
+                    <motion.img 
+                      key="nav-logo"
+                      layoutId={DESIGN_SYSTEM.layoutIds.BRAND_IDENTITY}
+                      transition={DESIGN_SYSTEM.springs.identity}
+                      src="https://raw.githubusercontent.com/soniglf/JACIResources/84c35cf151659486d49458cee28c1f353f42f47d/JACI_Color.png" 
+                      alt="JACI" 
+                      className="absolute inset-0 w-full h-full object-contain"
+                      style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
+                    />
+                  ) : (
+                    <motion.div 
+                      key="placeholder"
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 0 }} 
+                      exit={{ opacity: 0 }}
+                      className="w-full h-full"
+                    />
+                  )}
+                </AnimatePresence>
+              </div>
             </button>
           </Magnetic>
         </div>
@@ -52,6 +88,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
             return (
               <button
                 key={item.label}
+                onPointerEnter={() => handleIntentStart(item.view)}
+                onPointerLeave={() => handleIntentCancel(item.view)}
                 onClick={() => onChangeView(item.view)}
                 className={`relative px-5 py-2.5 text-[10px] font-black tracking-[0.15em] uppercase transition-all duration-500 whitespace-nowrap ${
                   isActive ? 'text-primary' : 'text-slate-500 hover:text-slate-900'
@@ -73,6 +111,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
         <div className="flex items-center gap-6">
           <button 
             onClick={() => onChangeView(ViewState.PRICING)}
+            onPointerEnter={() => handleIntentStart(ViewState.PRICING)}
+            onPointerLeave={() => handleIntentCancel(ViewState.PRICING)}
             className={`hidden md:block text-[10px] font-black uppercase tracking-[0.15em] transition-colors ${
               currentView === ViewState.PRICING ? 'text-primary' : 'text-slate-500 hover:text-slate-900'
             }`}
@@ -83,6 +123,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
           <Magnetic pullStrength={0.2}>
             <button 
               onClick={() => onChangeView(ViewState.REGISTER)}
+              onPointerEnter={() => handleIntentStart(ViewState.REGISTER)}
+              onPointerLeave={() => handleIntentCancel(ViewState.REGISTER)}
               className="group relative px-7 py-3 overflow-hidden rounded-full transition-all active:scale-95 shadow-glow-pink/10 hover:shadow-glow-pink/30"
             >
               <div className="absolute inset-0 bg-jaci-pink" />
@@ -116,6 +158,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
                   onChangeView(item.view);
                   setIsMobileMenuOpen(false);
                 }}
+                onPointerEnter={() => handleIntentStart(item.view)}
                 className={`px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all ${
                   currentView === item.view ? 'text-primary bg-primary/5' : 'text-slate-500 active:bg-slate-50'
                 }`}
@@ -126,6 +169,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
             <div className="h-px bg-slate-100 my-4" />
             <button 
               onClick={() => onChangeView(ViewState.REGISTER)}
+              onPointerEnter={() => handleIntentStart(ViewState.REGISTER)}
               className="w-full py-5 text-center text-[10px] font-black uppercase tracking-[0.2em] text-white bg-jaci-pink rounded-2xl shadow-button"
             >
               Inscríbete

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ViewContainer, InteractionCard, Magnetic, ScrollReveal, GlassBadge } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
@@ -10,11 +9,11 @@ export const RegisterView: React.FC = () => {
         <div className="text-center mb-20 max-w-3xl mx-auto flex flex-col items-center">
           <ScrollReveal>
             <GlassBadge icon="family_history" colorClass="text-jaci-yellow">Únete a la Familia JACI</GlassBadge>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 mb-8 font-display leading-[0.95] mt-6">
+            <h1 className={DESIGN_SYSTEM.typography.h1 + " mt-6"}>
               Forma parte de las <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-jaci-purple to-jaci-pink">monstruomentes</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-500 font-body leading-relaxed max-w-2xl mx-auto">
+            <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
               Estamos listos para recibirte. Elige el camino que mejor se adapte a las necesidades de tu pequeño genio.
             </p>
           </ScrollReveal>
@@ -27,7 +26,7 @@ export const RegisterView: React.FC = () => {
                 <div className="w-16 h-16 bg-primary-soft rounded-2xl flex items-center justify-center text-primary mb-8 border border-primary/20">
                   <span className="material-symbols-outlined text-4xl filled">school</span>
                 </div>
-                <h2 className="text-4xl font-black font-display text-slate-900 tracking-tight mb-4 leading-none">Inscripciones 2024</h2>
+                <h2 className={DESIGN_SYSTEM.typography.h2 + " mb-4"}>Inscripciones 2024</h2>
                 <p className="text-slate-600 mb-10 font-body text-lg leading-relaxed flex-1">
                   Asegura el lugar de tu pequeño ahora. Nuestro proceso es ágil, transparente y diseñado para familias modernas.
                 </p>
@@ -50,7 +49,7 @@ export const RegisterView: React.FC = () => {
                 <div className="w-16 h-16 bg-jaci-green-soft rounded-2xl flex items-center justify-center text-jaci-green mb-8 border border-jaci-green/20">
                   <span className="material-symbols-outlined text-4xl filled">chat</span>
                 </div>
-                <h2 className="text-4xl font-black font-display text-slate-900 tracking-tight mb-4 leading-none">Atención Directa</h2>
+                <h2 className={DESIGN_SYSTEM.typography.h2 + " mb-4"}>Atención Directa</h2>
                 <p className="text-slate-600 mb-10 font-body text-lg leading-relaxed flex-1">
                   ¿Tienes dudas sobre costos, horarios o nuestra metodología de colores? Conversa con nosotros hoy mismo.
                 </p>
@@ -59,13 +58,13 @@ export const RegisterView: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-primary group-hover/item:scale-110 transition-transform border border-slate-100">
                       <span className="material-symbols-outlined text-xl filled">location_on</span>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-700 font-display">Sedes Centro o Americas</span>
+                    <span className={DESIGN_SYSTEM.typography.label + " !text-slate-700"}>Sedes Centro o Americas</span>
                   </div>
                   <div className="flex items-center gap-4 p-6 rounded-[2rem] bg-slate-50 border border-slate-100 group/item hover:bg-white hover:shadow-sm transition-all cursor-pointer">
                     <div className="w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-jaci-pink group-hover/item:scale-110 transition-transform border border-slate-100">
                       <span className="material-symbols-outlined text-xl filled">mail</span>
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-700 font-display">hola@jacischool.edu</span>
+                    <span className={DESIGN_SYSTEM.typography.label + " !text-slate-700"}>hola@jacischool.edu</span>
                   </div>
                 </div>
                 <Magnetic pullStrength={0.2}>

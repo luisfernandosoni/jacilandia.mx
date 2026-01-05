@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ViewContainer, InteractionCard, ScrollReveal, GlassBadge } from '../components/MotionPrimitives';
 import { Testimonial, DESIGN_SYSTEM } from '../types';
 
@@ -34,11 +33,11 @@ export const TestimonialsView: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto flex flex-col items-center mb-24">
           <ScrollReveal>
             <GlassBadge icon="forum" colorClass="text-jaci-pink">Testimonios</GlassBadge>
-            <h1 className="text-5xl md:text-7xl font-black font-display text-slate-900 tracking-tight leading-[0.95] mb-8 mt-6">
+            <h1 className={DESIGN_SYSTEM.typography.h1 + " mt-6"}>
               Lo que dicen nuestras <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-jaci-purple">familias</span>
             </h1>
-            <p className="text-xl text-slate-500 font-body leading-relaxed">
+            <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
               Historias reales de padres y alumnos que forman parte de nuestro crecimiento diario y nuestra magia.
             </p>
           </ScrollReveal>
@@ -58,7 +57,7 @@ export const TestimonialsView: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-slate-900 text-lg font-black leading-tight font-display tracking-tight">{t.name}</p>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">{t.role}</p>
+                      <p className={DESIGN_SYSTEM.typography.label + " mt-1"}>{t.role}</p>
                     </div>
                   </div>
                   <div className="flex gap-1 text-jaci-yellow">

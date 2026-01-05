@@ -9,6 +9,11 @@ export enum ViewState {
   REGISTER = 'REGISTER'
 }
 
+export enum PerformanceProfile {
+  LITE = 'LITE',
+  HIGH = 'HIGH'
+}
+
 export interface NavItem {
   label: string;
   view: ViewState;
@@ -35,34 +40,29 @@ export const DESIGN_SYSTEM = {
       deep: 'blur(40px)',
     },
     gutters: {
-      section: 'py-20 md:py-32',
-      container: 'px-6 md:px-12 lg:px-20',
+      section: 'py-24 md:py-32 lg:py-40',
+      container: 'px-8 md:px-16 lg:px-24',
     }
   },
+  typography: {
+    h1: 'text-5xl md:text-7xl lg:text-[5.5rem] font-black font-display tracking-tight leading-[0.95]',
+    h2: 'text-4xl md:text-6xl font-black font-display tracking-tight leading-[1]',
+    h3: 'text-3xl md:text-5xl font-black font-display tracking-tight leading-[1.1]',
+    body: 'text-lg md:text-xl text-slate-500 font-body leading-relaxed',
+    label: 'text-[10px] font-black uppercase tracking-[0.2em] text-slate-400'
+  },
   springs: {
-    snappy: { type: 'spring', stiffness: 400, damping: 30, mass: 0.8 } as const,
-    gentle: { type: 'spring', stiffness: 120, damping: 20, mass: 1 } as const,
-    bouncy: { type: 'spring', stiffness: 500, damping: 15, mass: 0.5 } as const,
-    projection: { type: 'spring', stiffness: 600, damping: 35, mass: 1.2 } as const,
-    magnetic: { stiffness: 180, damping: 12, mass: 0.08 } as const,
-    identity: { type: 'spring', stiffness: 300, damping: 30, mass: 1 } as const,
-  },
-  easings: {
-    expo: [0.19, 1, 0.22, 1],
-    smooth: [0.23, 1, 0.32, 1],
-    outQuint: [0.22, 1, 0.36, 1],
-  },
-  animations: {
-    fadeInUp: {
-      initial: { opacity: 0, y: 15, scale: 0.98 },
-      animate: { opacity: 1, y: 0, scale: 1 },
-      exit: { opacity: 0, y: -15, scale: 0.98 },
-    },
+    snappy: { type: 'spring', stiffness: 450, damping: 32, mass: 0.8 } as const,
+    gentle: { type: 'spring', stiffness: 150, damping: 25, mass: 1 } as const,
+    bouncy: { type: 'spring', stiffness: 500, damping: 20, mass: 0.6 } as const,
+    projection: { type: 'spring', stiffness: 600, damping: 40, mass: 1.2 } as const,
+    magnetic: { stiffness: 200, damping: 15, mass: 0.1 } as const,
+    identity: { type: 'spring', stiffness: 400, damping: 30, mass: 1.2 } as const,
   },
   layoutIds: {
     NAV_PILL: 'nav-active-indicator',
-    BRAND_BADGE: 'brand-badge-main',
     BRAND_IDENTITY: 'jaci-brand-identity',
+    HERO_BADGE: 'hero-badge-projection',
   },
   colors: {
     primary: '#25C0F4',
@@ -77,6 +77,6 @@ export const DESIGN_SYSTEM = {
     }
   },
   physics: {
-    magneticPull: 0.28,
+    magneticPull: 0.32,
   }
 } as const;

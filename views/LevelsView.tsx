@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { ViewContainer, InteractionCard, GlassBadge, ScrollReveal } from '../components/MotionPrimitives';
+import { ViewContainer, InteractionCard, GlassBadge, ScrollReveal, OptimizedImage } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
 export const LevelsView: React.FC = () => {
@@ -11,11 +10,11 @@ export const LevelsView: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto mb-24 flex flex-col items-center">
           <ScrollReveal>
             <GlassBadge icon="route" colorClass="text-jaci-purple">Ruta Educativa</GlassBadge>
-            <h1 className="text-5xl md:text-7xl font-black font-display text-slate-900 tracking-tight leading-[0.95] mb-8 mt-6">
+            <h1 className={DESIGN_SYSTEM.typography.h1 + " mt-6"}>
               Tu camino en <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-jaci-purple to-jaci-yellow">JACI</span>
             </h1>
-            <p className="text-xl text-slate-500 font-body leading-relaxed">
+            <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
               Un recorrido diseñado para potenciar cada etapa del crecimiento, desde los primeros pasos hasta la autonomía total.
             </p>
           </ScrollReveal>
@@ -58,27 +57,27 @@ export const LevelsView: React.FC = () => {
             <ScrollReveal key={level.id} delay={i * 0.1} className="min-w-[320px] md:min-w-[400px] snap-center">
               <InteractionCard borderColor={level.color} className="h-full !p-0">
                 <div className="flex flex-col h-full">
-                  <div className="aspect-[16/10] w-full relative overflow-hidden">
-                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105" style={{ backgroundImage: `url('${level.img}')` }}></div>
-                    <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xl px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-800 shadow-md border border-white">
+                  <div className="relative overflow-hidden group">
+                    <OptimizedImage src={level.img} alt={level.title} />
+                    <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xl px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-800 shadow-md border border-white z-20">
                       {level.age}
                     </div>
                   </div>
                   <div className="p-8 md:p-10 flex flex-col flex-1 relative">
                     <span className="absolute -top-10 left-6 text-8xl font-black text-slate-900/5 select-none pointer-events-none group-hover:text-slate-900/10 transition-colors duration-500 leading-none">{level.id}</span>
-                    <div className="flex items-center gap-4 mb-6">
+                    <div className="flex items-center gap-4 mb-6 relative z-10">
                       <div className="size-12 rounded-2xl bg-white shadow-soft flex items-center justify-center border border-slate-100 group-hover:scale-110 transition-transform duration-500">
                         <span className="material-symbols-outlined text-2xl filled" style={{ color: level.color }}>{level.icon}</span>
                       </div>
                       <div>
                         <h3 className="text-2xl font-black font-display text-slate-900 tracking-tight leading-none mb-1">{level.title}</h3>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: level.color }}>{level.subtitle}</p>
+                        <p className={DESIGN_SYSTEM.typography.label} style={{ color: level.color }}>{level.subtitle}</p>
                       </div>
                     </div>
-                    <p className="text-base text-slate-500 font-body leading-relaxed mb-8 flex-1">
+                    <p className="text-base text-slate-500 font-body leading-relaxed mb-8 flex-1 relative z-10">
                       {level.desc}
                     </p>
-                    <button className="w-full py-5 border-2 border-slate-100 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-500 font-display">
+                    <button className="w-full py-5 border-2 border-slate-100 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-500 font-display relative z-10">
                       Ver Programa
                     </button>
                   </div>
