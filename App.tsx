@@ -1,10 +1,8 @@
-
 import React, { useState, useTransition, Suspense, useCallback, memo, lazy, useEffect, createContext, useContext, useDeferredValue } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ViewState, DESIGN_SYSTEM, PerformanceProfile } from './types';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
-import { AIConcierge } from './components/AIConcierge';
 
 /**
  * Silicon Valley Standard: Main-Thread Task Scheduler
@@ -154,7 +152,6 @@ const App: React.FC = () => {
           </AnimatePresence>
         </main>
 
-        <AIConcierge currentView={currentView} />
         <Footer />
       </div>
     </PerformanceContext.Provider>
