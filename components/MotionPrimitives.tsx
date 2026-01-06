@@ -6,8 +6,11 @@ import { usePerformance } from '../App';
 
 interface ViewContainerProps extends HTMLMotionProps<'section'> {
   children: React.ReactNode;
+  // Explicitly defined to resolve recognition issues in strict TS environments
+  className?: string;
 }
 
+// Fixed: Added explicit className to interface to support prop passing and destructuring
 export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, className = "", ...props }) => (
   <motion.section
     initial="hidden"
@@ -36,8 +39,11 @@ export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, cla
 interface InteractionCardProps extends HTMLMotionProps<'div'> {
   borderColor?: string;
   children: React.ReactNode;
+  // Explicitly defined to resolve recognition issues in strict TS environments
+  className?: string;
 }
 
+// Fixed: Added explicit className to interface to support prop passing and destructuring
 export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children, borderColor = 'rgba(37,192,244,0.15)', className = "", ...props }) => {
   const prefersReducedMotion = useReducedMotion();
   const perf = usePerformance();
