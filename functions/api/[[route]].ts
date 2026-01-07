@@ -1,3 +1,4 @@
+
 import { Hono } from 'hono';
 import { handle } from 'hono/cloudflare-pages';
 import { Lucia, generateIdFromEntropySize, Session, User } from "lucia";
@@ -7,6 +8,7 @@ import { D1Adapter } from "@lucia-auth/adapter-sqlite";
 type Bindings = {
   DB: any; // D1Database
   R2: any; // R2Bucket
+  MP_ACCESS_TOKEN: string; // MercadoPago Access Token
 };
 
 type Variables = {
@@ -168,6 +170,55 @@ app.get('/download/:dropId', async (c) => {
   headers.set('Content-Disposition', `attachment; filename="${safeFilename}.zip"`);
 
   return new Response(object.body, { headers });
+});
+
+// 5. CHECKOUT SUSCRIPCIÓN (MERCADOPAGO)
+app.post('/checkout/subscription', async (c) => {
+  const user = c.get('user');
+  
+  if (!user) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  // Configuración del Payload para Preapproval (Suscripción)
+  const payload = {
+    reason: "Suscripción JACI Monstruomente",
+    auto_recurring: {
+      frequency: 1,
+      frequency_type: "months",
+      transaction_amount: 99,
+      currency_id: "MXN"
+    },
+    back_url: "https://jaci.pages.dev/?view=DASHBOARD&payment=success",
+    external_reference: user.id, // Vinculamos la suscripción al ID del usuario
+    // Fix: Access custom email property via any cast
+    payer_email: (user as any).email,
+    status: "pending"
+  };
+
+  try {
+    const response = await fetch("https://api.mercadopago.com/preapproval", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${c.env.MP_ACCESS_TOKEN}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data: any = await response.json();
+
+    if (!response.ok) {
+      console.error("MercadoPago Error:", data);
+      return c.json({ error: "Payment creation failed", details: data }, 500);
+    }
+
+    // Retornamos el link de pago (init_point)
+    return c.json({ init_point: data.init_point });
+  } catch (error) {
+    console.error("Internal Error:", error);
+    return c.json({ error: "Internal Server Error" }, 500);
+  }
 });
 
 export const onRequest = handle(app);

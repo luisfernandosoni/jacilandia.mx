@@ -1,8 +1,44 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { ViewContainer, InteractionCard, Magnetic, ScrollReveal, GlassBadge } from '../components/MotionPrimitives';
-import { DESIGN_SYSTEM } from '../types';
+import { DESIGN_SYSTEM, ViewState } from '../types';
 
 export const PricingView: React.FC = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      // 1. Calling the MercadoPago preapproval endpoint
+      const response = await fetch('/api/checkout/subscription', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      // 2. Auth Guard: If not logged in (401), redirect to Dashboard for identification
+      if (response.status === 401) {
+        window.location.href = '/?view=DASHBOARD'; 
+        return;
+      }
+
+      // Fix: Cast response to expected type to resolve 'unknown' property access errors
+      const data = await response.json() as { init_point?: string };
+      
+      // 3. Handover to MercadoPago Secure Gateway
+      if (data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        throw new Error("No init point returned");
+      }
+    } catch (e) {
+      console.error("Subscription Error:", e);
+      alert("Hubo un error al conectar con el servidor de pagos. Por favor intenta de nuevo.");
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="w-full">
       <ViewContainer>
@@ -68,8 +104,23 @@ export const PricingView: React.FC = () => {
                 </div>
 
                 <Magnetic pullStrength={0.1}>
-                  <button className="w-full py-6 bg-slate-900 text-white rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-jaci-pink hover:scale-[1.02] active:scale-95 transition-all duration-500 font-display">
-                    Comenzar ahora
+                  <button 
+                    onClick={handleSubscribe}
+                    disabled={isProcessing}
+                    className={`w-full py-6 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl transition-all duration-500 font-display flex items-center justify-center gap-3 ${
+                      isProcessing 
+                        ? 'bg-slate-700 text-white cursor-wait' 
+                        : 'bg-slate-900 text-white hover:bg-jaci-pink hover:scale-[1.02] active:scale-95'
+                    }`}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Sincronizando...</span>
+                      </>
+                    ) : (
+                      'Comenzar ahora'
+                    )}
                   </button>
                 </Magnetic>
                 

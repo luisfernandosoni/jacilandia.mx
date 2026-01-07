@@ -1,3 +1,4 @@
+
 export enum ViewState {
   HOME = 'HOME',
   ABOUT = 'ABOUT',
@@ -6,7 +7,7 @@ export enum ViewState {
   LOCATIONS = 'LOCATIONS',
   PRICING = 'PRICING',
   LEVELS = 'LEVELS',
-  REGISTER = 'REGISTER'
+  REGISTER = 'REGISTER',
   DASHBOARD = 'DASHBOARD'
 }
 
