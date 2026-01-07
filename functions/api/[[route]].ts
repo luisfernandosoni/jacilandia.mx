@@ -121,7 +121,6 @@ app.post('/checkout/subscription', async (c) => {
     // Fix: Explicitly cast 'user' to any to access the 'email' property defined via Lucia's getUserAttributes
     payer_email: (user as any).email, // Autocompletar el email del usuario en MP
     external_reference: user.id, // CRÍTICO: Esto vincula el pago con tu usuario en D1
-    status: "authorized"
   };
 
   try {
