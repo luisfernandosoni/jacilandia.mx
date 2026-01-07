@@ -3,10 +3,6 @@ import { ViewContainer, InteractionCard, Magnetic, ScrollReveal, GlassBadge } fr
 import { DESIGN_SYSTEM } from '../types';
 import { usePerformance } from '../App';
 
-/**
- * Silicon Valley Standard: Named Export
- * Must match the lazy loader in App.tsx: m => ({ default: m.PricingView })
- */
 export const PricingView: React.FC = () => {
   usePerformance();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -16,13 +12,11 @@ export const PricingView: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      // 1. Handshake with our Cloudflare Hono API
       const response = await fetch('/api/checkout/subscription', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
       
-      // 2. Dynamic Redirection for Unauthenticated Users
       if (response.status === 401) {
         window.location.href = '/?view=DASHBOARD'; 
         return;
@@ -32,7 +26,6 @@ export const PricingView: React.FC = () => {
       
       if (data.error) throw new Error(data.error);
 
-      // 3. Secure Gateway Redirection
       if (data.init_point) {
         window.location.href = data.init_point;
       }
@@ -59,7 +52,7 @@ export const PricingView: React.FC = () => {
           </ScrollReveal>
         </div>
 
-        <div className="flex justify-center mb-32">
+        <div className="flex flex-col items-center mb-32">
           <ScrollReveal delay={0.2} className="w-full max-w-lg">
             <div className="relative group">
               {/* Dynamic Aura Glow */}
@@ -79,7 +72,7 @@ export const PricingView: React.FC = () => {
                   
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-6xl md:text-7xl font-black font-display text-slate-900">$99</span>
-                    <div className="flex flex-col items-start">
+                    <div className="flex items-baseline flex-col items-start">
                       <span className="text-lg font-black text-jaci-pink tracking-tight leading-none">MXN</span>
                       <span className="text-sm font-bold text-slate-400">/ mes</span>
                     </div>
@@ -105,28 +98,39 @@ export const PricingView: React.FC = () => {
                   ))}
                 </div>
 
-                <Magnetic pullStrength={0.1}>
+                <div className="flex flex-col gap-6">
+                  <Magnetic pullStrength={0.1}>
+                    <button 
+                      onClick={handleSubscribe}
+                      disabled={isProcessing}
+                      className={`w-full py-6 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl transition-all duration-500 font-display flex items-center justify-center gap-3 ${
+                        isProcessing 
+                          ? 'bg-slate-700 text-white cursor-wait' 
+                          : 'bg-slate-900 text-white hover:bg-jaci-pink hover:scale-[1.02] active:scale-95'
+                      }`}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Procesando...</span>
+                        </>
+                      ) : (
+                        'Comenzar ahora'
+                      )}
+                    </button>
+                  </Magnetic>
+                  
                   <button 
-                    onClick={handleSubscribe}
-                    disabled={isProcessing}
-                    className={`w-full py-6 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl transition-all duration-500 font-display flex items-center justify-center gap-3 ${
-                      isProcessing 
-                        ? 'bg-slate-700 text-white cursor-wait' 
-                        : 'bg-slate-900 text-white hover:bg-jaci-pink hover:scale-[1.02] active:scale-95'
-                    }`}
+                    onClick={() => window.location.href = '/?view=DASHBOARD'}
+                    className="group flex items-center justify-center gap-2 text-slate-400 hover:text-slate-900 transition-colors py-2"
                   >
-                    {isProcessing ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Procesando...</span>
-                      </>
-                    ) : (
-                      'Comenzar ahora'
-                    )}
+                    <span className="text-[10px] font-black uppercase tracking-widest">¿Ya eres miembro?</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-primary group-hover:underline">Accede a tus descargas</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
                   </button>
-                </Magnetic>
+                </div>
                 
-                <p className="text-center mt-6 text-slate-400 text-[9px] font-medium uppercase tracking-widest">
+                <p className="text-center mt-8 text-slate-400 text-[9px] font-medium uppercase tracking-widest">
                   Pagos seguros vía MercadoPago
                 </p>
               </InteractionCard>

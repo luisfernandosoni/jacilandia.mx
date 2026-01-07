@@ -101,41 +101,40 @@ export const DashboardView: React.FC = () => {
     );
   }
 
-  // --- GUEST VIEW: EL DISEÑO DEFINITIVO ---
+  // --- GUEST VIEW: ACCESO AL CONTENIDO (EL ESTÁNDAR JACI) ---
   if (!user) {
     return (
-      <div className="w-full min-h-[90vh] flex items-center justify-center p-6 md:p-12">
-        <ScrollReveal className="w-full max-w-[480px]">
-          <div className="relative bg-white rounded-[4rem] shadow-[0_40px_100px_-20px_rgba(15,23,42,0.08)] border border-slate-50 overflow-hidden flex flex-col items-center px-12 py-20">
+      <div className="w-full min-h-[85vh] flex items-center justify-center p-8">
+        <ScrollReveal className="w-full max-w-[440px]">
+          <div className="relative bg-white rounded-[4rem] shadow-[0_50px_100px_-20px_rgba(15,23,42,0.12)] border border-slate-50 overflow-hidden flex flex-col items-center px-10 py-16 md:px-14 md:py-20">
             
-            {/* Cápsula de acento lateral flotante - Referencia exacta */}
-            <div className="absolute left-0 top-[20%] bottom-[20%] w-[5px] bg-primary rounded-r-full shadow-[0_0_20px_rgba(37,192,244,0.3)]" />
+            {/* Acento lateral integrado 1:1 con la referencia visual */}
+            <div className="absolute left-0 top-[15%] bottom-[15%] w-[5px] bg-primary rounded-r-full shadow-[0_0_20px_rgba(37,192,244,0.3)]" />
             
             {/* Header Icon Assembly */}
-            <div className="relative mb-14">
-              <div className="w-24 h-24 bg-primary/5 rounded-[2.5rem] flex items-center justify-center group">
-                <div className="flex items-center gap-1 text-primary">
+            <div className="mb-12">
+              <div className="w-24 h-24 bg-primary/5 rounded-[2.5rem] flex items-center justify-center border border-primary/10">
+                <div className="flex items-center gap-1.5 text-primary">
                   <span className="material-symbols-outlined text-3xl font-light">person</span>
-                  <div className="w-6 h-[2px] bg-primary/30 rounded-full" />
+                  <div className="w-4 h-[2px] bg-primary/20 rounded-full" />
                   <span className="material-symbols-outlined text-3xl filled">lock</span>
                 </div>
               </div>
             </div>
 
             {/* Typography Stack */}
-            <div className="text-center mb-14">
-              <h2 className="text-[3.5rem] font-black font-display text-slate-900 leading-[0.92] tracking-tight mb-8">
-                Acceso <br/> Tutores
+            <div className="text-center mb-12">
+              <h2 className="text-5xl font-black font-display text-slate-900 leading-[0.95] tracking-tight mb-8">
+                Acceso al <br/> Contenido
               </h2>
-              <p className="text-slate-400 font-body text-[1.1rem] leading-relaxed max-w-[280px] mx-auto">
+              <p className="text-slate-400 font-body text-[1rem] leading-relaxed max-w-[300px] mx-auto opacity-80">
                 Ingresa tu correo registrado para desbloquear tu material educativo y gestionar tu suscripción.
               </p>
             </div>
 
-            {/* Form Interface */}
+            {/* Form Interface Pro */}
             <form onSubmit={handleLogin} className="w-full space-y-8">
               <div className="relative group">
-                {/* Mail Icon */}
                 <div className="absolute left-6 top-1/2 -translate-y-1/2 text-primary">
                   <span className="material-symbols-outlined text-2xl">mail</span>
                 </div>
@@ -144,28 +143,28 @@ export const DashboardView: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="f@gmail.co"
-                  className="w-full h-20 pl-16 pr-16 bg-white border-[2.5px] border-primary rounded-[2rem] font-body text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-8 focus:ring-primary/5 transition-all text-lg font-medium"
+                  placeholder="tu@correo.com"
+                  className="w-full h-20 pl-16 pr-14 bg-white border-2 border-primary rounded-[2rem] font-body text-slate-900 placeholder:text-slate-200 focus:outline-none focus:ring-8 focus:ring-primary/5 transition-all text-lg font-medium"
                   required
                 />
 
-                {/* Shield Verification Icon */}
                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-blue-600">
-                  <span className="material-symbols-outlined text-2xl font-black">verified_user</span>
+                  <span className="material-symbols-outlined text-2xl filled">verified</span>
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-center">
+              <div className="pt-2 w-full flex justify-center">
                 <Magnetic pullStrength={0.12}>
                   <button 
                     type="submit"
                     disabled={isSubmitting}
-                    className="group relative h-20 px-14 bg-slate-900 text-white rounded-[2.5rem] font-black font-display text-[11px] uppercase tracking-[0.35em] shadow-[0_25px_50px_-12px_rgba(15,23,42,0.3)] hover:shadow-[0_35px_60px_-15px_rgba(15,23,42,0.4)] active:scale-95 transition-all flex items-center justify-center disabled:opacity-50 overflow-hidden"
+                    className="h-20 px-14 bg-slate-900 text-white rounded-[2.5rem] font-black font-display text-[11px] uppercase tracking-[0.35em] shadow-[0_25px_50px_-12px_rgba(15,23,42,0.3)] hover:shadow-[0_35px_60px_-15px_rgba(15,23,42,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 overflow-hidden"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    <span className="relative z-10">
-                      {isSubmitting ? 'Verificando...' : 'Ingresar ahora'}
-                    </span>
+                    {isSubmitting ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      'INGRESAR AHORA'
+                    )}
                   </button>
                 </Magnetic>
               </div>
