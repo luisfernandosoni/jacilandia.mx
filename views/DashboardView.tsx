@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { ViewContainer, InteractionCard, ScrollReveal, GlassBadge, OptimizedImage, Magnetic } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
-// Interfaces basadas en la respuesta de la API
 interface User {
   id: string;
   email: string;
@@ -32,12 +30,9 @@ export const DashboardView: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [drops, setDrops] = useState<Drop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Estado para el formulario de login
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Verificación de sesión al montar
   useEffect(() => {
     checkAuth();
   }, []);
@@ -48,7 +43,7 @@ export const DashboardView: React.FC = () => {
       const data = await res.json() as UserResponse;
       if (data.user) {
         setUser(data.user);
-        fetchDrops(); // Si hay usuario, cargamos el contenido inmediatamente
+        fetchDrops();
       } else {
         setIsLoading(false);
       }
@@ -95,162 +90,155 @@ export const DashboardView: React.FC = () => {
     window.open(`/api/download/${id}`, '_blank');
   };
 
-  // --- LOADING STATE ---
   if (isLoading) {
     return (
       <ViewContainer className="min-h-[60vh] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-          <span className={DESIGN_SYSTEM.typography.label}>Conectando...</span>
+          <span className={DESIGN_SYSTEM.typography.label}>Sincronizando...</span>
         </div>
       </ViewContainer>
     );
   }
 
-  // --- GUEST VIEW: BRUTALIST LOGIN ---
+  // --- GUEST VIEW: LOGIN EXACTO A LA REFERENCIA ---
   if (!user) {
     return (
-      <div className="w-full min-h-[70vh] flex items-center justify-center relative overflow-hidden">
-        {/* Decorative Blob */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] -z-10" />
+      <div className="w-full min-h-[85vh] flex items-center justify-center p-6">
+        <ScrollReveal className="w-full max-w-[420px]">
+          <div className="relative bg-white rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] border border-slate-100 overflow-hidden flex flex-col items-center px-10 py-16">
+            {/* El característico borde azul lateral de la imagen */}
+            <div className="absolute left-0 top-[10%] bottom-[10%] w-[3px] bg-primary rounded-r-full" />
+            
+            {/* Icon Box */}
+            <div className="w-20 h-20 bg-primary-soft rounded-[2rem] flex items-center justify-center text-primary mb-10">
+              <span className="material-symbols-outlined text-4xl filled">person_lock</span>
+            </div>
 
-        <ViewContainer className="max-w-md w-full">
-          <ScrollReveal>
-            <InteractionCard borderColor={DESIGN_SYSTEM.colors.primary} className="bg-white/80 backdrop-blur-xl">
-              <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-primary-soft rounded-2xl flex items-center justify-center text-primary mb-8 border border-primary/20 shadow-inner">
-                  <span className="material-symbols-outlined text-3xl filled">lock_person</span>
+            <h2 className="text-[2.8rem] font-black font-display text-slate-900 leading-tight mb-6 text-center">
+              Acceso <br/> Tutores
+            </h2>
+
+            <p className="text-slate-400 font-body text-center text-[1.15rem] leading-relaxed mb-12 px-2">
+              Ingresa tu correo registrado para desbloquear tu material educativo y gestionar tu suscripción.
+            </p>
+
+            <form onSubmit={handleLogin} className="w-full space-y-6">
+              <div className="relative group">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary">
+                  <span className="material-symbols-outlined text-2xl">mail</span>
                 </div>
-                
-                <h2 className={DESIGN_SYSTEM.typography.h2 + " mb-3"}>Acceso Tutores</h2>
-                <p className={DESIGN_SYSTEM.typography.body + " mb-10 text-base"}>
-                  Ingresa tu correo registrado para desbloquear tu material educativo y gestionar tu suscripción.
-                </p>
-
-                <form onSubmit={handleLogin} className="w-full flex flex-col gap-5">
-                  <div className="relative group">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-xl group-focus-within:text-primary transition-colors">mail</span>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="nombre@email.com"
-                      className="w-full pl-12 pr-6 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl outline-none focus:border-primary focus:bg-white transition-all font-body text-slate-900 placeholder:text-slate-400 shadow-inner"
-                      required
-                    />
-                  </div>
-                  
-                  <Magnetic pullStrength={0.1}>
-                    <button 
-                      type="submit" 
-                      disabled={isSubmitting}
-                      className="w-full py-4 bg-slate-900 text-white rounded-full font-black font-display text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-primary hover:shadow-glow-primary/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>Verificando...</span>
-                        </>
-                      ) : (
-                        <span>Ingresar Ahora</span>
-                      )}
-                    </button>
-                  </Magnetic>
-                </form>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="f@gmail.co"
+                  className="w-full h-16 pl-14 pr-14 bg-white border-2 border-primary rounded-2xl font-body text-slate-900 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg"
+                  required
+                />
+                <div className="absolute right-5 top-1/2 -translate-y-1/2 text-blue-600">
+                   <span className="material-symbols-outlined filled text-2xl">verified_user</span>
+                </div>
               </div>
-            </InteractionCard>
-          </ScrollReveal>
-        </ViewContainer>
+
+              <Magnetic pullStrength={0.1}>
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full h-16 bg-[#0f172a] text-white rounded-full font-black font-display text-[11px] uppercase tracking-[0.25em] shadow-xl hover:bg-slate-800 active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
+                >
+                  {isSubmitting ? 'VERIFICANDO...' : 'INGRESAR AHORA'}
+                </button>
+              </Magnetic>
+            </form>
+          </div>
+        </ScrollReveal>
       </div>
     );
   }
 
-  // --- USER VIEW: BENTO GRID DASHBOARD ---
+  // --- USER VIEW: DASHBOARD REFINADO ---
   return (
-    <div className="w-full min-h-screen">
+    <div className="w-full min-h-screen pb-24">
       <ViewContainer>
-        {/* Header Personalizado */}
-        <div className="flex flex-col items-center text-center mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-20 flex flex-col items-center">
           <ScrollReveal>
-            <GlassBadge icon="space_dashboard" colorClass="text-jaci-purple">Tu Espacio Personal</GlassBadge>
-            <h1 className={DESIGN_SYSTEM.typography.h2 + " mt-8 mb-4"}>
-              Colección <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-jaci-purple to-jaci-pink">Monstruomente</span>
+            <GlassBadge icon="account_circle" colorClass="text-primary">Panel de Control</GlassBadge>
+            <h1 className={DESIGN_SYSTEM.typography.h2 + " mt-8"}>
+              Tu Colección <span className="text-primary">JACI</span>
             </h1>
-            <p className={DESIGN_SYSTEM.typography.body + " max-w-xl mx-auto"}>
-              Hola, <span className="text-slate-900 font-bold border-b-2 border-jaci-yellow">{user.email.split('@')[0]}</span>. 
-              Aquí tienes tus herramientas para cambiar el mundo, una mente a la vez.
+            <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
+              Bienvenido de nuevo. Aquí encontrarás todo el material pedagógico de tu suscripción actual.
             </p>
           </ScrollReveal>
         </div>
 
-        {/* The Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {drops.map((drop, idx) => (
-            <ScrollReveal key={drop.id} delay={idx * 0.05}>
+            <ScrollReveal key={drop.id} delay={idx * 0.1}>
               <InteractionCard 
-                borderColor={drop.is_unlocked ? DESIGN_SYSTEM.colors.green : DESIGN_SYSTEM.colors.slate[500]} 
-                className={`h-full ${!drop.is_unlocked ? 'opacity-90' : ''}`}
+                borderColor={drop.is_unlocked ? DESIGN_SYSTEM.colors.green : DESIGN_SYSTEM.colors.slate[800]}
+                className="h-full !p-0 overflow-hidden"
               >
                 <div className="flex flex-col h-full">
-                  {/* Meta Header */}
-                  <div className="flex justify-between items-center mb-6">
-                    <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm ${
-                      drop.is_unlocked 
-                        ? 'bg-jaci-green-soft text-jaci-green border-jaci-green/20' 
-                        : 'bg-slate-100 text-slate-500 border-slate-200'
-                    }`}>
-                      {drop.is_unlocked ? 'Adquirido' : 'Bloqueado'}
-                    </div>
-                    <span className={DESIGN_SYSTEM.typography.label + " !text-slate-400"}>
-                      {drop.month} {drop.year}
-                    </span>
-                  </div>
-
-                  {/* Cover Image Visual */}
-                  <div className={`relative aspect-[4/3] rounded-[1.8rem] overflow-hidden mb-8 shadow-sm border border-slate-100 group`}>
+                  {/* Hero Image inside Card */}
+                  <div className="relative aspect-[16/11] overflow-hidden group/img">
                     <OptimizedImage 
-                      src={drop.cover_image || `https://placehold.co/600x450/f1f5f9/94a3b8?text=${drop.title}`} 
-                      alt={drop.title} 
-                      className={`w-full h-full object-cover transition-all duration-700 ${!drop.is_unlocked ? 'grayscale contrast-125' : 'group-hover:scale-105'}`}
+                      src={drop.cover_image || `https://placehold.co/800x600/f8fafc/64748b?text=${drop.title}`}
+                      alt={drop.title}
+                      className={`w-full h-full object-cover transition-transform duration-1000 ${drop.is_unlocked ? 'group-hover/img:scale-110' : 'grayscale opacity-60'}`}
                     />
                     
-                    {/* Overlay para items bloqueados */}
                     {!drop.is_unlocked && (
-                      <div className="absolute inset-0 bg-slate-900/10 flex items-center justify-center backdrop-blur-[2px]">
-                         <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                           <span className="material-symbols-outlined text-slate-900 text-2xl">lock</span>
+                      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[4px] flex items-center justify-center">
+                         <div className="size-16 bg-white rounded-full flex items-center justify-center shadow-2xl">
+                           <span className="material-symbols-outlined text-slate-900 text-3xl filled">lock</span>
                          </div>
                       </div>
                     )}
+
+                    <div className="absolute top-6 left-6 z-20">
+                      <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md border border-white/20 shadow-lg ${
+                        drop.is_unlocked ? 'bg-jaci-green/90 text-white' : 'bg-slate-900/80 text-white'
+                      }`}>
+                        {drop.is_unlocked ? 'Contenido Activo' : 'Suscripción Necesaria'}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Info & Actions */}
-                  <div className="flex flex-col flex-1">
-                    <h3 className="text-2xl font-black font-display text-slate-900 mb-3 leading-tight">
+                  {/* Body Padding Matching LevelsView */}
+                  <div className="p-10 flex flex-col flex-1">
+                    <div className="flex justify-between items-center mb-6">
+                      <span className={DESIGN_SYSTEM.typography.label}>{drop.month} {drop.year}</span>
+                      <div className="size-2 bg-slate-200 rounded-full"></div>
+                    </div>
+
+                    <h3 className="text-2xl font-black font-display text-slate-900 mb-4 leading-tight">
                       {drop.title}
                     </h3>
-                    <p className="text-slate-500 text-sm font-body mb-8 flex-1 leading-relaxed">
+                    
+                    <p className="text-slate-500 font-body text-base leading-relaxed mb-10 flex-1">
                       {drop.is_unlocked 
-                        ? "Material completo disponible. Incluye guías PDF y actividades interactivas." 
-                        : "Este contenido es exclusivo para miembros con suscripción activa."}
+                        ? "Este pack incluye 12 actividades dinámicas, 3 guías PDF y videos exclusivos de esta temporada." 
+                        : "Desbloquea este material y miles de recursos más uniéndote a nuestra membresía mensual."}
                     </p>
 
-                    <Magnetic pullStrength={0.05}>
+                    <Magnetic pullStrength={0.08}>
                       {drop.is_unlocked ? (
                         <button 
                           onClick={() => handleDownload(drop.id)}
-                          className="w-full py-4 bg-slate-900 text-white rounded-full font-black font-display text-[10px] uppercase tracking-[0.2em] shadow-lg hover:bg-jaci-green hover:shadow-glow-green/30 transition-all flex items-center justify-center gap-2 group/btn"
+                          className="w-full py-5 bg-slate-900 text-white rounded-full font-black font-display text-[10px] uppercase tracking-[0.25em] shadow-xl hover:bg-jaci-green transition-all flex items-center justify-center gap-2 group/btn"
                         >
-                          <span className="material-symbols-outlined text-lg group-hover/btn:-translate-y-0.5 transition-transform">download</span>
+                          <span className="material-symbols-outlined text-lg">cloud_download</span>
                           Descargar Pack
                         </button>
                       ) : (
                         <button 
                           onClick={() => window.location.href = '?view=PRICING'}
-                          className="w-full py-4 border-2 border-slate-200 text-slate-500 rounded-full font-black font-display text-[10px] uppercase tracking-[0.2em] hover:border-jaci-pink hover:text-jaci-pink hover:bg-jaci-pink-soft transition-all flex items-center justify-center gap-2"
+                          className="w-full py-5 border-2 border-slate-100 text-slate-400 rounded-full font-black font-display text-[10px] uppercase tracking-[0.25em] hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all flex items-center justify-center gap-2"
                         >
-                          Obtener Acceso
+                          <span className="material-symbols-outlined text-lg">star</span>
+                          Suscribirme Ahora
                         </button>
                       )}
                     </Magnetic>
