@@ -44,6 +44,7 @@ const VIEW_LOADERS: Record<ViewState, () => Promise<any>> = {
   [ViewState.LOCATIONS]: () => import('./views/LocationsView'),
   [ViewState.PRICING]: () => import('./views/PricingView'),
   [ViewState.REGISTER]: () => import('./views/RegisterView'),
+  [ViewState.DASHBOARD]: () => import('./views/DashboardView'), // <--- NUEVO
 };
 
 const HomeView = lazy(() => VIEW_LOADERS[ViewState.HOME]().then(m => ({ default: m.HomeView })));
@@ -54,6 +55,7 @@ const LocationsView = lazy(() => VIEW_LOADERS[ViewState.LOCATIONS]().then(m => (
 const PricingView = lazy(() => VIEW_LOADERS[ViewState.PRICING]().then(m => ({ default: m.PricingView })));
 const LevelsView = lazy(() => VIEW_LOADERS[ViewState.LEVELS]().then(m => ({ default: m.LevelsView })));
 const RegisterView = lazy(() => VIEW_LOADERS[ViewState.REGISTER]().then(m => ({ default: m.RegisterView })));
+const DashboardView = lazy(() => VIEW_LOADERS[ViewState.DASHBOARD]().then(m => ({ default: m.DashboardView })));
 
 export const prewarmView = (view: ViewState) => {
   const conn = (navigator as any).connection;
@@ -90,6 +92,7 @@ const ViewRenderer = memo(({ view }: { view: ViewState }) => {
     case ViewState.LOCATIONS: return <LocationsView />;
     case ViewState.PRICING: return <PricingView />;
     case ViewState.REGISTER: return <RegisterView />;
+    case ViewState.DASHBOARD: return <DashboardView />; // <--- NUEVO
     default: return <HomeView />;
   }
 });

@@ -7,6 +7,7 @@ export enum ViewState {
   PRICING = 'PRICING',
   LEVELS = 'LEVELS',
   REGISTER = 'REGISTER'
+  DASHBOARD = 'DASHBOARD'
 }
 
 export enum PerformanceProfile {
