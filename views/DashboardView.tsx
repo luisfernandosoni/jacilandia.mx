@@ -101,55 +101,74 @@ export const DashboardView: React.FC = () => {
     );
   }
 
-  // --- GUEST VIEW: LOGIN EXACTO A LA REFERENCIA ---
+  // --- GUEST VIEW: EL DISEÑO DEFINITIVO ---
   if (!user) {
     return (
-      <div className="w-full min-h-[85vh] flex items-center justify-center p-6">
-        <ScrollReveal className="w-full max-w-[420px]">
-          <div className="relative bg-white rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] border border-slate-100 overflow-hidden flex flex-col items-center px-10 py-16">
-            {/* El característico borde azul lateral de la imagen */}
-            <div className="absolute left-0 top-[10%] bottom-[10%] w-[3px] bg-primary rounded-r-full" />
+      <div className="w-full min-h-[90vh] flex items-center justify-center p-6 md:p-12">
+        <ScrollReveal className="w-full max-w-[480px]">
+          <div className="relative bg-white rounded-[4rem] shadow-[0_40px_100px_-20px_rgba(15,23,42,0.08)] border border-slate-50 overflow-hidden flex flex-col items-center px-12 py-20">
             
-            {/* Icon Box */}
-            <div className="w-20 h-20 bg-primary-soft rounded-[2rem] flex items-center justify-center text-primary mb-10">
-              <span className="material-symbols-outlined text-4xl filled">person_lock</span>
+            {/* Cápsula de acento lateral flotante - Referencia exacta */}
+            <div className="absolute left-0 top-[20%] bottom-[20%] w-[5px] bg-primary rounded-r-full shadow-[0_0_20px_rgba(37,192,244,0.3)]" />
+            
+            {/* Header Icon Assembly */}
+            <div className="relative mb-14">
+              <div className="w-24 h-24 bg-primary/5 rounded-[2.5rem] flex items-center justify-center group">
+                <div className="flex items-center gap-1 text-primary">
+                  <span className="material-symbols-outlined text-3xl font-light">person</span>
+                  <div className="w-6 h-[2px] bg-primary/30 rounded-full" />
+                  <span className="material-symbols-outlined text-3xl filled">lock</span>
+                </div>
+              </div>
             </div>
 
-            <h2 className="text-[2.8rem] font-black font-display text-slate-900 leading-tight mb-6 text-center">
-              Acceso <br/> Tutores
-            </h2>
+            {/* Typography Stack */}
+            <div className="text-center mb-14">
+              <h2 className="text-[3.5rem] font-black font-display text-slate-900 leading-[0.92] tracking-tight mb-8">
+                Acceso <br/> Tutores
+              </h2>
+              <p className="text-slate-400 font-body text-[1.1rem] leading-relaxed max-w-[280px] mx-auto">
+                Ingresa tu correo registrado para desbloquear tu material educativo y gestionar tu suscripción.
+              </p>
+            </div>
 
-            <p className="text-slate-400 font-body text-center text-[1.15rem] leading-relaxed mb-12 px-2">
-              Ingresa tu correo registrado para desbloquear tu material educativo y gestionar tu suscripción.
-            </p>
-
-            <form onSubmit={handleLogin} className="w-full space-y-6">
+            {/* Form Interface */}
+            <form onSubmit={handleLogin} className="w-full space-y-8">
               <div className="relative group">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-primary">
+                {/* Mail Icon */}
+                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-primary">
                   <span className="material-symbols-outlined text-2xl">mail</span>
                 </div>
+                
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="f@gmail.co"
-                  className="w-full h-16 pl-14 pr-14 bg-white border-2 border-primary rounded-2xl font-body text-slate-900 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg"
+                  className="w-full h-20 pl-16 pr-16 bg-white border-[2.5px] border-primary rounded-[2rem] font-body text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-8 focus:ring-primary/5 transition-all text-lg font-medium"
                   required
                 />
-                <div className="absolute right-5 top-1/2 -translate-y-1/2 text-blue-600">
-                   <span className="material-symbols-outlined filled text-2xl">verified_user</span>
+
+                {/* Shield Verification Icon */}
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-blue-600">
+                  <span className="material-symbols-outlined text-2xl font-black">verified_user</span>
                 </div>
               </div>
 
-              <Magnetic pullStrength={0.1}>
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full h-16 bg-[#0f172a] text-white rounded-full font-black font-display text-[11px] uppercase tracking-[0.25em] shadow-xl hover:bg-slate-800 active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
-                >
-                  {isSubmitting ? 'VERIFICANDO...' : 'INGRESAR AHORA'}
-                </button>
-              </Magnetic>
+              <div className="pt-4 flex justify-center">
+                <Magnetic pullStrength={0.12}>
+                  <button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="group relative h-20 px-14 bg-slate-900 text-white rounded-[2.5rem] font-black font-display text-[11px] uppercase tracking-[0.35em] shadow-[0_25px_50px_-12px_rgba(15,23,42,0.3)] hover:shadow-[0_35px_60px_-15px_rgba(15,23,42,0.4)] active:scale-95 transition-all flex items-center justify-center disabled:opacity-50 overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    <span className="relative z-10">
+                      {isSubmitting ? 'Verificando...' : 'Ingresar ahora'}
+                    </span>
+                  </button>
+                </Magnetic>
+              </div>
             </form>
           </div>
         </ScrollReveal>
@@ -157,7 +176,7 @@ export const DashboardView: React.FC = () => {
     );
   }
 
-  // --- USER VIEW: DASHBOARD REFINADO ---
+  // --- USER VIEW: DASHBOARD (MANTIENE LA JERARQUÍA REFINADA) ---
   return (
     <div className="w-full min-h-screen pb-24">
       <ViewContainer>
@@ -178,10 +197,9 @@ export const DashboardView: React.FC = () => {
             <ScrollReveal key={drop.id} delay={idx * 0.1}>
               <InteractionCard 
                 borderColor={drop.is_unlocked ? DESIGN_SYSTEM.colors.green : DESIGN_SYSTEM.colors.slate[800]}
-                className="h-full !p-0 overflow-hidden"
+                className="h-full !p-0 overflow-hidden group/card"
               >
                 <div className="flex flex-col h-full">
-                  {/* Hero Image inside Card */}
                   <div className="relative aspect-[16/11] overflow-hidden group/img">
                     <OptimizedImage 
                       src={drop.cover_image || `https://placehold.co/800x600/f8fafc/64748b?text=${drop.title}`}
@@ -206,14 +224,13 @@ export const DashboardView: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Body Padding Matching LevelsView */}
                   <div className="p-10 flex flex-col flex-1">
                     <div className="flex justify-between items-center mb-6">
                       <span className={DESIGN_SYSTEM.typography.label}>{drop.month} {drop.year}</span>
                       <div className="size-2 bg-slate-200 rounded-full"></div>
                     </div>
 
-                    <h3 className="text-2xl font-black font-display text-slate-900 mb-4 leading-tight">
+                    <h3 className="text-2xl font-black font-display text-slate-900 mb-4 leading-tight group-hover/card:text-primary transition-colors">
                       {drop.title}
                     </h3>
                     
