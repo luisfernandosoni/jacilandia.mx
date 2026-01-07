@@ -1,9 +1,14 @@
-
 import React, { useState } from 'react';
 import { ViewContainer, InteractionCard, Magnetic, ScrollReveal, GlassBadge } from '../components/MotionPrimitives';
-import { DESIGN_SYSTEM, ViewState } from '../types';
+import { DESIGN_SYSTEM } from '../types';
+import { usePerformance } from '../App';
 
+/**
+ * Silicon Valley Standard: Named Export
+ * Must match the lazy loader in App.tsx: m => ({ default: m.PricingView })
+ */
 export const PricingView: React.FC = () => {
+  usePerformance();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubscribe = async () => {
@@ -11,29 +16,28 @@ export const PricingView: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      // 1. Calling the MercadoPago preapproval endpoint
+      // 1. Handshake with our Cloudflare Hono API
       const response = await fetch('/api/checkout/subscription', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
       
-      // 2. Auth Guard: If not logged in (401), redirect to Dashboard for identification
+      // 2. Dynamic Redirection for Unauthenticated Users
       if (response.status === 401) {
         window.location.href = '/?view=DASHBOARD'; 
         return;
       }
 
-      // Fix: Cast response to expected type to resolve 'unknown' property access errors
-      const data = await response.json() as { init_point?: string };
+      const data = await response.json() as { init_point?: string, error?: string };
       
-      // 3. Handover to MercadoPago Secure Gateway
+      if (data.error) throw new Error(data.error);
+
+      // 3. Secure Gateway Redirection
       if (data.init_point) {
         window.location.href = data.init_point;
-      } else {
-        throw new Error("No init point returned");
       }
     } catch (e) {
-      console.error("Subscription Error:", e);
+      console.error("Payment Handshake Error:", e);
       alert("Hubo un error al conectar con el servidor de pagos. Por favor intenta de nuevo.");
       setIsProcessing(false);
     }
@@ -45,25 +49,24 @@ export const PricingView: React.FC = () => {
         <div className="text-center max-w-4xl mx-auto flex flex-col items-center mb-24">
           <ScrollReveal>
             <GlassBadge icon="verified" colorClass="text-jaci-pink">Acceso Premium Monstruomente</GlassBadge>
-            <h1 className={DESIGN_SYSTEM.typography.h1}>
+            <h1 className={DESIGN_SYSTEM.typography.h1 + " mt-8"}>
               Desbloquea la <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-jaci-pink to-jaci-purple">Magia Completa</span>
             </h1>
             <p className={`${DESIGN_SYSTEM.typography.body} mt-10`}>
-              Únete a nuestra comunidad y obtén acceso total a todas nuestras herramientas pedagógicas, contenido exclusivo y seguimiento personalizado.
+              Únete a nuestra membresía y recibe packs exclusivos de material educativo diseñados para potenciar el genio de tus hijos cada mes.
             </p>
           </ScrollReveal>
         </div>
 
         <div className="flex justify-center mb-32">
-          {/* Plan Único Centrado */}
           <ScrollReveal delay={0.2} className="w-full max-w-lg">
             <div className="relative group">
-              {/* Decorative Glow */}
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-jaci-pink/20 to-jaci-purple/20 rounded-[3rem] blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+              {/* Dynamic Aura Glow */}
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-jaci-pink/20 to-jaci-purple/20 rounded-[3rem] blur-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
               
               <InteractionCard borderColor={DESIGN_SYSTEM.colors.pink} className="relative h-full border-2 border-jaci-pink/30 bg-white/90 backdrop-blur-xl">
-                <div className="absolute top-0 right-0 bg-jaci-pink text-white text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-bl-[2rem] shadow-sm">
+                <div className="absolute top-0 right-0 bg-jaci-pink text-white text-[9px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-bl-[2rem] shadow-sm z-20">
                   Plan Único Premium
                 </div>
                 
@@ -72,7 +75,7 @@ export const PricingView: React.FC = () => {
                     <span className="material-symbols-outlined text-4xl filled">rocket_launch</span>
                   </div>
                   
-                  <h3 className="text-3xl font-black font-display text-slate-900 mb-4">Suscripción Monstruomente</h3>
+                  <h3 className="text-3xl font-black font-display text-slate-900 mb-4">Suscripción Mensual</h3>
                   
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-6xl md:text-7xl font-black font-display text-slate-900">$99</span>
@@ -82,21 +85,20 @@ export const PricingView: React.FC = () => {
                     </div>
                   </div>
                   
-                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-12">Pesos Mexicanos</p>
+                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-12">Cancela cuando quieras</p>
                 </div>
 
                 <div className="space-y-6 mb-12 px-4">
                   {[
-                    'Acceso ilimitado a recursos PDF',
-                    'Videos y lecciones exclusivas',
-                    'Soporte prioritario para familias',
-                    'Materiales descargables premium',
-                    'Comunidad de padres JACI',
-                    'Actualizaciones de contenido semanales'
+                    'Drop mensual de recursos premium',
+                    'Acceso inmediato a la colección vigente',
+                    'Licencia para uso personal ilimitado',
+                    'Dashboard de descargas dedicado',
+                    'Soporte prioritario 24/7'
                   ].map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-4 text-slate-700 font-body font-bold text-base">
                       <div className="size-6 rounded-full bg-jaci-pink/10 flex items-center justify-center shrink-0">
-                        <span className="material-symbols-outlined text-jaci-pink text-[16px] filled">stars</span>
+                        <span className="material-symbols-outlined text-jaci-pink text-[16px] filled">check_circle</span>
                       </div>
                       {feature}
                     </div>
@@ -116,7 +118,7 @@ export const PricingView: React.FC = () => {
                     {isProcessing ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Sincronizando...</span>
+                        <span>Procesando...</span>
                       </>
                     ) : (
                       'Comenzar ahora'
@@ -125,7 +127,7 @@ export const PricingView: React.FC = () => {
                 </Magnetic>
                 
                 <p className="text-center mt-6 text-slate-400 text-[9px] font-medium uppercase tracking-widest">
-                  Cancela en cualquier momento · Sin cargos ocultos
+                  Pagos seguros vía MercadoPago
                 </p>
               </InteractionCard>
             </div>
