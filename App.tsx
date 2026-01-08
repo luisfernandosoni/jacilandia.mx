@@ -7,7 +7,6 @@ import { Footer } from './components/Footer';
 
 /**
  * Silicon Valley Standard: Main-Thread Task Scheduler
- * Breaks down long execution tasks into smaller chunks to maintain 60fps and low INP.
  */
 const scheduler = {
   yield: async () => {
@@ -27,9 +26,9 @@ const scheduler = {
 const PerformanceContext = createContext<PerformanceProfile>(PerformanceProfile.HIGH);
 export const usePerformance = () => useContext(PerformanceContext);
 
-// Speculative Registry
+// Speculative Registry Updated to assets.jacilandia.mx
 const CRITICAL_ASSETS: Record<string, string[]> = {
-  [ViewState.HOME]: ["https://raw.githubusercontent.com/soniglf/JACIResources/84c35cf151659486d49458cee28c1f353f42f47d/JACI_Color.png"],
+  [ViewState.HOME]: ["https://assets.jacilandia.mx/JACI_Color.png"],
   [ViewState.METHODOLOGY]: ["https://lh3.googleusercontent.com/aida-public/AB6AXuA4sB3k0FBFYI_qENJexMKPDpIIadN6siWEcb1uScQwl1CeA8sBd_sKxm1D1oFg3A0I1FUDN9OVs6ofN7NhxlOOcqKZ_L2ctAEJIwxrxHxMC3CnEdPWifTw6t7HoaS_CFa_Ix2HkpubNRN9-2XD9i78O8xFjXz2VmPPJPmIROyJRfwW0C3ypLM-jqQ-OSkhhyj31JuwxjlxzUd-IR-3AvH4MMVJ41bzXkxQmsCZgY-BYyQosWYUpvLD1J6qVbgYr2RXmxYQM8Xdrb6u"],
   [ViewState.LEVELS]: ["https://lh3.googleusercontent.com/aida-public/AB6AXuBNZlftM73AD9x8L97Rhl_5DejCEzh3EgdYA_XIQRZ07xYRS5BQGsEQSOEh7rKYByF3NrstYqTX-HHqsZR6EMM8gUL0g89JD9VkOrJbwYxfpWv0zohD--WcFXhSfZ4mPtMk6mD8nBmkE4Wbua0VZ1MwrSh1E7TcTh0F6mDJ2rYlp_FGapjh144xOImeCJFgEVRB9JSEJbKdEkS5lw2BTKldvRToREzYIkB1FCBHDscEY27DWRmFf4HeXE6S2y51a0_VMmFy6sgz8xe8"],
   [ViewState.LOCATIONS]: ["https://lh3.googleusercontent.com/aida-public/AB6AXuA-UKXNC-U7dc2fO-B0B9Cnyo3Dy8WyrvaMgN7UdSVnbGNkfu1shrCQzxAdNWCN31Bdwekwo0YAF7faiQ24E1yAIFDuSKdexMt3AnIcVeTIxtPDaB2BurM1lXhZdZeTtkhuuOJuODUbNt9qzZ6wnsGPcf3Ju_6sGx0Lqt74Q6tXSSAt7or1Z6VgPTaeRVNAvQpIBzr1BsD9iyEQ1hkSSlMwZCxIfKme-bJdXjdcdOM49lu_7uhVOaKqwo_nIi99pqAHaPakpbA4lNfb"]
@@ -44,7 +43,7 @@ const VIEW_LOADERS: Record<ViewState, () => Promise<any>> = {
   [ViewState.LOCATIONS]: () => import('./views/LocationsView'),
   [ViewState.PRICING]: () => import('./views/PricingView'),
   [ViewState.REGISTER]: () => import('./views/RegisterView'),
-  [ViewState.DASHBOARD]: () => import('./views/DashboardView'), // <--- NUEVO
+  [ViewState.DASHBOARD]: () => import('./views/DashboardView'),
 };
 
 const HomeView = lazy(() => VIEW_LOADERS[ViewState.HOME]().then(m => ({ default: m.HomeView })));
@@ -76,10 +75,6 @@ export const prewarmView = (view: ViewState) => {
   }, 'background');
 };
 
-/**
- * Segmented View Renderer
- * Uses DeferredValue to decouple state updates from heavy UI rendering.
- */
 const ViewRenderer = memo(({ view }: { view: ViewState }) => {
   const deferredView = useDeferredValue(view);
   
@@ -92,7 +87,7 @@ const ViewRenderer = memo(({ view }: { view: ViewState }) => {
     case ViewState.LOCATIONS: return <LocationsView />;
     case ViewState.PRICING: return <PricingView />;
     case ViewState.REGISTER: return <RegisterView />;
-    case ViewState.DASHBOARD: return <DashboardView />; // <--- NUEVO
+    case ViewState.DASHBOARD: return <DashboardView />;
     default: return <HomeView />;
   }
 });
@@ -102,10 +97,6 @@ const App: React.FC = () => {
   const [isPending, startTransition] = useTransition();
   const [performance, setPerformance] = useState<PerformanceProfile>(PerformanceProfile.HIGH);
 
-  /**
-   * Silicon Valley Standard: URL Callback Monitor
-   * Detects payment or auth status directly from query params.
-   */
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const payment = params.get('payment');
@@ -124,7 +115,6 @@ const App: React.FC = () => {
 
     if (newView) {
       setCurrentView(newView);
-      // Clean URL for professional appearance
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
@@ -141,10 +131,7 @@ const App: React.FC = () => {
 
   const handleViewChange = useCallback(async (view: ViewState) => {
     if (currentView === view) return;
-
-    // Silicon Valley Tactic: Yield before heavy transition
     await scheduler.yield();
-
     startTransition(() => {
       if ((document as any).startViewTransition) {
         (document as any).startViewTransition(() => setCurrentView(view));

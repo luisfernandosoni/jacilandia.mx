@@ -26,8 +26,6 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
 
   /**
    * Intent-Based Speculative Preloading
-   * If user hovers for >80ms, they have a 70% probability of clicking.
-   * We preload code and assets during this "lost" time.
    */
   const handleIntentStart = (view: ViewState) => {
     intentTimers.current[view] = window.setTimeout(() => {
@@ -62,7 +60,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
                       key="nav-logo"
                       layoutId={DESIGN_SYSTEM.layoutIds.BRAND_IDENTITY}
                       transition={DESIGN_SYSTEM.springs.identity}
-                      src="https://raw.githubusercontent.com/soniglf/JACIResources/84c35cf151659486d49458cee28c1f353f42f47d/JACI_Color.png" 
+                      src="https://assets.jacilandia.mx/JACI_Color.png" 
                       alt="JACI" 
                       className="absolute inset-0 w-full h-full object-contain"
                       style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}

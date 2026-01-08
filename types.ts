@@ -29,6 +29,21 @@ export interface Testimonial {
   color: string;
 }
 
+export const JACI_SQUAD = {
+  BUW: "https://assets.jacilandia.mx/Buw.png",
+  GRAPPY: "https://assets.jacilandia.mx/Grappy.png",
+  GULY: "https://assets.jacilandia.mx/Guly.png",
+  KIKIN: "https://assets.jacilandia.mx/Kikin.png",
+  LY: "https://assets.jacilandia.mx/Ly.png",
+  PEPE: "https://assets.jacilandia.mx/Pepe.png",
+  POMPIN: "https://assets.jacilandia.mx/Pompín.png",
+  POSITIVIN: "https://assets.jacilandia.mx/Positivin.png",
+  POW: "https://assets.jacilandia.mx/Pow.png",
+  TOMAS: "https://assets.jacilandia.mx/Tomás.png",
+  TUFIN: "https://assets.jacilandia.mx/Tufín.png",
+  TUI: "https://assets.jacilandia.mx/Tui.png"
+} as const;
+
 export const DESIGN_SYSTEM = {
   tokens: {
     radius: {
@@ -60,6 +75,7 @@ export const DESIGN_SYSTEM = {
     projection: { type: 'spring', stiffness: 600, damping: 40, mass: 1.2 } as const,
     magnetic: { stiffness: 200, damping: 15, mass: 0.1 } as const,
     identity: { type: 'spring', stiffness: 400, damping: 30, mass: 1.2 } as const,
+    float: { repeat: Infinity, repeatType: 'reverse', duration: 4, ease: "easeInOut" } as const,
   },
   layoutIds: {
     NAV_PILL: 'nav-active-indicator',

@@ -7,10 +7,9 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6 py-16 md:px-12 lg:px-20">
         <div className="flex flex-col md:flex-row justify-between items-center gap-12">
           <div className="flex flex-col items-center md:items-start gap-4">
-            {/* Official Horizontal Imagotype - Amplified for Legibility */}
             <div className="flex flex-col items-center md:items-start">
               <img 
-                src="https://raw.githubusercontent.com/soniglf/JACIResources/84c35cf151659486d49458cee28c1f353f42f47d/LOGO_H_Color.png" 
+                src="https://assets.jacilandia.mx/LOGO_H_Color.png" 
                 alt="JACI" 
                 className="h-20 w-auto object-contain transition-all duration-300"
               />

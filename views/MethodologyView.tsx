@@ -1,11 +1,17 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ScrollReveal, InteractionCard, ViewContainer, GlassBadge, Magnetic } from '../components/MotionPrimitives';
+import { ScrollReveal, InteractionCard, ViewContainer, GlassBadge, Magnetic, FloatingMonster } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
 export const MethodologyView: React.FC = () => {
   return (
-    <div className="w-full">
+    <div className="w-full relative">
+      {/* Background Ambience */}
+      <div className="absolute top-[40%] right-[-5%] opacity-30 pointer-events-none">
+        <FloatingMonster monster="LY" size="size-72" />
+      </div>
+
       <ViewContainer>
         {/* Header Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center mb-48">
@@ -28,6 +34,10 @@ export const MethodologyView: React.FC = () => {
                  <div className="aspect-[4/3] rounded-[3.5rem] overflow-hidden shadow-soft border-[12px] border-white relative z-10 bg-slate-50">
                     <div className="w-full h-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-105" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA4sB3k0FBFYI_qENJexMKPDpIIadN6siWEcb1uScQwl1CeA8sBd_sKxm1D1oFg3A0I1FUDN9OVs6ofN7NhxlOOcqKZ_L2ctAEJIwxrxHxMC3CnEdPWifTw6t7HoaS_CFa_Ix2HkpubNRN9-2XD9i78O8xFjXz2VmPPJPmIROyJRfwW0C3ypLM-jqQ-OSkhhyj31JuwxjlxzUd-IR-3AvH4MMVJ41bzXkxQmsCZgY-BYyQosWYUpvLD1J6qVbgYr2RXmxYQM8Xdrb6u')" }}></div>
                  </div>
+                 {/* Peeking Monster */}
+                 <div className="absolute -top-20 -right-10 z-20">
+                   <FloatingMonster monster="GULY" size="size-40" />
+                 </div>
                </div>
              </ScrollReveal>
           </div>
@@ -47,7 +57,10 @@ export const MethodologyView: React.FC = () => {
         {/* Feature Cards Unified */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-48">
            <ScrollReveal delay={0.1}>
-             <InteractionCard borderColor={DESIGN_SYSTEM.colors.purple} className="h-full">
+             <InteractionCard borderColor={DESIGN_SYSTEM.colors.purple} className="h-full relative overflow-visible">
+                <div className="absolute -bottom-12 -right-10 pointer-events-none group-hover:scale-110 transition-transform">
+                  <FloatingMonster monster="BUW" size="size-32" />
+                </div>
                 <div className="w-16 h-16 bg-jaci-purple-soft text-jaci-purple rounded-2xl flex items-center justify-center border border-jaci-purple/20 mb-8">
                   <span className="material-symbols-outlined text-3xl filled">psychology</span>
                 </div>
@@ -59,7 +72,10 @@ export const MethodologyView: React.FC = () => {
            </ScrollReveal>
 
            <ScrollReveal delay={0.2}>
-             <InteractionCard borderColor={DESIGN_SYSTEM.colors.yellow} className="h-full">
+             <InteractionCard borderColor={DESIGN_SYSTEM.colors.yellow} className="h-full relative overflow-visible">
+                <div className="absolute -bottom-12 -left-10 pointer-events-none group-hover:scale-110 transition-transform">
+                  <FloatingMonster monster="PEPE" size="size-32" />
+                </div>
                 <div className="w-16 h-16 bg-jaci-yellow-soft text-jaci-yellow rounded-2xl flex items-center justify-center border border-jaci-yellow/20 mb-8">
                   <span className="material-symbols-outlined text-3xl filled">explore</span>
                 </div>
@@ -77,26 +93,37 @@ export const MethodologyView: React.FC = () => {
             <h2 className={DESIGN_SYSTEM.typography.h2 + " mb-24 text-center"}>Nuestros <span className="text-jaci-green">Programas</span></h2>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-            {['Estimulación', 'Preescolar JACI', 'Summer Camp'].map((name, i) => {
+            {[
+              { name: 'Estimulación', monster: 'TUFIN' },
+              { name: 'Preescolar JACI', monster: 'POSITIVIN' },
+              { name: 'Summer Camp', monster: 'POMPIN' }
+            ].map((prog, i) => {
               const colors = [DESIGN_SYSTEM.colors.primary, DESIGN_SYSTEM.colors.pink, DESIGN_SYSTEM.colors.yellow];
               return (
                 <ScrollReveal key={i} delay={i * 0.1}>
-                  <InteractionCard borderColor={colors[i]} className="h-full">
+                  <InteractionCard borderColor={colors[i]} className="h-full group">
                     <div className="flex justify-between items-start mb-10">
                       <div className="size-14 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-900 border border-slate-100">
                         <span className="material-symbols-outlined text-2xl" style={{ color: colors[i] }}>{i === 0 ? 'child_care' : i === 1 ? 'school' : 'sunny'}</span>
                       </div>
                       <span className={DESIGN_SYSTEM.typography.label}>{i === 0 ? '0-2 años' : i === 1 ? '3-5 años' : 'Vacacional'}</span>
                     </div>
-                    <h4 className="text-2xl font-black font-display text-slate-900 mb-6">{name}</h4>
+                    <div className="flex items-center gap-4 mb-6">
+                       <h4 className="text-2xl font-black font-display text-slate-900">{prog.name}</h4>
+                    </div>
                     <p className="text-slate-500 text-sm leading-relaxed mb-12 font-body flex-grow">
                       {i === 0 ? 'Un despertar de los sentidos en un entorno lleno de amor y seguridad.' : 
                        i === 1 ? 'Donde la magia sucede. Preparación académica balanceada con juego libre estructurado.' :
                        'Aventura total bajo el sol con experimentos científicos, arte y muchísima diversión.'}
                     </p>
-                    <button className="w-full py-5 border-2 border-slate-100 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-500">
-                      Ver Detalles
-                    </button>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex justify-center -mb-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <FloatingMonster monster={prog.monster as any} size="size-20" />
+                      </div>
+                      <button className="w-full py-5 border-2 border-slate-100 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-500">
+                        Ver Detalles
+                      </button>
+                    </div>
                   </InteractionCard>
                 </ScrollReveal>
               );

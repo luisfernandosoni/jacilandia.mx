@@ -1,16 +1,14 @@
 
 import React, { useRef, memo, useCallback, useState, useMemo, useEffect } from 'react';
 import { motion, HTMLMotionProps, useSpring, useScroll, useTransform, useReducedMotion, useInView } from 'framer-motion';
-import { DESIGN_SYSTEM, PerformanceProfile } from '../types';
+import { DESIGN_SYSTEM, PerformanceProfile, JACI_SQUAD } from '../types';
 import { usePerformance } from '../App';
 
 interface ViewContainerProps extends HTMLMotionProps<'section'> {
   children: React.ReactNode;
-  // Explicitly defined to resolve recognition issues in strict TS environments
   className?: string;
 }
 
-// Fixed: Added explicit className to interface to support prop passing and destructuring
 export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, className = "", ...props }) => (
   <motion.section
     initial="hidden"
@@ -39,11 +37,9 @@ export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, cla
 interface InteractionCardProps extends HTMLMotionProps<'div'> {
   borderColor?: string;
   children: React.ReactNode;
-  // Explicitly defined to resolve recognition issues in strict TS environments
   className?: string;
 }
 
-// Fixed: Added explicit className to interface to support prop passing and destructuring
 export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children, borderColor = 'rgba(37,192,244,0.15)', className = "", ...props }) => {
   const prefersReducedMotion = useReducedMotion();
   const perf = usePerformance();
@@ -138,6 +134,46 @@ export const OptimizedImage: React.FC<{
         />
       )}
     </div>
+  );
+});
+
+export const FloatingMonster: React.FC<{ 
+  monster: keyof typeof JACI_SQUAD; 
+  className?: string;
+  delay?: number;
+  size?: string;
+}> = memo(({ monster, className = "", delay = 0, size = "size-32" }) => {
+  const prefersReducedMotion = useReducedMotion();
+  const perf = usePerformance();
+
+  if (perf === PerformanceProfile.LITE) {
+    return (
+      <img 
+        src={JACI_SQUAD[monster]} 
+        alt={monster} 
+        className={`${size} object-contain ${className}`} 
+      />
+    );
+  }
+
+  return (
+    <motion.img
+      src={JACI_SQUAD[monster]}
+      alt={monster}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ 
+        opacity: 1, 
+        y: prefersReducedMotion ? 0 : [0, -15, 0],
+        rotate: prefersReducedMotion ? 0 : [0, 5, -5, 0]
+      }}
+      transition={{
+        opacity: { duration: 1, delay },
+        y: { ...DESIGN_SYSTEM.springs.float, delay },
+        rotate: { ...DESIGN_SYSTEM.springs.float, duration: 6, delay }
+      }}
+      className={`${size} object-contain select-none pointer-events-none drop-shadow-2xl ${className}`}
+      style={{ willChange: 'transform, opacity' }}
+    />
   );
 });
 

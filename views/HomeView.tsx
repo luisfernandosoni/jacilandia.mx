@@ -1,11 +1,20 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ViewContainer, Magnetic, ScrollReveal, GlassBadge } from '../components/MotionPrimitives';
+import { ViewContainer, Magnetic, ScrollReveal, GlassBadge, FloatingMonster } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
 export const HomeView: React.FC = () => {
   return (
     <div className="relative w-full overflow-hidden">
+      {/* Squad Guardians */}
+      <div className="absolute top-[20%] left-[10%] hidden lg:block z-0 pointer-events-none">
+        <FloatingMonster monster="POMPIN" size="size-48" delay={0.5} />
+      </div>
+      <div className="absolute bottom-[30%] right-[12%] hidden lg:block z-0 pointer-events-none">
+        <FloatingMonster monster="GRAPPY" size="size-56" delay={1} />
+      </div>
+
       <ViewContainer className="flex flex-col items-center text-center">
         {/* Brand Badge with Shared Layout Projection */}
         <Magnetic pullStrength={0.08}>
@@ -20,7 +29,7 @@ export const HomeView: React.FC = () => {
                <motion.img 
                  layoutId={DESIGN_SYSTEM.layoutIds.BRAND_IDENTITY}
                  transition={DESIGN_SYSTEM.springs.identity}
-                 src="https://raw.githubusercontent.com/soniglf/JACIResources/84c35cf151659486d49458cee28c1f353f42f47d/JACI_Color.png" 
+                 src="https://assets.jacilandia.mx/JACI_Color.png" 
                  alt="JACI Icon" 
                  className="w-full h-full object-contain relative z-10"
                  style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}

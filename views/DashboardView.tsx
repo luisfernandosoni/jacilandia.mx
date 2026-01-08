@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { ViewContainer, InteractionCard, ScrollReveal, GlassBadge, OptimizedImage, Magnetic } from '../components/MotionPrimitives';
+import { ViewContainer, InteractionCard, ScrollReveal, GlassBadge, OptimizedImage, Magnetic, FloatingMonster } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
 interface User {
@@ -24,6 +25,7 @@ interface UserResponse {
 interface LoginResponse {
   success: boolean;
   user: User;
+  error?: string;
 }
 
 export const DashboardView: React.FC = () => {
@@ -32,6 +34,7 @@ export const DashboardView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -67,22 +70,38 @@ export const DashboardView: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
     setIsSubmitting(true);
+    
     try {
       const res = await fetch('/api/auth/login-dev', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
+      
       const data = await res.json() as LoginResponse;
-      if (data.success) {
+      
+      if (res.ok && data.success) {
         setUser(data.user);
         fetchDrops();
+      } else {
+        setLoginError(data.error || "Error al intentar ingresar. Revisa tu correo.");
       }
     } catch (error) {
-      console.error("Error de login", error);
+      setLoginError("Problema de conexión con el servidor.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setUser(null);
+      setDrops([]);
+    } catch (error) {
+      console.error("Error al cerrar sesión", error);
     }
   };
 
@@ -101,29 +120,34 @@ export const DashboardView: React.FC = () => {
     );
   }
 
-  // --- GUEST VIEW: ACCESO AL CONTENIDO (EL ESTÁNDAR JACI) ---
+  // --- GUEST VIEW ---
   if (!user) {
     return (
-      <div className="w-full min-h-[85vh] flex items-center justify-center p-8">
+      <div className="w-full min-h-[85vh] flex items-center justify-center p-8 relative">
+        {/* Background companions for login */}
+        <div className="absolute top-1/4 left-[5%] opacity-20 rotate-12">
+          <FloatingMonster monster="POMPIN" size="size-32" />
+        </div>
+        <div className="absolute bottom-1/4 right-[5%] opacity-20 -rotate-12">
+          <FloatingMonster monster="TUFIN" size="size-32" />
+        </div>
+
         <ScrollReveal className="w-full max-w-[440px]">
           <div className="relative bg-white rounded-[4rem] shadow-[0_50px_100px_-20px_rgba(15,23,42,0.12)] border border-slate-50 overflow-hidden flex flex-col items-center px-10 py-16 md:px-14 md:py-20">
-            
-            {/* Acento lateral integrado 1:1 con la referencia visual */}
+            {/* Peeking monster for login area */}
+            <div className="absolute -top-10 -right-6">
+              <FloatingMonster monster="TOMAS" size="size-24" />
+            </div>
+
             <div className="absolute left-0 top-[15%] bottom-[15%] w-[5px] bg-primary rounded-r-full shadow-[0_0_20px_rgba(37,192,244,0.3)]" />
-            
-            {/* Header Icon Assembly */}
-            <div className="mb-12">
-              <div className="w-24 h-24 bg-primary/5 rounded-[2.5rem] flex items-center justify-center border border-primary/10">
+            <div className="mb-12 text-center">
+              <div className="w-24 h-24 bg-primary/5 rounded-[2.5rem] flex items-center justify-center border border-primary/10 mx-auto mb-8">
                 <div className="flex items-center gap-1.5 text-primary">
                   <span className="material-symbols-outlined text-3xl font-light">person</span>
                   <div className="w-4 h-[2px] bg-primary/20 rounded-full" />
                   <span className="material-symbols-outlined text-3xl filled">lock</span>
                 </div>
               </div>
-            </div>
-
-            {/* Typography Stack */}
-            <div className="text-center mb-12">
               <h2 className="text-5xl font-black font-display text-slate-900 leading-[0.95] tracking-tight mb-8">
                 Acceso al <br/> Contenido
               </h2>
@@ -131,40 +155,34 @@ export const DashboardView: React.FC = () => {
                 Ingresa tu correo registrado para desbloquear tu material educativo y gestionar tu suscripción.
               </p>
             </div>
-
-            {/* Form Interface Pro */}
             <form onSubmit={handleLogin} className="w-full space-y-8">
               <div className="relative group">
                 <div className="absolute left-6 top-1/2 -translate-y-1/2 text-primary">
                   <span className="material-symbols-outlined text-2xl">mail</span>
                 </div>
-                
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@correo.com"
-                  className="w-full h-20 pl-16 pr-14 bg-white border-2 border-primary rounded-[2rem] font-body text-slate-900 placeholder:text-slate-200 focus:outline-none focus:ring-8 focus:ring-primary/5 transition-all text-lg font-medium"
+                  className={`w-full h-20 pl-16 pr-14 bg-white border-2 rounded-[2rem] font-body text-slate-900 placeholder:text-slate-200 focus:outline-none focus:ring-8 focus:ring-primary/5 transition-all text-lg font-medium ${loginError ? 'border-red-400' : 'border-primary'}`}
                   required
                 />
-
-                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-blue-600">
-                  <span className="material-symbols-outlined text-2xl filled">verified</span>
+                <div className={`absolute right-6 top-1/2 -translate-y-1/2 ${loginError ? 'text-red-500' : 'text-blue-600'}`}>
+                  <span className="material-symbols-outlined text-2xl filled">
+                    {loginError ? 'error' : 'verified'}
+                  </span>
                 </div>
               </div>
-
+              {loginError && <p className="text-red-500 text-xs font-black uppercase tracking-widest text-center">{loginError}</p>}
               <div className="pt-2 w-full flex justify-center">
                 <Magnetic pullStrength={0.12}>
                   <button 
                     type="submit"
                     disabled={isSubmitting}
-                    className="h-20 px-14 bg-slate-900 text-white rounded-[2.5rem] font-black font-display text-[11px] uppercase tracking-[0.35em] shadow-[0_25px_50px_-12px_rgba(15,23,42,0.3)] hover:shadow-[0_35px_60px_-15px_rgba(15,23,42,0.4)] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 overflow-hidden"
+                    className="h-20 px-14 bg-slate-900 text-white rounded-[2.5rem] font-black font-display text-[11px] uppercase tracking-[0.35em] shadow-xl hover:shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                   >
-                    {isSubmitting ? (
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      'INGRESAR AHORA'
-                    )}
+                    {isSubmitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'INGRESAR AHORA'}
                   </button>
                 </Magnetic>
               </div>
@@ -175,19 +193,37 @@ export const DashboardView: React.FC = () => {
     );
   }
 
-  // --- USER VIEW: DASHBOARD (MANTIENE LA JERARQUÍA REFINADA) ---
+  // --- USER VIEW ---
   return (
-    <div className="w-full min-h-screen pb-24">
+    <div className="w-full min-h-screen pb-24 relative">
+      <div className="absolute top-[10%] right-[5%] z-0">
+        <FloatingMonster monster="POSITIVIN" size="size-48" />
+      </div>
+
       <ViewContainer>
-        <div className="text-center max-w-3xl mx-auto mb-20 flex flex-col items-center">
-          <ScrollReveal>
-            <GlassBadge icon="account_circle" colorClass="text-primary">Panel de Control</GlassBadge>
-            <h1 className={DESIGN_SYSTEM.typography.h2 + " mt-8"}>
-              Tu Colección <span className="text-primary">JACI</span>
-            </h1>
-            <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
-              Bienvenido de nuevo. Aquí encontrarás todo el material pedagógico de tu suscripción actual.
-            </p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-20 gap-8">
+          <div className="flex flex-col items-start">
+            <ScrollReveal>
+              <GlassBadge icon="account_circle" colorClass="text-primary">Panel de Control</GlassBadge>
+              <h1 className={DESIGN_SYSTEM.typography.h2 + " mt-8"}>
+                Tu Colección <span className="text-primary">JACI</span>
+              </h1>
+              <p className={DESIGN_SYSTEM.typography.body + " mt-4 max-w-xl"}>
+                Bienvenido, <span className="font-bold text-slate-900">{user.email}</span>. Aquí encontrarás todo el material pedagógico de tu suscripción.
+              </p>
+            </ScrollReveal>
+          </div>
+          
+          <ScrollReveal delay={0.2}>
+            <Magnetic pullStrength={0.1}>
+              <button 
+                onClick={handleLogout}
+                className="px-8 py-4 bg-slate-100 text-slate-500 rounded-full font-black font-display text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-lg">logout</span>
+                Cerrar Sesión
+              </button>
+            </Magnetic>
           </ScrollReveal>
         </div>
 
@@ -205,7 +241,6 @@ export const DashboardView: React.FC = () => {
                       alt={drop.title}
                       className={`w-full h-full object-cover transition-transform duration-1000 ${drop.is_unlocked ? 'group-hover/img:scale-110' : 'grayscale opacity-60'}`}
                     />
-                    
                     {!drop.is_unlocked && (
                       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[4px] flex items-center justify-center">
                          <div className="size-16 bg-white rounded-full flex items-center justify-center shadow-2xl">
@@ -213,7 +248,6 @@ export const DashboardView: React.FC = () => {
                          </div>
                       </div>
                     )}
-
                     <div className="absolute top-6 left-6 z-20">
                       <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md border border-white/20 shadow-lg ${
                         drop.is_unlocked ? 'bg-jaci-green/90 text-white' : 'bg-slate-900/80 text-white'
@@ -228,31 +262,18 @@ export const DashboardView: React.FC = () => {
                       <span className={DESIGN_SYSTEM.typography.label}>{drop.month} {drop.year}</span>
                       <div className="size-2 bg-slate-200 rounded-full"></div>
                     </div>
-
-                    <h3 className="text-2xl font-black font-display text-slate-900 mb-4 leading-tight group-hover/card:text-primary transition-colors">
-                      {drop.title}
-                    </h3>
-                    
+                    <h3 className="text-2xl font-black font-display text-slate-900 mb-4 leading-tight group-hover/card:text-primary transition-colors">{drop.title}</h3>
                     <p className="text-slate-500 font-body text-base leading-relaxed mb-10 flex-1">
-                      {drop.is_unlocked 
-                        ? "Este pack incluye 12 actividades dinámicas, 3 guías PDF y videos exclusivos de esta temporada." 
-                        : "Desbloquea este material y miles de recursos más uniéndote a nuestra membresía mensual."}
+                      {drop.is_unlocked ? "Este pack incluye 12 actividades dinámicas, 3 guías PDF y videos exclusivos." : "Desbloquea este material uniéndote a nuestra membresía mensual."}
                     </p>
-
                     <Magnetic pullStrength={0.08}>
                       {drop.is_unlocked ? (
-                        <button 
-                          onClick={() => handleDownload(drop.id)}
-                          className="w-full py-5 bg-slate-900 text-white rounded-full font-black font-display text-[10px] uppercase tracking-[0.25em] shadow-xl hover:bg-jaci-green transition-all flex items-center justify-center gap-2 group/btn"
-                        >
+                        <button onClick={() => handleDownload(drop.id)} className="w-full py-5 bg-slate-900 text-white rounded-full font-black font-display text-[10px] uppercase tracking-[0.25em] shadow-xl hover:bg-jaci-green transition-all flex items-center justify-center gap-2">
                           <span className="material-symbols-outlined text-lg">cloud_download</span>
                           Descargar Pack
                         </button>
                       ) : (
-                        <button 
-                          onClick={() => window.location.href = '?view=PRICING'}
-                          className="w-full py-5 border-2 border-slate-100 text-slate-400 rounded-full font-black font-display text-[10px] uppercase tracking-[0.25em] hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all flex items-center justify-center gap-2"
-                        >
+                        <button onClick={() => window.location.href = '?view=PRICING'} className="w-full py-5 border-2 border-slate-100 text-slate-400 rounded-full font-black font-display text-[10px] uppercase tracking-[0.25em] hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all flex items-center justify-center gap-2">
                           <span className="material-symbols-outlined text-lg">star</span>
                           Suscribirme Ahora
                         </button>
