@@ -75,20 +75,20 @@ export const AboutView: React.FC = () => {
 
               {/* Stats Grid - Enhanced Legibility */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-12">
-                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-500">
-                  <span className="material-symbols-outlined text-3xl text-primary mb-4 filled">flag</span>
-                  <h4 className="font-black font-display text-slate-900 text-xl mb-2">Pioneros</h4>
-                  <p className="text-sm text-slate-600 font-medium font-body leading-tight">Creadores de un método funcional para enseñar a leer.</p>
+                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-500 group/stat">
+                  <span className="material-symbols-outlined text-4xl text-primary mb-4 filled group-hover/stat:scale-110 transition-transform">flag</span>
+                  <h4 className="font-black font-display text-slate-900 text-2xl mb-2">Pioneros</h4>
+                  <p className="text-sm text-slate-700 font-bold font-body leading-snug">Creadores de un método funcional para enseñar a leer.</p>
                 </div>
-                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-jaci-green/20 transition-all duration-500">
-                  <span className="material-symbols-outlined text-3xl text-jaci-green mb-4 filled">trending_up</span>
-                  <h4 className="font-black font-display text-slate-900 text-xl mb-2">Resultados</h4>
-                  <p className="text-sm text-slate-600 font-medium font-body leading-tight">+2,000 niños han desbloqueado su potencial.</p>
+                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-jaci-green/20 transition-all duration-500 group/stat">
+                  <span className="material-symbols-outlined text-4xl text-jaci-green mb-4 filled group-hover/stat:scale-110 transition-transform">trending_up</span>
+                  <h4 className="font-black font-display text-slate-900 text-2xl mb-2">Resultados</h4>
+                  <p className="text-sm text-slate-700 font-bold font-body leading-snug">+2,000 niños han desbloqueado su potencial.</p>
                 </div>
-                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-jaci-purple/20 transition-all duration-500">
-                  <span className="material-symbols-outlined text-3xl text-jaci-purple mb-4 filled">psychology</span>
-                  <h4 className="font-black font-display text-slate-900 text-xl mb-2">Expertise</h4>
-                  <p className="text-sm text-slate-600 font-medium font-body leading-tight">Enfoque en activación neuronal y neurodesarrollo.</p>
+                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-jaci-purple/20 transition-all duration-500 group/stat">
+                  <span className="material-symbols-outlined text-4xl text-jaci-purple mb-4 filled group-hover/stat:scale-110 transition-transform">psychology</span>
+                  <h4 className="font-black font-display text-slate-900 text-2xl mb-2">Expertise</h4>
+                  <p className="text-sm text-slate-700 font-bold font-body leading-snug">Enfoque en activación neuronal y neurodesarrollo.</p>
                 </div>
               </div>
             </ScrollReveal>
@@ -107,7 +107,7 @@ export const AboutView: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
             {/* Academic Column */}
             <ScrollReveal delay={0.1}>
-              <InteractionCard borderColor={DESIGN_SYSTEM.colors.primary} className="h-full bg-slate-50/50">
+              <InteractionCard borderColor={DESIGN_SYSTEM.colors.primary} className="h-full bg-slate-50/30">
                 <div className="flex items-center gap-4 mb-10">
                   <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
                     <span className="material-symbols-outlined text-2xl filled">school</span>
@@ -141,14 +141,14 @@ export const AboutView: React.FC = () => {
                     <>Diplomado en Intervención en alumnos con <strong>TDAH</strong></>,
                     <>Diplomado en <strong>Neurobiología</strong> del desarrollo</>,
                     <>Diplomado en <strong>Funciones ejecutivas</strong></>,
-                    <>Diplomado en Regulación emocional <strong>UNAM</strong></>,
+                    <>Diplomado en <strong>Regulación emocional</strong> UNAM</>,
                     <>Diplomado en <strong>Mindfulness</strong></>,
-                    <>Diplomado en Ciencias de la <strong>felicidad</strong></>,
+                    <>Diplomado en <strong>Ciencias de la felicidad</strong></>,
                     <>Diplomado en Juegos y movimientos para la <strong>activación neuronal</strong></>
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-3 pl-2">
                       <span className="material-symbols-outlined text-primary text-base mt-0.5 filled opacity-70">check_circle</span>
-                      <span className="text-slate-600 font-body text-sm font-medium">{item}</span>
+                      <span className="text-slate-800 font-body text-sm font-medium">{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -158,7 +158,7 @@ export const AboutView: React.FC = () => {
             {/* Certifications & Standards Column */}
             <div className="flex flex-col gap-8">
               <ScrollReveal delay={0.2}>
-                <InteractionCard borderColor={DESIGN_SYSTEM.colors.green} className="bg-slate-50/50">
+                <InteractionCard borderColor={DESIGN_SYSTEM.colors.green} className="bg-slate-50/30">
                   <div className="flex items-center gap-4 mb-8">
                     <div className="w-12 h-12 bg-jaci-green rounded-xl flex items-center justify-center text-white shadow-lg shadow-jaci-green/30">
                       <span className="material-symbols-outlined text-2xl filled">verified</span>
@@ -169,8 +169,8 @@ export const AboutView: React.FC = () => {
                     <li className="flex items-start gap-3">
                       <span className="material-symbols-outlined text-jaci-green text-lg mt-0.5 filled">workspace_premium</span>
                       <div>
-                        <span className="text-slate-900 font-bold block text-base">Disciplina Positiva</span>
-                        <span className="text-slate-500 text-sm">Certificada por la <strong>PDA</strong></span>
+                        <span className="text-slate-900 font-black block text-base">Disciplina Positiva</span>
+                        <span className="text-slate-600 text-sm font-medium">Certificada por la <strong>PDA</strong></span>
                       </div>
                     </li>
                   </ul>
@@ -178,7 +178,7 @@ export const AboutView: React.FC = () => {
               </ScrollReveal>
 
               <ScrollReveal delay={0.3}>
-                <InteractionCard borderColor={DESIGN_SYSTEM.colors.yellow} className="bg-slate-50/50 flex-1">
+                <InteractionCard borderColor={DESIGN_SYSTEM.colors.yellow} className="bg-slate-50/30 flex-1">
                   <div className="flex items-center gap-4 mb-8">
                     <div className="w-12 h-12 bg-jaci-yellow rounded-xl flex items-center justify-center text-white shadow-lg shadow-jaci-yellow/30">
                       <span className="material-symbols-outlined text-2xl filled">stars</span>
@@ -192,12 +192,12 @@ export const AboutView: React.FC = () => {
                       { code: "EC0217.01", desc: "Impartición de cursos de formación" },
                       { code: "EC0076", desc: "Evaluación de la competencia" }
                     ].map((std, i) => (
-                      <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-jaci-yellow/30 transition-colors">
-                        <div className="flex flex-col items-center justify-center bg-slate-900 text-white min-w-[70px] py-2 rounded-xl">
-                          <span className="text-[10px] font-black uppercase tracking-wider leading-none mb-1">CÓDIGO</span>
-                          <span className="text-xs font-black">{std.code}</span>
+                      <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm hover:border-jaci-yellow/40 hover:shadow-md transition-all">
+                        <div className="flex flex-col items-center justify-center bg-slate-900 text-white min-w-[75px] py-2 rounded-xl">
+                          <span className="text-[10px] font-black uppercase tracking-wider leading-none mb-1 opacity-60">CÓDIGO</span>
+                          <span className="text-sm font-black tracking-tighter">{std.code}</span>
                         </div>
-                        <span className="text-slate-900 text-sm font-bold leading-tight">{std.desc}</span>
+                        <span className="text-slate-900 text-sm font-black leading-tight">{std.desc}</span>
                       </div>
                     ))}
                   </div>

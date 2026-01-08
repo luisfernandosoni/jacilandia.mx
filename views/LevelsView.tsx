@@ -9,7 +9,7 @@ export const LevelsView: React.FC = () => {
       id: "01",
       title: "JACILINGÜES",
       subtitle: "Preescolar / 4+ años",
-      monster: "TUI",
+      monster: "POSITIVIN",
       color: "#25c0f4",
       icon: "child_care",
       desc: "Para los pequeños exploradores que inician su viaje. Navegamos juntos el 2° y 3° de preescolar. Trabajamos motricidad, seguimiento de instrucciones y los primeros pasos hacia la lectoescritura.",

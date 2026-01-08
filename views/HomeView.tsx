@@ -2,12 +2,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ViewContainer, Magnetic, ScrollReveal, GlassBadge, FloatingMonster } from '../components/MotionPrimitives';
-import { DESIGN_SYSTEM } from '../types';
+import { DESIGN_SYSTEM, ViewState } from '../types';
+import { useNavigation } from '../App';
 
 export const HomeView: React.FC = () => {
+  const { navigateTo } = useNavigation();
+
   return (
-    <div className="relative w-full overflow-x-hidden">
-      {/* Squad Guardians - Now persistent on mobile with safe positioning */}
+    <div className="relative w-full overflow-x-hidden min-h-[85vh] flex flex-col justify-center">
+      {/* Squad Guardians - Persistent positioning */}
       <div className="absolute top-[12%] left-2 md:left-[10%] z-0 pointer-events-none opacity-40 md:opacity-100">
         <FloatingMonster monster="POMPIN" size="size-28 md:size-48" delay={0.5} />
       </div>
@@ -15,7 +18,7 @@ export const HomeView: React.FC = () => {
         <FloatingMonster monster="GRAPPY" size="size-36 md:size-56" delay={1} />
       </div>
 
-      <ViewContainer className="flex flex-col items-center text-center relative z-10">
+      <ViewContainer className="flex flex-col items-center text-center relative z-10 pt-12 pb-24">
         {/* Brand Badge with Shared Layout Projection */}
         <Magnetic pullStrength={0.08}>
           <motion.div 
@@ -23,6 +26,7 @@ export const HomeView: React.FC = () => {
             animate={{ scale: 1, opacity: 1 }}
             transition={DESIGN_SYSTEM.springs.bouncy}
             className="group relative w-32 h-32 md:w-48 md:h-48 mb-20 cursor-pointer"
+            onClick={() => navigateTo(ViewState.ABOUT)}
           >
             <div className="absolute inset-4 bg-primary/20 rounded-[3rem] blur-2xl group-hover:blur-3xl transition-all duration-500" />
             <div className="relative w-full h-full bg-white/80 backdrop-blur-xl rounded-[3rem] shadow-soft flex items-center justify-center p-9 border border-white/40">
@@ -45,7 +49,7 @@ export const HomeView: React.FC = () => {
           </motion.div>
         </Magnetic>
 
-        {/* Hero Title Standardized with Perfect Symmetry */}
+        {/* Hero Title Standardized */}
         <div className="relative w-full max-w-5xl mx-auto mb-16 flex flex-col items-center px-4">
           <ScrollReveal className="w-full flex flex-col items-center">
             <GlassBadge icon="auto_awesome" colorClass="text-primary" className="!mx-auto">
@@ -70,28 +74,20 @@ export const HomeView: React.FC = () => {
           </motion.p>
         </div>
 
-        {/* Action Button */}
+        {/* Action Button - Linked to Methodology */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1 }}
         >
           <Magnetic pullStrength={0.15}>
-            <button className="px-10 py-5 bg-slate-900 text-white rounded-full text-lg font-bold shadow-2xl hover:bg-slate-800 transition-all transform hover:scale-105 active:scale-95 font-display">
+            <button 
+              onClick={() => navigateTo(ViewState.METHODOLOGY)}
+              className="px-10 py-5 bg-slate-900 text-white rounded-full text-lg font-bold shadow-2xl hover:bg-slate-800 transition-all transform hover:scale-105 active:scale-95 font-display"
+            >
               Conoce el Método
             </button>
           </Magnetic>
-        </motion.div>
-
-        {/* Scroll Indicator */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
-          transition={{ delay: 1.5, duration: 1 }}
-          className="mt-24 flex flex-col items-center gap-4"
-        >
-          <span className={DESIGN_SYSTEM.typography.label}>Desliza</span>
-          <div className="w-px h-12 bg-gradient-to-b from-slate-200 to-transparent" />
         </motion.div>
       </ViewContainer>
     </div>
