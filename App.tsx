@@ -29,6 +29,7 @@ export const usePerformance = () => useContext(PerformanceContext);
 // Speculative Registry Updated to assets.jacilandia.mx
 const CRITICAL_ASSETS: Record<string, string[]> = {
   [ViewState.HOME]: ["https://assets.jacilandia.mx/JACI_Color.png"],
+  [ViewState.ABOUT]: ["https://assets.jacilandia.mx/JessydeJACI.jpg"],
   [ViewState.METHODOLOGY]: ["https://lh3.googleusercontent.com/aida-public/AB6AXuA4sB3k0FBFYI_qENJexMKPDpIIadN6siWEcb1uScQwl1CeA8sBd_sKxm1D1oFg3A0I1FUDN9OVs6ofN7NhxlOOcqKZ_L2ctAEJIwxrxHxMC3CnEdPWifTw6t7HoaS_CFa_Ix2HkpubNRN9-2XD9i78O8xFjXz2VmPPJPmIROyJRfwW0C3ypLM-jqQ-OSkhhyj31JuwxjlxzUd-IR-3AvH4MMVJ41bzXkxQmsCZgY-BYyQosWYUpvLD1J6qVbgYr2RXmxYQM8Xdrb6u"],
   [ViewState.LEVELS]: ["https://lh3.googleusercontent.com/aida-public/AB6AXuBNZlftM73AD9x8L97Rhl_5DejCEzh3EgdYA_XIQRZ07xYRS5BQGsEQSOEh7rKYByF3NrstYqTX-HHqsZR6EMM8gUL0g89JD9VkOrJbwYxfpWv0zohD--WcFXhSfZ4mPtMk6mD8nBmkE4Wbua0VZ1MwrSh1E7TcTh0F6mDJ2rYlp_FGapjh144xOImeCJFgEVRB9JSEJbKdEkS5lw2BTKldvRToREzYIkB1FCBHDscEY27DWRmFf4HeXE6S2y51a0_VMmFy6sgz8xe8"],
   [ViewState.LOCATIONS]: ["https://lh3.googleusercontent.com/aida-public/AB6AXuA-UKXNC-U7dc2fO-B0B9Cnyo3Dy8WyrvaMgN7UdSVnbGNkfu1shrCQzxAdNWCN31Bdwekwo0YAF7faiQ24E1yAIFDuSKdexMt3AnIcVeTIxtPDaB2BurM1lXhZdZeTtkhuuOJuODUbNt9qzZ6wnsGPcf3Ju_6sGx0Lqt74Q6tXSSAt7or1Z6VgPTaeRVNAvQpIBzr1BsD9iyEQ1hkSSlMwZCxIfKme-bJdXjdcdOM49lu_7uhVOaKqwo_nIi99pqAHaPakpbA4lNfb"]
@@ -146,8 +147,9 @@ const App: React.FC = () => {
       <div className={`min-h-screen flex flex-col font-body selection:bg-primary/20 transition-colors duration-1000 ${isPending ? 'bg-slate-50/50' : 'bg-surface'}`}>
         <Navigation currentView={currentView} onChangeView={handleViewChange} />
         
-        <main className="flex-grow relative overflow-hidden" style={{ contain: 'layout paint' }}>
-          <AnimatePresence mode="popLayout" initial={false}>
+        {/* Silicon Valley Correction: Removed all 'contain' restrictions to allow artistic bleeding */}
+        <main className="flex-grow relative overflow-x-clip">
+          <AnimatePresence mode="popLayout" initial={true}>
             <motion.div
               key={currentView}
               initial={{ opacity: 0, scale: 0.99, filter: 'blur(4px)' }}

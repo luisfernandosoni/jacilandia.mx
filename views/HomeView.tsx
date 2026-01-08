@@ -6,16 +6,16 @@ import { DESIGN_SYSTEM } from '../types';
 
 export const HomeView: React.FC = () => {
   return (
-    <div className="relative w-full overflow-hidden">
-      {/* Squad Guardians */}
-      <div className="absolute top-[20%] left-[10%] hidden lg:block z-0 pointer-events-none">
-        <FloatingMonster monster="POMPIN" size="size-48" delay={0.5} />
+    <div className="relative w-full overflow-x-hidden">
+      {/* Squad Guardians - Now persistent on mobile with safe positioning */}
+      <div className="absolute top-[12%] left-2 md:left-[10%] z-0 pointer-events-none opacity-40 md:opacity-100">
+        <FloatingMonster monster="POMPIN" size="size-28 md:size-48" delay={0.5} />
       </div>
-      <div className="absolute bottom-[30%] right-[12%] hidden lg:block z-0 pointer-events-none">
-        <FloatingMonster monster="GRAPPY" size="size-56" delay={1} />
+      <div className="absolute bottom-[20%] right-2 md:right-[12%] z-0 pointer-events-none opacity-40 md:opacity-100">
+        <FloatingMonster monster="GRAPPY" size="size-36 md:size-56" delay={1} />
       </div>
 
-      <ViewContainer className="flex flex-col items-center text-center">
+      <ViewContainer className="flex flex-col items-center text-center relative z-10">
         {/* Brand Badge with Shared Layout Projection */}
         <Magnetic pullStrength={0.08}>
           <motion.div 
@@ -45,11 +45,13 @@ export const HomeView: React.FC = () => {
           </motion.div>
         </Magnetic>
 
-        {/* Hero Title Standardized */}
-        <div className="relative max-w-5xl mx-auto mb-16 flex flex-col items-center">
-          <ScrollReveal>
-            <GlassBadge icon="auto_awesome" colorClass="text-primary">Bienvenidos a JACI</GlassBadge>
-            <h1 className={DESIGN_SYSTEM.typography.h1}>
+        {/* Hero Title Standardized with Perfect Symmetry */}
+        <div className="relative w-full max-w-5xl mx-auto mb-16 flex flex-col items-center px-4">
+          <ScrollReveal className="w-full flex flex-col items-center">
+            <GlassBadge icon="auto_awesome" colorClass="text-primary" className="!mx-auto">
+              Bienvenidos a JACI
+            </GlassBadge>
+            <h1 className={`${DESIGN_SYSTEM.typography.h1} w-full text-center mt-6`}>
               En JACI creamos las <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-jaci-pink to-jaci-purple">
                 monstruomentes
@@ -62,7 +64,7 @@ export const HomeView: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
-            className={`${DESIGN_SYSTEM.typography.body} max-w-2xl mx-auto mt-10`}
+            className={`${DESIGN_SYSTEM.typography.body} max-w-2xl mx-auto mt-10 px-4 text-center`}
           >
             Descubre cómo aprendemos jugando y transformamos la curiosidad en un súper poder que dura para toda la vida.
           </motion.p>

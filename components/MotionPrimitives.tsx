@@ -23,11 +23,11 @@ export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, cla
     style={{ 
       contentVisibility: 'auto', 
       containIntrinsicSize: '1px 800px',
-      contain: 'layout style paint',
+      contain: 'layout style',
       transform: 'translateZ(0)',
       backfaceVisibility: 'hidden'
     }}
-    className={`relative z-10 w-full ${DESIGN_SYSTEM.tokens.gutters.container} ${DESIGN_SYSTEM.tokens.gutters.section} max-w-[1600px] mx-auto ${className}`}
+    className={`relative z-10 w-full px-5 md:px-16 lg:px-24 ${DESIGN_SYSTEM.tokens.gutters.section} max-w-[1600px] mx-auto ${className}`}
     {...props}
   >
     {children}
@@ -52,7 +52,7 @@ export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children,
     transformStyle: 'preserve-3d' as const,
     perspective: '1000px',
     willChange: isInView && (isHovered || prefersReducedMotion === false) ? 'transform, opacity' : 'auto',
-    contain: 'layout style paint',
+    contain: 'layout style',
     backgroundColor: (perf === PerformanceProfile.HIGH && isInView) ? 'rgba(255, 255, 255, 0.8)' : '#ffffff',
     backdropFilter: (perf === PerformanceProfile.HIGH && isInView) ? 'blur(16px)' : 'none',
     transform: 'translateZ(0)',
@@ -160,6 +160,7 @@ export const FloatingMonster: React.FC<{
     <motion.img
       src={JACI_SQUAD[monster]}
       alt={monster}
+      inherit={false}
       initial={{ opacity: 0, y: 10 }}
       animate={{ 
         opacity: 1, 
@@ -167,9 +168,21 @@ export const FloatingMonster: React.FC<{
         rotate: prefersReducedMotion ? 0 : [0, 5, -5, 0]
       }}
       transition={{
-        opacity: { duration: 1, delay },
-        y: { ...DESIGN_SYSTEM.springs.float, delay },
-        rotate: { ...DESIGN_SYSTEM.springs.float, duration: 6, delay }
+        opacity: { duration: 0.8, delay },
+        y: { 
+          repeat: Infinity, 
+          repeatType: 'reverse', 
+          duration: 4, 
+          ease: "easeInOut",
+          delay: delay + 0.5 
+        },
+        rotate: { 
+          repeat: Infinity, 
+          repeatType: 'reverse', 
+          duration: 6, 
+          ease: "easeInOut",
+          delay: delay + 0.5
+        }
       }}
       className={`${size} object-contain select-none pointer-events-none drop-shadow-2xl ${className}`}
       style={{ willChange: 'transform, opacity' }}
@@ -177,7 +190,7 @@ export const FloatingMonster: React.FC<{
   );
 });
 
-export const GlassBadge: React.FC<{ icon: string; children: React.ReactNode; colorClass?: string }> = memo(({ icon, children, colorClass = "text-primary" }) => {
+export const GlassBadge: React.FC<{ icon: string; children: React.ReactNode; colorClass?: string; className?: string }> = memo(({ icon, children, colorClass = "text-primary", className = "" }) => {
   const perf = usePerformance();
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "5% 0px", once: false });
@@ -187,7 +200,7 @@ export const GlassBadge: React.FC<{ icon: string; children: React.ReactNode; col
       ref={ref}
       initial={{ opacity: 0, y: 10 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-      className={`inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-white/60 shadow-sm mb-10 w-fit mx-auto lg:mx-0 ${perf === PerformanceProfile.HIGH && isInView ? 'bg-white/80 backdrop-blur-xl' : 'bg-white'}`}
+      className={`inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-white/60 shadow-sm mb-10 w-fit mx-auto lg:mx-0 ${perf === PerformanceProfile.HIGH && isInView ? 'bg-white/80 backdrop-blur-xl' : 'bg-white'} ${className}`}
       style={{ transform: 'translateZ(0)', contain: 'content' }}
     >
       <span className={`material-symbols-outlined text-[18px] ${colorClass}`}>{icon}</span>
@@ -272,7 +285,7 @@ export const ScrollReveal: React.FC<{ children: React.ReactNode; delay?: number;
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ ...DESIGN_SYSTEM.springs.gentle, delay, duration: 0.6 }}
       className={className}
-      style={{ transform: 'translateZ(0)', contain: 'layout paint' }}
+      style={{ transform: 'translateZ(0)', contain: 'layout' }}
     >
       {children}
     </motion.div>

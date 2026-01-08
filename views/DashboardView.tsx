@@ -123,35 +123,35 @@ export const DashboardView: React.FC = () => {
   // --- GUEST VIEW ---
   if (!user) {
     return (
-      <div className="w-full min-h-[85vh] flex items-center justify-center p-8 relative">
-        {/* Background companions for login */}
-        <div className="absolute top-1/4 left-[5%] opacity-20 rotate-12">
-          <FloatingMonster monster="POMPIN" size="size-32" />
+      <div className="w-full min-h-[85vh] flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+        {/* Background companions for login - Now safe for all viewports */}
+        <div className="absolute top-[10%] left-[2%] opacity-10 md:opacity-20 rotate-12">
+          <FloatingMonster monster="POMPIN" size="size-24 md:size-32" />
         </div>
-        <div className="absolute bottom-1/4 right-[5%] opacity-20 -rotate-12">
-          <FloatingMonster monster="TUFIN" size="size-32" />
+        <div className="absolute bottom-[10%] right-[2%] opacity-10 md:opacity-20 -rotate-12">
+          <FloatingMonster monster="TUFIN" size="size-24 md:size-32" />
         </div>
 
-        <ScrollReveal className="w-full max-w-[440px]">
-          <div className="relative bg-white rounded-[4rem] shadow-[0_50px_100px_-20px_rgba(15,23,42,0.12)] border border-slate-50 overflow-hidden flex flex-col items-center px-10 py-16 md:px-14 md:py-20">
-            {/* Peeking monster for login area */}
-            <div className="absolute -top-10 -right-6">
-              <FloatingMonster monster="TOMAS" size="size-24" />
+        <ScrollReveal className="w-full max-w-[440px] relative z-10">
+          <div className="relative bg-white rounded-[3rem] md:rounded-[4rem] shadow-[0_50px_100px_-20px_rgba(15,23,42,0.12)] border border-slate-50 overflow-visible flex flex-col items-center px-8 py-12 md:px-14 md:py-20">
+            {/* Peeking monster for login area - Z-index fixed */}
+            <div className="absolute -top-12 -right-4 md:-top-10 md:-right-6 z-20">
+              <FloatingMonster monster="TOMAS" size="size-20 md:size-24" />
             </div>
 
-            <div className="absolute left-0 top-[15%] bottom-[15%] w-[5px] bg-primary rounded-r-full shadow-[0_0_20px_rgba(37,192,244,0.3)]" />
+            <div className="absolute left-0 top-[15%] bottom-[15%] w-[4px] md:w-[5px] bg-primary rounded-r-full shadow-[0_0_20px_rgba(37,192,244,0.3)]" />
             <div className="mb-12 text-center">
-              <div className="w-24 h-24 bg-primary/5 rounded-[2.5rem] flex items-center justify-center border border-primary/10 mx-auto mb-8">
+              <div className="w-20 h-20 md:w-24 md:h-24 bg-primary/5 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center border border-primary/10 mx-auto mb-8">
                 <div className="flex items-center gap-1.5 text-primary">
-                  <span className="material-symbols-outlined text-3xl font-light">person</span>
-                  <div className="w-4 h-[2px] bg-primary/20 rounded-full" />
-                  <span className="material-symbols-outlined text-3xl filled">lock</span>
+                  <span className="material-symbols-outlined text-2xl md:text-3xl font-light">person</span>
+                  <div className="w-3 md:w-4 h-[2px] bg-primary/20 rounded-full" />
+                  <span className="material-symbols-outlined text-2xl md:text-3xl filled">lock</span>
                 </div>
               </div>
-              <h2 className="text-5xl font-black font-display text-slate-900 leading-[0.95] tracking-tight mb-8">
+              <h2 className="text-4xl md:text-5xl font-black font-display text-slate-900 leading-[0.95] tracking-tight mb-8">
                 Acceso al <br/> Contenido
               </h2>
-              <p className="text-slate-400 font-body text-[1rem] leading-relaxed max-w-[300px] mx-auto opacity-80">
+              <p className="text-slate-400 font-body text-[0.9rem] md:text-[1rem] leading-relaxed max-w-[300px] mx-auto opacity-80">
                 Ingresa tu correo registrado para desbloquear tu material educativo y gestionar tu suscripción.
               </p>
             </div>
@@ -165,14 +165,9 @@ export const DashboardView: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@correo.com"
-                  className={`w-full h-20 pl-16 pr-14 bg-white border-2 rounded-[2rem] font-body text-slate-900 placeholder:text-slate-200 focus:outline-none focus:ring-8 focus:ring-primary/5 transition-all text-lg font-medium ${loginError ? 'border-red-400' : 'border-primary'}`}
+                  className={`w-full h-16 md:h-20 pl-16 pr-14 bg-white border-2 rounded-[1.5rem] md:rounded-[2rem] font-body text-slate-900 placeholder:text-slate-200 focus:outline-none focus:ring-8 focus:ring-primary/5 transition-all text-base md:text-lg font-medium ${loginError ? 'border-red-400' : 'border-primary'}`}
                   required
                 />
-                <div className={`absolute right-6 top-1/2 -translate-y-1/2 ${loginError ? 'text-red-500' : 'text-blue-600'}`}>
-                  <span className="material-symbols-outlined text-2xl filled">
-                    {loginError ? 'error' : 'verified'}
-                  </span>
-                </div>
               </div>
               {loginError && <p className="text-red-500 text-xs font-black uppercase tracking-widest text-center">{loginError}</p>}
               <div className="pt-2 w-full flex justify-center">
@@ -180,7 +175,7 @@ export const DashboardView: React.FC = () => {
                   <button 
                     type="submit"
                     disabled={isSubmitting}
-                    className="h-20 px-14 bg-slate-900 text-white rounded-[2.5rem] font-black font-display text-[11px] uppercase tracking-[0.35em] shadow-xl hover:shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                    className="h-16 md:h-20 px-10 md:px-14 bg-slate-900 text-white rounded-[1.75rem] md:rounded-[2.5rem] font-black font-display text-[10px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.35em] shadow-xl hover:shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                   >
                     {isSubmitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'INGRESAR AHORA'}
                   </button>
@@ -195,17 +190,17 @@ export const DashboardView: React.FC = () => {
 
   // --- USER VIEW ---
   return (
-    <div className="w-full min-h-screen pb-24 relative">
-      <div className="absolute top-[10%] right-[5%] z-0">
-        <FloatingMonster monster="POSITIVIN" size="size-48" />
+    <div className="w-full min-h-screen pb-24 relative overflow-x-hidden">
+      <div className="absolute top-[8%] right-[2%] z-0 opacity-40 md:opacity-100">
+        <FloatingMonster monster="POSITIVIN" size="size-32 md:size-48" />
       </div>
 
-      <ViewContainer>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-20 gap-8">
-          <div className="flex flex-col items-start">
+      <ViewContainer className="relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 md:mb-20 gap-8">
+          <div className="flex flex-col items-start px-4">
             <ScrollReveal>
               <GlassBadge icon="account_circle" colorClass="text-primary">Panel de Control</GlassBadge>
-              <h1 className={DESIGN_SYSTEM.typography.h2 + " mt-8"}>
+              <h1 className={DESIGN_SYSTEM.typography.h2 + " mt-6"}>
                 Tu Colección <span className="text-primary">JACI</span>
               </h1>
               <p className={DESIGN_SYSTEM.typography.body + " mt-4 max-w-xl"}>
@@ -214,20 +209,22 @@ export const DashboardView: React.FC = () => {
             </ScrollReveal>
           </div>
           
-          <ScrollReveal delay={0.2}>
-            <Magnetic pullStrength={0.1}>
-              <button 
-                onClick={handleLogout}
-                className="px-8 py-4 bg-slate-100 text-slate-500 rounded-full font-black font-display text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all flex items-center gap-2"
-              >
-                <span className="material-symbols-outlined text-lg">logout</span>
-                Cerrar Sesión
-              </button>
-            </Magnetic>
-          </ScrollReveal>
+          <div className="px-4 w-full md:w-auto">
+            <ScrollReveal delay={0.2}>
+              <Magnetic pullStrength={0.1}>
+                <button 
+                  onClick={handleLogout}
+                  className="w-full md:w-auto px-8 py-4 bg-slate-100 text-slate-500 rounded-full font-black font-display text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-lg">logout</span>
+                  Cerrar Sesión
+                </button>
+              </Magnetic>
+            </ScrollReveal>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 px-4">
           {drops.map((drop, idx) => (
             <ScrollReveal key={drop.id} delay={idx * 0.1}>
               <InteractionCard 
@@ -243,13 +240,13 @@ export const DashboardView: React.FC = () => {
                     />
                     {!drop.is_unlocked && (
                       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[4px] flex items-center justify-center">
-                         <div className="size-16 bg-white rounded-full flex items-center justify-center shadow-2xl">
-                           <span className="material-symbols-outlined text-slate-900 text-3xl filled">lock</span>
+                         <div className="size-14 md:size-16 bg-white rounded-full flex items-center justify-center shadow-2xl">
+                           <span className="material-symbols-outlined text-slate-900 text-2xl md:text-3xl filled">lock</span>
                          </div>
                       </div>
                     )}
-                    <div className="absolute top-6 left-6 z-20">
-                      <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest backdrop-blur-md border border-white/20 shadow-lg ${
+                    <div className="absolute top-4 left-4 md:top-6 md:left-6 z-20">
+                      <div className={`px-3 py-1.5 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest backdrop-blur-md border border-white/20 shadow-lg ${
                         drop.is_unlocked ? 'bg-jaci-green/90 text-white' : 'bg-slate-900/80 text-white'
                       }`}>
                         {drop.is_unlocked ? 'Contenido Activo' : 'Suscripción Necesaria'}
@@ -257,23 +254,23 @@ export const DashboardView: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="p-10 flex flex-col flex-1">
+                  <div className="p-8 md:p-10 flex flex-col flex-1">
                     <div className="flex justify-between items-center mb-6">
                       <span className={DESIGN_SYSTEM.typography.label}>{drop.month} {drop.year}</span>
                       <div className="size-2 bg-slate-200 rounded-full"></div>
                     </div>
-                    <h3 className="text-2xl font-black font-display text-slate-900 mb-4 leading-tight group-hover/card:text-primary transition-colors">{drop.title}</h3>
-                    <p className="text-slate-500 font-body text-base leading-relaxed mb-10 flex-1">
+                    <h3 className="text-xl md:text-2xl font-black font-display text-slate-900 mb-4 leading-tight group-hover/card:text-primary transition-colors">{drop.title}</h3>
+                    <p className="text-slate-500 font-body text-sm md:text-base leading-relaxed mb-10 flex-1">
                       {drop.is_unlocked ? "Este pack incluye 12 actividades dinámicas, 3 guías PDF y videos exclusivos." : "Desbloquea este material uniéndote a nuestra membresía mensual."}
                     </p>
                     <Magnetic pullStrength={0.08}>
                       {drop.is_unlocked ? (
-                        <button onClick={() => handleDownload(drop.id)} className="w-full py-5 bg-slate-900 text-white rounded-full font-black font-display text-[10px] uppercase tracking-[0.25em] shadow-xl hover:bg-jaci-green transition-all flex items-center justify-center gap-2">
+                        <button onClick={() => handleDownload(drop.id)} className="w-full py-4 md:py-5 bg-slate-900 text-white rounded-full font-black font-display text-[9px] md:text-[10px] uppercase tracking-[0.25em] shadow-xl hover:bg-jaci-green transition-all flex items-center justify-center gap-2">
                           <span className="material-symbols-outlined text-lg">cloud_download</span>
                           Descargar Pack
                         </button>
                       ) : (
-                        <button onClick={() => window.location.href = '?view=PRICING'} className="w-full py-5 border-2 border-slate-100 text-slate-400 rounded-full font-black font-display text-[10px] uppercase tracking-[0.25em] hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all flex items-center justify-center gap-2">
+                        <button onClick={() => window.location.href = '?view=PRICING'} className="w-full py-4 md:py-5 border-2 border-slate-100 text-slate-400 rounded-full font-black font-display text-[9px] md:text-[10px] uppercase tracking-[0.25em] hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all flex items-center justify-center gap-2">
                           <span className="material-symbols-outlined text-lg">star</span>
                           Suscribirme Ahora
                         </button>
