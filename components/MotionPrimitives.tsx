@@ -4,6 +4,22 @@ import { motion, HTMLMotionProps, useSpring, useScroll, useTransform, useReduced
 import { DESIGN_SYSTEM, PerformanceProfile, JACI_SQUAD } from '../types';
 import { usePerformance } from '../App';
 
+// Utilidad global para optimización de imágenes vía Cloudflare
+export const getCloudflareImageUrl = (src: string, options: { width: number, quality?: number, fit?: string, blur?: number }) => {
+  if (!src) return '';
+  const baseTransform = "/cdn-cgi/image/";
+  const quality = options.quality || 85;
+  const fit = options.fit || 'contain';
+  const blurParam = options.blur ? `,blur=${options.blur}` : '';
+  const config = `width=${options.width},quality=${quality},format=auto,fit=${fit}${blurParam}`;
+  
+  const cleanPath = src.replace('https://assets.jacilandia.mx', '');
+  const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+  const sourceImage = src.includes('jacilandia.mx') ? `https://assets.jacilandia.mx${finalPath}` : src;
+  
+  return `${baseTransform}${config}/${encodeURIComponent(sourceImage)}`;
+};
+
 interface ViewContainerProps extends HTMLMotionProps<'section'> {
   children: React.ReactNode;
   className?: string;
@@ -104,34 +120,17 @@ export const OptimizedImage: React.FC<{
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "50% 0px", once: true }); 
 
-  const getTransformUrl = useCallback((width: number, blur: number = 0) => {
-    const baseTransform = "/cdn-cgi/image/";
-    const quality = width < 600 ? 75 : (perf === PerformanceProfile.LITE ? 60 : 85);
-    const blurParam = blur > 0 ? `,blur=${blur}` : '';
-    const options = `width=${width},quality=${quality},format=auto,fit=${objectFit}${blurParam}`;
-    
-    const cleanPath = src.replace('https://assets.jacilandia.mx', '');
-    const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
-    
-    // Si la URL es externa (no jacilandia.mx), la usamos tal cual.
-    // IMPORTANTE: Codificamos la URL fuente para asegurar que los caracteres especiales (como comas en Google Photos)
-    // no rompan el parsing del atributo srcset del navegador.
-    const sourceImage = src.includes('jacilandia.mx') ? `https://assets.jacilandia.mx${finalPath}` : src;
-    
-    return `${baseTransform}${options}/${encodeURIComponent(sourceImage)}`;
-  }, [src, perf, objectFit]);
-
-  const placeholderUrl = useMemo(() => getTransformUrl(30, 20), [getTransformUrl]);
+  const placeholderUrl = useMemo(() => getCloudflareImageUrl(src, { width: 30, blur: 20, fit: objectFit }), [src, objectFit]);
   
   const srcSet = useMemo(() => {
     return `
-      ${getTransformUrl(400)} 400w,
-      ${getTransformUrl(640)} 640w,
-      ${getTransformUrl(960)} 960w,
-      ${getTransformUrl(1280)} 1280w,
-      ${getTransformUrl(1920)} 1920w
+      ${getCloudflareImageUrl(src, { width: 400, fit: objectFit })} 400w,
+      ${getCloudflareImageUrl(src, { width: 640, fit: objectFit })} 640w,
+      ${getCloudflareImageUrl(src, { width: 960, fit: objectFit })} 960w,
+      ${getCloudflareImageUrl(src, { width: 1280, fit: objectFit })} 1280w,
+      ${getCloudflareImageUrl(src, { width: 1920, fit: objectFit })} 1920w
     `;
-  }, [getTransformUrl]);
+  }, [src, objectFit]);
 
   const defaultSizes = sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw";
 
@@ -158,7 +157,7 @@ export const OptimizedImage: React.FC<{
 
       {(isInView || priority === 'high') && (
         <motion.img
-          src={getTransformUrl(1280)}
+          src={getCloudflareImageUrl(src, { width: 1280, fit: objectFit })}
           srcSet={srcSet}
           sizes={defaultSizes}
           alt={alt}
@@ -200,7 +199,7 @@ export const FloatingMonster: React.FC<{
   if (perf === PerformanceProfile.LITE) {
     return (
       <img 
-        src={JACI_SQUAD[monster]} 
+        src={getCloudflareImageUrl(JACI_SQUAD[monster], { width: 300, fit: 'contain' })} 
         alt="" 
         className={`${size} object-contain ${className} drop-shadow-md`} 
         loading={priority ? "eager" : "lazy"}
@@ -208,7 +207,6 @@ export const FloatingMonster: React.FC<{
     );
   }
 
-  // Desacoplamos la animación de las variantes del padre usando un estado de visibilidad forzado o simplemente evitando herencia
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0, y: 30 }}
@@ -216,7 +214,7 @@ export const FloatingMonster: React.FC<{
       transition={{ 
         delay: delay, 
         duration: 0.8, 
-        ease: [0.34, 1.56, 0.64, 1], // Custom Overshoot
+        ease: [0.34, 1.56, 0.64, 1],
       }}
       style={{ 
         translateY: prefersReducedMotion ? 0 : velocityY, 

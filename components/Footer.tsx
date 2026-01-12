@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Magnetic } from './MotionPrimitives';
+import { Magnetic, getCloudflareImageUrl } from './MotionPrimitives';
 import { useNavigation } from '../App';
 import { ViewState } from '../types';
 
@@ -72,6 +72,9 @@ export const Footer: React.FC = () => {
   const { navigateTo } = useNavigation();
   const currentYear = new Date().getFullYear();
 
+  // Optimización de Logo para Footer
+  const optimizedLogoUrl = getCloudflareImageUrl("https://assets.jacilandia.mx/LOGO_H_Color.png", { width: 320 });
+
   return (
     <footer className="bg-white/50 backdrop-blur-sm border-t border-gray-200 mt-auto overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 py-16 md:px-12 lg:px-20">
@@ -83,7 +86,7 @@ export const Footer: React.FC = () => {
               className="flex flex-col items-center md:items-start group cursor-pointer"
             >
               <img 
-                src="https://assets.jacilandia.mx/LOGO_H_Color.png" 
+                src={optimizedLogoUrl} 
                 alt="JACI Xalapa" 
                 className="h-20 w-auto object-contain transition-all duration-500 group-hover:scale-105"
               />

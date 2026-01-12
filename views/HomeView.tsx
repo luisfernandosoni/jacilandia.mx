@@ -1,12 +1,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ViewContainer, Magnetic, ScrollReveal, GlassBadge, FloatingMonster } from '../components/MotionPrimitives';
+import { ViewContainer, Magnetic, ScrollReveal, GlassBadge, FloatingMonster, getCloudflareImageUrl } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM, ViewState } from '../types';
 import { useNavigation } from '../App';
 
 export const HomeView: React.FC = () => {
   const { navigateTo } = useNavigation();
+
+  // Optimización de Logo para Home Hero
+  const optimizedLogoUrl = getCloudflareImageUrl("https://assets.jacilandia.mx/JACI_Color.png", { width: 480 });
 
   return (
     <div className="relative w-full overflow-x-hidden min-h-[85vh] flex flex-col justify-center">
@@ -33,7 +36,7 @@ export const HomeView: React.FC = () => {
                <motion.img 
                  layoutId={DESIGN_SYSTEM.layoutIds.BRAND_IDENTITY}
                  transition={DESIGN_SYSTEM.springs.identity}
-                 src="https://assets.jacilandia.mx/JACI_Color.png" 
+                 src={optimizedLogoUrl} 
                  alt="JACI Xalapa" 
                  // @ts-ignore
                  fetchpriority="high"

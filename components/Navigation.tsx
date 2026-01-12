@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ViewState, NavItem, DESIGN_SYSTEM } from '../types';
-import { Magnetic } from './MotionPrimitives';
+import { Magnetic, getCloudflareImageUrl } from './MotionPrimitives';
 import { prewarmView, useDataCache, applyAtmosphere } from '../App';
 
 interface NavigationProps {
@@ -27,24 +27,18 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
   const handleIntentStart = (view: ViewState) => {
     intentTimers.current[view] = window.setTimeout(() => {
       prewarmView(view);
-      
-      // Speculative Atmospheric Shift (50% blend intent)
-      // Solo aplicamos si el usuario mantiene el hover para evitar flashes de color rápidos
       applyAtmosphere(view);
-      
       if (view === ViewState.DASHBOARD) {
         prefetch('user', () => fetch('/api/user').then(r => r.json()));
         prefetch('drops', () => fetch('/api/drops').then(r => r.json()));
       }
-    }, 120); // Un poco más conservador para el cambio visual
+    }, 120);
   };
 
   const handleIntentCancel = (view: ViewState) => {
     if (intentTimers.current[view]) {
       clearTimeout(intentTimers.current[view]);
       delete intentTimers.current[view];
-      
-      // Restore current atmosphere if intent cancelled
       applyAtmosphere(currentView);
     }
   };
@@ -53,6 +47,9 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
     onChangeView(view);
     setIsMobileMenuOpen(false);
   };
+
+  // Optimización de Logo para Navigation
+  const optimizedLogoUrl = getCloudflareImageUrl("https://assets.jacilandia.mx/JACI_Color.png", { width: 120 });
 
   return (
     <header className="sticky top-0 z-[100] w-full bg-white/95 backdrop-blur-xl border-b border-white/40 shadow-sm min-h-[5rem]">
@@ -73,8 +70,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
                       key="nav-logo"
                       layoutId={DESIGN_SYSTEM.layoutIds.BRAND_IDENTITY}
                       transition={DESIGN_SYSTEM.springs.identity}
-                      src="https://assets.jacilandia.mx/JACI_Color.png" 
-                      alt="" 
+                      src={optimizedLogoUrl} 
+                      alt="JACI Logo" 
                       className="absolute inset-0 w-full h-full object-contain"
                     />
                   ) : (
