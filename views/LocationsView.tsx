@@ -1,13 +1,21 @@
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { ViewContainer, InteractionCard, GlassBadge, ScrollReveal, Magnetic, OptimizedImage } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
-// Tipado para TypeScript y Google Maps
+// Extendemos el objeto window para TypeScript y definimos ImportMeta para Vite
 declare global {
   interface Window {
     google: any;
+    initMapJaci?: () => void;
     gm_authFailure?: () => void;
+  }
+
+  interface ImportMetaEnv {
+    readonly VITE_GOOGLE_MAPS_API_KEY: string;
+  }
+
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
   }
 }
 
@@ -57,16 +65,13 @@ const LOCATIONS: LocationConfig[] = [
   }
 ];
 
-/**
- * Componente StreetView robusto con Fallback.
- * Intenta cargar el panorama interactivo. Si falla (por API Key, red, cuota), muestra la imagen estática.
- */
+// Componente individual de StreetView con manejo de estado robusto
 const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isError, setIsError] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const initMap = useCallback(() => {
+  const initPanorama = useCallback(() => {
     if (!containerRef.current || !window.google || !window.google.maps) return;
 
     try {
@@ -74,68 +79,55 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
         position: location.coordinates,
         pov: location.pov,
         zoom: 0,
+        disableDefaultUI: true,
         addressControl: false,
-        linksControl: false,
-        panControl: false,
-        enableCloseButton: false,
         fullscreenControl: false,
-        zoomControl: false,
+        linksControl: false,
         motionTracking: false,
         motionTrackingControl: false,
+        panControl: false,
+        enableCloseButton: false,
+        zoomControl: false,
         showRoadLabels: false,
-        disableDefaultUI: true, // Interfaz limpia
         clickToGo: true,
       });
-      
-      // Listener para saber cuando el panorama está listo y quitar el loader
-      panorama.addListener("status_changed", () => {
-        if (panorama.getStatus() === "OK") {
+
+      // Verificamos si realmente cargó datos del panorama
+      panorama.addListener('status_changed', () => {
+        const status = panorama.getStatus();
+        if (status === 'OK') {
           setIsLoading(false);
         } else {
-          console.warn(`Street View status not OK for ${location.name}:`, panorama.getStatus());
-          setIsError(true);
+          console.warn(`Street View data not found for ${location.id}: ${status}`);
+          setHasError(true);
         }
       });
-
-    } catch (e) {
-      console.error("Error initializing Street View:", e);
-      setIsError(true);
+    } catch (error) {
+      console.error("Error initializing panorama:", error);
+      setHasError(true);
     }
   }, [location]);
 
   useEffect(() => {
-    // 1. Obtener API Key de forma segura
-    let apiKey = '';
-    
-    try {
-      // Intentamos leer la variable estándar de Vite
-      // Fix: Cast import.meta to any to avoid TS error 'Property env does not exist on type ImportMeta'
-      apiKey = (import.meta as any).env.VITE_GOOGLE_MAPS_API_KEY || '';
-    } catch (e) {
-      // Si import.meta.env falla, asumimos error
-      console.warn("Could not read env vars");
-    }
-
-    // Si no hay key, vamos directo al fallback
+    // 1. Verificar API Key
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
-      console.warn("Missing VITE_GOOGLE_MAPS_API_KEY");
-      setIsError(true);
-      setIsLoading(false);
+      console.warn("⚠️ VITE_GOOGLE_MAPS_API_KEY no encontrada. Usando modo fallback.");
+      setHasError(true);
       return;
     }
 
-    // 2. Manejo global de errores de autenticación de Google Maps
+    // 2. Manejador global de error de autenticación (definido por Google)
     window.gm_authFailure = () => {
-      console.error("Google Maps Authentication Failure");
-      setIsError(true);
-      setIsLoading(false);
+      console.error("Google Maps Auth Failure detected.");
+      setHasError(true);
     };
 
-    // 3. Carga del Script
+    // 3. Cargar Script si no existe
     if (window.google && window.google.maps) {
-      initMap();
+      initPanorama();
     } else {
-      const scriptId = 'google-maps-script';
+      const scriptId = 'google-maps-loader';
       if (!document.getElementById(scriptId)) {
         const script = document.createElement('script');
         script.id = scriptId;
@@ -143,52 +135,45 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
         script.async = true;
         script.defer = true;
         
-        // Callback global para cuando termine de cargar
-        (window as any).initMapJaci = () => {
-          // Disparamos un evento custom para notificar a todas las instancias
-          window.dispatchEvent(new Event('google-maps-loaded'));
+        // Callback global
+        window.initMapJaci = () => {
+          window.dispatchEvent(new Event('google-maps-ready'));
         };
-
-        script.onerror = () => setIsError(true);
+        
+        script.onerror = () => setHasError(true);
         document.head.appendChild(script);
       }
-
-      // Escuchar el evento de carga si ya se estaba cargando
-      const handleLoad = () => initMap();
-      window.addEventListener('google-maps-loaded', handleLoad);
-      return () => window.removeEventListener('google-maps-loaded', handleLoad);
+      
+      const handleReady = () => initPanorama();
+      window.addEventListener('google-maps-ready', handleReady);
+      return () => window.removeEventListener('google-maps-ready', handleReady);
     }
-  }, [initMap]);
+  }, [initPanorama]);
 
-  // Renderizado del Fallback (Imagen Estática)
-  if (isError) {
+  if (hasError) {
     return (
       <div className="w-full h-full relative group">
         <OptimizedImage 
           src={location.fallbackImage} 
-          alt={location.name}
-          className="w-full h-full object-cover"
+          alt={location.name} 
+          className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700" 
           aspectRatio="aspect-video"
         />
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent pointer-events-none" />
       </div>
     );
   }
 
   return (
     <div className="w-full h-full relative bg-slate-200">
-      {/* Contenedor del Mapa */}
       <div ref={containerRef} className="w-full h-full absolute inset-0 z-0" />
-      
-      {/* Loader Overlay */}
       {isLoading && (
         <div className="absolute inset-0 z-10 bg-slate-100 animate-pulse flex items-center justify-center">
-          <span className="material-symbols-outlined text-4xl text-slate-300 animate-spin">sync</span>
+          <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-500 rounded-full animate-spin" />
         </div>
       )}
-
-      {/* Interacción Hint Overlay (Desaparece al interactuar si Google lo permite, o se mantiene para estética) */}
-      <div className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent opacity-60" />
+      {/* Overlay para mejorar legibilidad de textos sobre el mapa */}
+      <div className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
     </div>
   );
 };
@@ -218,7 +203,7 @@ export const LocationsView: React.FC = () => {
               <InteractionCard borderColor={loc.color} className="!p-0 h-full overflow-hidden group">
                 <div className="flex flex-col h-full">
                   
-                  {/* Street View / Image Container */}
+                  {/* Street View Container Interactivo */}
                   <div className="w-full relative aspect-video bg-slate-100 border-b border-white/20 overflow-hidden">
                     <StreetView location={loc} />
                     
@@ -230,10 +215,10 @@ export const LocationsView: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Indicador de 360 */}
-                    <div className="absolute bottom-4 right-4 z-30 pointer-events-none">
+                    {/* Indicador de Interactividad */}
+                    <div className="absolute bottom-4 right-4 z-30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       <div className="bg-black/50 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[12px]">360</span>
+                        <span className="material-symbols-outlined text-[10px]">360</span>
                         Explorar
                       </div>
                     </div>
@@ -253,8 +238,9 @@ export const LocationsView: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Static Map Container (Contexto) */}
+                    {/* Static Map Container (Fallback/Contexto) */}
                     <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border-4 border-white shadow-sm group/map">
+                      {/* Master Link Overlay */}
                       <a 
                         href={loc.masterUrl}
                         target="_blank"
