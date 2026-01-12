@@ -1,4 +1,3 @@
-
 import React, { useRef, memo, useCallback, useState, useMemo, useEffect } from 'react';
 import { motion, HTMLMotionProps, useSpring, useScroll, useTransform, useReducedMotion, useInView, useVelocity } from 'framer-motion';
 import { DESIGN_SYSTEM, PerformanceProfile, JACI_SQUAD } from '../types';
@@ -25,7 +24,6 @@ interface ViewContainerProps extends HTMLMotionProps<'section'> {
   className?: string;
 }
 
-// Fix ViewContainer type to correctly include children and className in the memoized component
 export const ViewContainer = memo(({ children, className = "", ...props }: ViewContainerProps) => (
   <motion.section
     initial="hidden"
@@ -115,13 +113,20 @@ export const OptimizedImage: React.FC<{
   priority?: 'high' | 'low' | 'auto';
   objectFit?: 'cover' | 'contain';
   sizes?: string;
-}> = memo(({ src, alt, className = "", aspectRatio = "aspect-[16/10]", priority = "auto", objectFit = 'cover', sizes }) => {
+  isTransparent?: boolean; // Prop nueva para controlar fondos
+}> = memo(({ src, alt, className = "", aspectRatio = "aspect-[16/10]", priority = "auto", objectFit = 'cover', sizes, isTransparent = false }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const perf = usePerformance();
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "50% 0px", once: true }); 
 
-  const placeholderUrl = useMemo(() => getCloudflareImageUrl(src, { width: 30, blur: 20, fit: objectFit }), [src, objectFit]);
+  // Detectamos si es un PNG para forzar transparencia si no se especifica
+  const needsTransparency = isTransparent || src.toLowerCase().endsWith('.png');
+  
+  // Placeholder más sutil para imágenes transparentes
+  const placeholderUrl = useMemo(() => 
+    getCloudflareImageUrl(src, { width: 40, blur: needsTransparency ? 10 : 20, fit: objectFit }), 
+  [src, objectFit, needsTransparency]);
   
   const srcSet = useMemo(() => {
     return `
@@ -138,20 +143,21 @@ export const OptimizedImage: React.FC<{
   return (
     <div 
       ref={ref}
-      className={`relative overflow-hidden ${aspectRatio} bg-slate-100 ${className}`} 
+      className={`relative overflow-hidden ${aspectRatio} ${needsTransparency ? 'bg-transparent' : 'bg-slate-100'} ${className}`} 
       style={{ 
         contain: 'paint',
         aspectRatio: aspectRatio.includes('[') ? aspectRatio.split('-')[1].replace('[','').replace(']','') : 'auto'
       }}
     >
+      {/* Placeholder con opacidad reducida para transparentes */}
       <div 
-        className="absolute inset-0 z-0 transition-opacity duration-700 ease-out"
+        className="absolute inset-0 z-0 transition-opacity duration-1000 ease-out"
         style={{ 
           backgroundImage: `url('${placeholderUrl}')`,
-          backgroundSize: 'cover',
+          backgroundSize: needsTransparency ? 'contain' : 'cover',
           backgroundPosition: 'center',
-          filter: 'scale(1.1)',
-          opacity: isLoaded ? 0 : 1
+          backgroundRepeat: 'no-repeat',
+          opacity: isLoaded ? 0 : (needsTransparency ? 0.3 : 1)
         }}
         aria-hidden="true"
       />
@@ -165,7 +171,7 @@ export const OptimizedImage: React.FC<{
           onLoad={() => setIsLoaded(true)}
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoaded ? 1 : 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           className={`relative z-10 w-full h-full object-${objectFit} transform-gpu`}
           loading={priority === 'high' ? 'eager' : 'lazy'}
           decoding="async"
@@ -244,6 +250,7 @@ export const FloatingMonster: React.FC<{
           className="w-full h-full !bg-transparent"
           aspectRatio="aspect-square"
           objectFit="contain"
+          isTransparent={true} // Forzamos transparencia para monstruos
           priority={priority ? 'high' : 'auto'}
           sizes={`(max-width: 768px) 150px, 300px`}
         />
