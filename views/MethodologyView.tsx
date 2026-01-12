@@ -59,7 +59,7 @@ export const MethodologyView: React.FC = () => {
           </div>
         </div>
 
-        {/* SECTION 2: DNA VALUES (Updated with specific images and logical descriptions) */}
+        {/* SECTION 2: DNA VALUES (Updated to show only the circular badges) */}
         <div className="mb-48">
           <div className="text-center mb-20 flex flex-col items-center">
             <ScrollReveal>
@@ -72,13 +72,13 @@ export const MethodologyView: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             <ScrollReveal delay={0.1}>
-              <InteractionCard borderColor={DESIGN_SYSTEM.colors.primary} className="h-full group">
-                <div className="flex flex-col gap-6 h-full">
-                  <div className="relative h-40 w-full mb-2 overflow-hidden rounded-2xl bg-primary/5 p-4 flex items-center justify-center">
+              <InteractionCard borderColor={DESIGN_SYSTEM.colors.primary} className="h-full group !bg-white">
+                <div className="flex flex-col gap-6 h-full items-center text-center">
+                  <div className="relative h-44 w-full mb-2 flex items-center justify-center">
                     <OptimizedImage 
                       src="https://assets.jacilandia.mx/JACI_Activación Neuronal.png" 
                       alt="Activación Neuronal"
-                      className="w-full h-full group-hover:scale-110 transition-transform duration-700"
+                      className="w-40 h-40 group-hover:scale-110 transition-transform duration-700 !bg-transparent"
                       aspectRatio="aspect-square"
                       objectFit="contain"
                     />
@@ -94,13 +94,13 @@ export const MethodologyView: React.FC = () => {
             </ScrollReveal>
 
             <ScrollReveal delay={0.2}>
-              <InteractionCard borderColor={DESIGN_SYSTEM.colors.pink} className="h-full group">
-                <div className="flex flex-col gap-6 h-full">
-                  <div className="relative h-40 w-full mb-2 overflow-hidden rounded-2xl bg-jaci-pink/5 p-4 flex items-center justify-center">
+              <InteractionCard borderColor={DESIGN_SYSTEM.colors.pink} className="h-full group !bg-white">
+                <div className="flex flex-col gap-6 h-full items-center text-center">
+                  <div className="relative h-44 w-full mb-2 flex items-center justify-center">
                     <OptimizedImage 
                       src="https://assets.jacilandia.mx/JACI_Desarrollo Emocional.png" 
                       alt="Desarrollo Emocional"
-                      className="w-full h-full group-hover:scale-110 transition-transform duration-700"
+                      className="w-40 h-40 group-hover:scale-110 transition-transform duration-700 !bg-transparent"
                       aspectRatio="aspect-square"
                       objectFit="contain"
                     />
@@ -116,13 +116,13 @@ export const MethodologyView: React.FC = () => {
             </ScrollReveal>
 
             <ScrollReveal delay={0.3}>
-              <InteractionCard borderColor={DESIGN_SYSTEM.colors.yellow} className="h-full group">
-                <div className="flex flex-col gap-6 h-full">
-                  <div className="relative h-40 w-full mb-2 overflow-hidden rounded-2xl bg-jaci-yellow/5 p-4 flex items-center justify-center">
+              <InteractionCard borderColor={DESIGN_SYSTEM.colors.yellow} className="h-full group !bg-white">
+                <div className="flex flex-col gap-6 h-full items-center text-center">
+                  <div className="relative h-44 w-full mb-2 flex items-center justify-center">
                     <OptimizedImage 
                       src="https://assets.jacilandia.mx/JACI_Español.png" 
                       alt="Español"
-                      className="w-full h-full group-hover:scale-110 transition-transform duration-700"
+                      className="w-40 h-40 group-hover:scale-110 transition-transform duration-700 !bg-transparent"
                       aspectRatio="aspect-square"
                       objectFit="contain"
                     />
@@ -138,13 +138,13 @@ export const MethodologyView: React.FC = () => {
             </ScrollReveal>
 
             <ScrollReveal delay={0.4}>
-              <InteractionCard borderColor={DESIGN_SYSTEM.colors.purple} className="h-full group">
-                <div className="flex flex-col gap-6 h-full">
-                  <div className="relative h-40 w-full mb-2 overflow-hidden rounded-2xl bg-jaci-purple/5 p-4 flex items-center justify-center">
+              <InteractionCard borderColor={DESIGN_SYSTEM.colors.purple} className="h-full group !bg-white">
+                <div className="flex flex-col gap-6 h-full items-center text-center">
+                  <div className="relative h-44 w-full mb-2 flex items-center justify-center">
                     <OptimizedImage 
                       src="https://assets.jacilandia.mx/JACI_Matématicas.png" 
                       alt="Matemáticas"
-                      className="w-full h-full group-hover:scale-110 transition-transform duration-700"
+                      className="w-40 h-40 group-hover:scale-110 transition-transform duration-700 !bg-transparent"
                       aspectRatio="aspect-square"
                       objectFit="contain"
                     />
