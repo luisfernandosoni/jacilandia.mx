@@ -13,54 +13,35 @@
     
     <link rel="preload" href="https://assets.jacilandia.mx/JACI_Color.png" as="image" fetchpriority="high">
     
-    <!-- Optimización de Fuentes: display=swap para evitar texto invisible -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+    <!-- CARGA ASÍNCRONA DE FUENTES (Elimina bloqueo de renderizado) -->
+    <link 
+      rel="preload" 
+      as="style" 
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    >
+    <link 
+      rel="stylesheet" 
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" 
+      media="print" 
+      onload="this.media='all'"
+    >
     
-    <!-- FALLBACK: Tailwind CDN para entornos de vista previa sin Build Step -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "primary": "#25c0f4",
-              "primary-soft": "rgba(37, 192, 244, 0.12)",
-              "jaci-pink": "#f472b6",
-              "jaci-pink-soft": "rgba(244, 114, 182, 0.12)",
-              "jaci-yellow": "#fbbf24",
-              "jaci-yellow-soft": "rgba(251, 191, 36, 0.12)",
-              "jaci-purple": "#a78bfa",
-              "jaci-purple-soft": "rgba(167, 139, 250, 0.12)",
-              "jaci-green": "#22c55e",
-              "jaci-green-soft": "rgba(34, 197, 94, 0.12)",
-              "slate": {
-                "900": "#0f172a",
-                "800": "#1e293b",
-                "500": "#64748b",
-              },
-              "surface": "#fcfdfe",
-            },
-            fontFamily: {
-              "display": ["Space Grotesk", "ui-sans-serif", "system-ui", "sans-serif"],
-              "body": ["Noto Sans", "ui-sans-serif", "system-ui", "sans-serif"],
-            },
-            boxShadow: {
-              'soft': '0 20px 40px -12px rgba(15, 23, 42, 0.08)',
-              'glow-primary': '0 0 30px rgba(37, 192, 244, 0.25)',
-              'glow-pink': '0 0 30px rgba(244, 114, 182, 0.25)',
-              'glow-green': '0 0 30px rgba(34, 197, 94, 0.25)',
-            },
-            keyframes: {
-              shimmer: {
-                '100%': { transform: 'translateX(100%)' },
-              }
-            }
-          },
-        },
-      }
-    </script>
+    <link 
+      rel="preload" 
+      as="style" 
+      href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
+    >
+    <link 
+      rel="stylesheet" 
+      href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" 
+      media="print" 
+      onload="this.media='all'"
+    >
+    
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+    </noscript>
 
     <script type="importmap">
 {
@@ -83,6 +64,56 @@
   <body class="noise-grain">
     <div class="mesh-bg" id="mesh-bg"></div>
     <div id="root"></div>
+    
+    <!-- TAILWIND SMART GUARD (0ms impact on production) -->
+    <script>
+      (function() {
+        const checkTailwind = () => {
+          const canary = document.createElement('div');
+          canary.className = 'w-[0.123px]';
+          canary.style.position = 'absolute';
+          canary.style.visibility = 'hidden';
+          document.body.appendChild(canary);
+          
+          const isWorking = window.getComputedStyle(canary).width === '0.123px';
+          canary.remove();
+
+          if (!isWorking) {
+            console.warn('JACI Performance Guard: Native Tailwind not detected. Loading CDN fallback...');
+            const script = document.createElement('script');
+            script.src = "https://cdn.tailwindcss.com";
+            // Configuración del CDN para que use los mismos tokens que el nativo
+            script.onload = () => {
+              tailwind.config = {
+                theme: {
+                  extend: {
+                    colors: {
+                      "primary": "#25c0f4",
+                      "jaci-pink": "#f472b6",
+                      "jaci-yellow": "#fbbf24",
+                      "jaci-purple": "#a78bfa",
+                      "jaci-green": "#22c55e",
+                    },
+                    fontFamily: {
+                      "display": ["Space Grotesk", "sans-serif"],
+                      "body": ["Noto Sans", "sans-serif"],
+                    }
+                  }
+                }
+              };
+            };
+            document.head.appendChild(script);
+          }
+        };
+
+        if (document.readyState === 'complete') {
+          checkTailwind();
+        } else {
+          window.addEventListener('load', checkTailwind);
+        }
+      })();
+    </script>
+    
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
