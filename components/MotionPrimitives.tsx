@@ -9,7 +9,6 @@ interface ViewContainerProps extends HTMLMotionProps<'section'> {
   className?: string;
 }
 
-// Fix: Added ViewContainerProps generic to React.FC to resolve children and className missing in type definition
 export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, className = "", ...props }) => (
   <motion.section
     initial="hidden"
@@ -18,7 +17,7 @@ export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, cla
       hidden: { opacity: 0 },
       visible: {
         opacity: 1,
-        transition: { staggerChildren: 0.05, delayChildren: 0.01 }
+        transition: { staggerChildren: 0.1, delayChildren: 0.1 }
       }
     }}
     style={{ 
@@ -67,13 +66,11 @@ export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children,
       variants={{
         hidden: { opacity: 0, y: 20 },
         visible: { 
-          opacity: isInView ? 1 : 0, 
-          y: isInView ? 0 : 20, 
+          opacity: 1, 
+          y: 0, 
           transition: { ...DESIGN_SYSTEM.springs.gentle, duration: 0.5 }
         }
       }}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
       whileHover={prefersReducedMotion || !isInView || perf === PerformanceProfile.LITE ? {} : { 
         y: -10, 
         scale: 1.01,
@@ -193,8 +190,8 @@ export const FloatingMonster: React.FC<{
   const scrollVelocity = useVelocity(scrollY);
   
   const smoothVelocity = useSpring(scrollVelocity, { stiffness: 60, damping: 20 });
-  const velocityY = useTransform(smoothVelocity, [-3000, 3000], [60, -60]);
-  const velocityRotate = useTransform(smoothVelocity, [-3000, 3000], [-15, 15]);
+  const velocityY = useTransform(smoothVelocity, [-3000, 3000], [40, -40]);
+  const velocityRotate = useTransform(smoothVelocity, [-3000, 3000], [-10, 10]);
 
   if (perf === PerformanceProfile.LITE) {
     return (
@@ -207,15 +204,15 @@ export const FloatingMonster: React.FC<{
     );
   }
 
+  // Desacoplamos la animación de las variantes del padre usando un estado de visibilidad forzado o simplemente evitando herencia
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.5, y: 50 }}
+      initial={{ opacity: 0, scale: 0, y: 30 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ 
-        delay: delay * 0.5, 
-        duration: 1, 
-        ease: [0.22, 1, 0.36, 1],
-        scale: { ...DESIGN_SYSTEM.springs.bouncy, delay: delay * 0.5 }
+        delay: delay, 
+        duration: 0.8, 
+        ease: [0.34, 1.56, 0.64, 1], // Custom Overshoot
       }}
       style={{ 
         translateY: prefersReducedMotion ? 0 : velocityY, 
@@ -226,12 +223,12 @@ export const FloatingMonster: React.FC<{
     >
       <motion.div
         animate={prefersReducedMotion ? {} : {
-          y: [0, -20, 0],
-          rotate: [0, 5, -5, 0]
+          y: [0, -25, 0],
+          rotate: [0, 4, -4, 0]
         }}
         transition={prefersReducedMotion ? {} : {
-          y: { ...DESIGN_SYSTEM.springs.float, delay },
-          rotate: { ...DESIGN_SYSTEM.springs.float, delay, duration: 6 }
+          y: { ...DESIGN_SYSTEM.springs.float, delay: delay + 0.5 },
+          rotate: { ...DESIGN_SYSTEM.springs.float, delay: delay + 0.5, duration: 5 }
         }}
         className="w-full h-full"
       >
