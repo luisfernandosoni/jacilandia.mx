@@ -25,7 +25,8 @@ interface ViewContainerProps extends HTMLMotionProps<'section'> {
   className?: string;
 }
 
-export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, className = "", ...props }) => (
+// Fix ViewContainer type to correctly include children and className in the memoized component
+export const ViewContainer = memo(({ children, className = "", ...props }: ViewContainerProps) => (
   <motion.section
     initial="hidden"
     animate="visible"
@@ -181,12 +182,13 @@ export const OptimizedImage: React.FC<{
 });
 
 export const FloatingMonster: React.FC<{ 
-  monster: keyof typeof JACI_SQUAD; 
+  monster?: keyof typeof JACI_SQUAD; 
+  src?: string;
   className?: string;
   delay?: number;
   size?: string;
   priority?: boolean;
-}> = memo(({ monster, className = "", delay = 0, size = "size-32", priority = false }) => {
+}> = memo(({ monster, src, className = "", delay = 0, size = "size-32", priority = false }) => {
   const prefersReducedMotion = useReducedMotion();
   const perf = usePerformance();
   const { scrollY } = useScroll();
@@ -196,10 +198,12 @@ export const FloatingMonster: React.FC<{
   const velocityY = useTransform(smoothVelocity, [-3000, 3000], [40, -40]);
   const velocityRotate = useTransform(smoothVelocity, [-3000, 3000], [-10, 10]);
 
+  const finalSrc = src || (monster ? JACI_SQUAD[monster] : "");
+
   if (perf === PerformanceProfile.LITE) {
     return (
       <img 
-        src={getCloudflareImageUrl(JACI_SQUAD[monster], { width: 300, fit: 'contain' })} 
+        src={getCloudflareImageUrl(finalSrc, { width: 300, fit: 'contain' })} 
         alt="" 
         className={`${size} object-contain ${className} drop-shadow-md`} 
         loading={priority ? "eager" : "lazy"}
@@ -235,8 +239,8 @@ export const FloatingMonster: React.FC<{
         className="w-full h-full"
       >
         <OptimizedImage 
-          src={JACI_SQUAD[monster]} 
-          alt={monster} 
+          src={finalSrc} 
+          alt={monster || "monster"} 
           className="w-full h-full !bg-transparent"
           aspectRatio="aspect-square"
           objectFit="contain"

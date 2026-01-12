@@ -231,17 +231,11 @@ export const MethodologyView: React.FC = () => {
                   </p>
                   <div className="flex flex-col items-center">
                     <div className="flex justify-center opacity-80 group-hover:opacity-100 transition-all duration-500 transform group-hover:-translate-y-2">
-                      {prog.image ? (
-                        <OptimizedImage 
-                          src={prog.image} 
-                          alt={prog.name} 
-                          className="size-24 md:size-32 rounded-2xl shadow-lg !bg-transparent"
-                          aspectRatio="aspect-square"
-                          objectFit="cover"
-                        />
-                      ) : (
-                        <FloatingMonster monster={prog.monster as any} size="size-24 md:size-32" />
-                      )}
+                      <FloatingMonster 
+                        monster={prog.monster as any} 
+                        src={prog.image} 
+                        size="size-24 md:size-32" 
+                      />
                     </div>
                   </div>
                 </InteractionCard>
