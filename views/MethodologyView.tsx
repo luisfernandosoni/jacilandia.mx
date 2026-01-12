@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ScrollReveal, InteractionCard, ViewContainer, GlassBadge, Magnetic, FloatingMonster, ParallaxSection } from '../components/MotionPrimitives';
+// Fix: Removed ParallaxSection import as it is not exported from MotionPrimitives
+import { ScrollReveal, InteractionCard, ViewContainer, GlassBadge, Magnetic, FloatingMonster } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
 export const MethodologyView: React.FC = () => {
@@ -35,7 +36,7 @@ export const MethodologyView: React.FC = () => {
                <div className="relative group">
                  <div className="absolute -inset-4 md:-inset-6 border-4 border-dashed border-jaci-yellow/20 rounded-[3rem] md:rounded-[4rem] rotate-3" />
                  <div className="aspect-[4/3] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden shadow-soft border-[8px] md:border-[12px] border-white relative z-10 bg-slate-50">
-                    <div className="w-full h-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-105" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA4sB3k0FBFYI_qENJexMKPDpIIadN6siWEcb1uScQwl1CeA8sBd_sKxm1D1oFg3A0I1FUDN9OVs6ofN7NhxlOOcqKZ_L2ctAEJIwxrxHxMK3CnEdPWifTw6t7HoaS_CFa_Ix2HkpubNRN9-2XD9i78O8xFjXz2VmPPJPmIROyJRfwW0C3ypLM-jqQ-OSkhhyj31JuwxjlxzUd-IR-3AvH4MMVJ41bzXkxQmsCZgY-BYyQosWYUpvLD1J6qVbgYr2RXmxYQM8Xdrb6u')" }}></div>
+                    <div className="w-full h-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-105" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA4sB3k0FBFI_qENJexMKPDpIIadN6siWEcb1uScQwl1CeA8sBd_sKxm1D1oFg3A0I1FUDN9OVs6ofN7NhxlOOcqKZ_L2ctAEJIwxrxHxMK3CnEdPWifTw6t7HoaS_CFa_Ix2HkpubNRN9-2XD9i78O8xFjXz2VmPPJPmIROyJRfwW0C3ypLM-jqQ-OSkhhyj31JuwxjlxzUd-IR-3AvH4MMVJ41bzXkxQmsCZgY-BYyQosWYUpvLD1J6qVbgYr2RXmxYQM8Xdrb6u')" }}></div>
                  </div>
                  
                  {/* Monster: GULY */}
@@ -163,7 +164,7 @@ export const MethodologyView: React.FC = () => {
                     </div>
                     <h3 className="text-3xl md:text-5xl font-black font-display text-slate-900 mb-6 tracking-tight">Corazón y Mente</h3>
                     <p className="text-slate-600 text-lg md:text-2xl leading-relaxed font-body">
-                      La inteligencia emocional es nuestro núcleo. Enseñamos a gestionar emociones, creando niños seguros, autónomos y empáticos.
+                      La intelligence emocional es nuestro núcleo. Enseñamos a gestionar emociones, creando niños seguros, autónomos y empáticos.
                     </p>
                   </div>
                 </InteractionCard>

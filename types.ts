@@ -29,6 +29,24 @@ export interface Testimonial {
   color: string;
 }
 
+export interface ThemeColors {
+  primary: string;
+  secondary: string;
+  accent: string;
+}
+
+export const VIEW_THEMES: Record<ViewState, ThemeColors> = {
+  [ViewState.HOME]: { primary: 'rgba(37, 192, 244, 0.12)', secondary: 'rgba(244, 114, 182, 0.12)', accent: 'rgba(251, 191, 36, 0.08)' },
+  [ViewState.ABOUT]: { primary: 'rgba(167, 139, 250, 0.12)', secondary: 'rgba(37, 192, 244, 0.1)', accent: 'rgba(244, 114, 182, 0.05)' },
+  [ViewState.METHODOLOGY]: { primary: 'rgba(251, 191, 36, 0.12)', secondary: 'rgba(244, 114, 182, 0.12)', accent: 'rgba(37, 192, 244, 0.1)' },
+  [ViewState.LEVELS]: { primary: 'rgba(167, 139, 250, 0.15)', secondary: 'rgba(37, 192, 244, 0.1)', accent: 'rgba(34, 197, 94, 0.1)' },
+  [ViewState.TESTIMONIALS]: { primary: 'rgba(244, 114, 182, 0.15)', secondary: 'rgba(167, 139, 250, 0.1)', accent: 'rgba(37, 192, 244, 0.08)' },
+  [ViewState.LOCATIONS]: { primary: 'rgba(37, 192, 244, 0.15)', secondary: 'rgba(251, 191, 36, 0.1)', accent: 'rgba(34, 197, 94, 0.05)' },
+  [ViewState.PRICING]: { primary: 'rgba(244, 114, 182, 0.18)', secondary: 'rgba(167, 139, 250, 0.15)', accent: 'rgba(37, 192, 244, 0.1)' },
+  [ViewState.REGISTER]: { primary: 'rgba(34, 197, 94, 0.12)', secondary: 'rgba(37, 192, 244, 0.1)', accent: 'rgba(244, 114, 182, 0.08)' },
+  [ViewState.DASHBOARD]: { primary: 'rgba(15, 23, 42, 0.05)', secondary: 'rgba(37, 192, 244, 0.08)', accent: 'rgba(255, 255, 255, 0)' }
+};
+
 export const JACI_SQUAD = {
   BUW: "https://assets.jacilandia.mx/Buw.png",
   GRAPPY: "https://assets.jacilandia.mx/Grappy.png",
@@ -57,16 +75,16 @@ export const DESIGN_SYSTEM = {
       deep: 'blur(40px)',
     },
     gutters: {
-      section: 'py-24 md:py-32 lg:py-40',
-      container: 'px-8 md:px-16 lg:px-24',
+      section: 'py-[clamp(4rem,10vh,10rem)]',
+      container: 'px-[clamp(1.25rem,5vw,6rem)]',
     }
   },
   typography: {
-    h1: 'text-5xl md:text-7xl lg:text-[5.5rem] font-black font-display tracking-tight leading-[0.95]',
-    h2: 'text-4xl md:text-6xl font-black font-display tracking-tight leading-[1]',
-    h3: 'text-3xl md:text-5xl font-black font-display tracking-tight leading-[1.1]',
-    body: 'text-lg md:text-xl text-slate-500 font-body leading-relaxed',
-    label: 'text-[10px] font-black uppercase tracking-[0.2em] text-slate-400'
+    h1: 'text-[clamp(2.5rem,5vw+1rem,5.5rem)] font-black font-display tracking-tight leading-[0.95] text-balance',
+    h2: 'text-[clamp(2rem,4vw+1rem,3.75rem)] font-black font-display tracking-tight leading-[1] text-balance',
+    h3: 'text-[clamp(1.5rem,3vw+1rem,3rem)] font-black font-display tracking-tight leading-[1.1] text-balance',
+    body: 'text-[clamp(1rem,1vw+0.75rem,1.25rem)] text-slate-500 font-body leading-relaxed',
+    label: 'text-[0.75rem] md:text-xs font-black uppercase tracking-[0.15em] text-slate-400' 
   },
   springs: {
     snappy: { type: 'spring', stiffness: 450, damping: 32, mass: 0.8 } as const,
@@ -88,6 +106,13 @@ export const DESIGN_SYSTEM = {
     yellow: '#FBBF24',
     purple: '#A78BFA',
     green: '#22C55E',
+    accessible: {
+      primary: '#007B9E',
+      pink: '#B51B68',
+      yellow: '#926F00',
+      purple: '#6D28D9',
+      green: '#15803D'
+    },
     slate: {
       900: '#0F172A',
       800: '#1E293B',

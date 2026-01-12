@@ -104,8 +104,8 @@ export const LevelsView: React.FC = () => {
 
                     {/* Content Section with Fluid Typography */}
                     <div className="p-5 sm:p-6 md:p-10 pt-4 md:pt-6 flex flex-col flex-1 relative z-10">
-                      {/* Ghost Numbering */}
-                      <span className="absolute right-4 top-[20%] -translate-y-1/2 text-[8rem] md:text-[11rem] font-black text-slate-200/20 select-none pointer-events-none tracking-tighter z-0">
+                      {/* Ghost Numbering - Adjusted z-index and opacity to not interfere with content */}
+                      <span className="absolute right-4 top-[20%] -translate-y-1/2 text-[clamp(6rem,15vw,11rem)] font-black text-slate-200/20 select-none pointer-events-none tracking-tighter z-0" aria-hidden="true">
                         {level.id}
                       </span>
                       
@@ -114,8 +114,8 @@ export const LevelsView: React.FC = () => {
                           <span className="material-symbols-outlined text-2xl sm:text-3xl md:text-4xl filled" style={{ color: level.color }}>{level.icon}</span>
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
-                          {/* Fluid Title: Clamp ensures it fits within the card width on all devices */}
-                          <h3 className="text-[7.5vw] sm:text-[3.5vw] md:text-5xl font-black font-display text-slate-900 leading-[0.85] tracking-tight uppercase break-words hyphens-auto overflow-hidden">
+                          {/* Fluid Title: REMOVED overflow-hidden for accessibility safety */}
+                          <h3 className="text-[clamp(1.75rem,3.5vw,3rem)] md:text-5xl font-black font-display text-slate-900 leading-[0.85] tracking-tight uppercase break-words hyphens-auto text-balance">
                             {level.title}
                           </h3>
                           <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] mt-2 md:mt-3" style={{ color: level.color }}>
@@ -131,7 +131,7 @@ export const LevelsView: React.FC = () => {
                       {/* Mantra Box */}
                       <div className="mb-6 sm:mb-8 p-5 sm:p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-100/50 border border-slate-200/30 relative z-10 text-center">
                          <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-3 md:mb-4">Mantra Maestro</span>
-                         <p className="text-base sm:text-lg md:text-2xl font-display font-black text-slate-900 leading-tight">
+                         <p className="text-base sm:text-lg md:text-2xl font-display font-black text-slate-900 leading-tight text-balance">
                            “{level.mantra}”
                          </p>
                       </div>

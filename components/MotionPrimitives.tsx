@@ -1,6 +1,6 @@
 
-import React, { useRef, memo, useCallback, useState, useMemo, useEffect } from 'react';
-import { motion, HTMLMotionProps, useSpring, useScroll, useTransform, useReducedMotion, useInView } from 'framer-motion';
+import React, { useRef, memo, useCallback, useState, useMemo } from 'react';
+import { motion, HTMLMotionProps, useSpring, useScroll, useTransform, useReducedMotion, useInView, useVelocity } from 'framer-motion';
 import { DESIGN_SYSTEM, PerformanceProfile, JACI_SQUAD } from '../types';
 import { usePerformance } from '../App';
 
@@ -27,7 +27,7 @@ export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, cla
       transform: 'translateZ(0)',
       backfaceVisibility: 'hidden'
     }}
-    className={`relative z-10 w-full px-5 md:px-16 lg:px-24 ${DESIGN_SYSTEM.tokens.gutters.section} max-w-[1600px] mx-auto ${className}`}
+    className={`relative z-10 w-full ${DESIGN_SYSTEM.tokens.gutters.container} ${DESIGN_SYSTEM.tokens.gutters.section} max-w-[1600px] mx-auto ${className}`}
     {...props}
   >
     {children}
@@ -43,43 +43,42 @@ interface InteractionCardProps extends HTMLMotionProps<'div'> {
 export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children, borderColor = 'rgba(37,192,244,0.15)', className = "", ...props }) => {
   const prefersReducedMotion = useReducedMotion();
   const perf = usePerformance();
-  const [isHovered, setIsHovered] = useState(false);
   const ref = useRef(null);
-  const isInView = useInView(ref, { margin: "15% 0px 15% 0px", once: false });
+  const isInView = useInView(ref, { margin: "20% 0px", once: false });
 
-  const cardStyle = useMemo(() => ({
-    borderLeft: `4px solid ${borderColor}`,
-    transformStyle: 'preserve-3d' as const,
-    perspective: '1000px',
-    willChange: isInView && (isHovered || prefersReducedMotion === false) ? 'transform, opacity' : 'auto',
-    contain: 'layout style',
-    backgroundColor: (perf === PerformanceProfile.HIGH && isInView) ? 'rgba(255, 255, 255, 0.8)' : '#ffffff',
-    backdropFilter: (perf === PerformanceProfile.HIGH && isInView) ? 'blur(16px)' : 'none',
-    transform: 'translateZ(0)',
-  }), [borderColor, isHovered, isInView, perf, prefersReducedMotion]);
+  const cardStyle = useMemo(() => {
+    const isHigh = perf === PerformanceProfile.HIGH;
+    return {
+      borderLeft: `4px solid ${borderColor}`,
+      transformStyle: isHigh ? 'preserve-3d' as const : 'flat' as const,
+      perspective: isHigh ? '1000px' : 'none',
+      willChange: isInView && isHigh && !prefersReducedMotion ? 'transform, opacity' : 'auto',
+      contain: 'layout style',
+      backgroundColor: (isHigh && isInView) ? 'rgba(255, 255, 255, 0.8)' : '#ffffff',
+      backdropFilter: (isHigh && isInView) ? 'blur(16px)' : 'none',
+      transform: 'translateZ(0)',
+    };
+  }, [borderColor, isInView, perf, prefersReducedMotion]);
 
   return (
     <motion.div
       ref={ref}
       variants={{
-        hidden: { opacity: 0, y: 20, scale: 0.98 },
+        hidden: { opacity: 0, y: 20 },
         visible: { 
           opacity: isInView ? 1 : 0, 
           y: isInView ? 0 : 20, 
-          scale: isInView ? 1 : 0.98,
           transition: { ...DESIGN_SYSTEM.springs.gentle, duration: 0.5 }
         }
       }}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      whileHover={prefersReducedMotion || !isInView ? {} : { 
+      whileHover={prefersReducedMotion || !isInView || perf === PerformanceProfile.LITE ? {} : { 
         y: -10, 
         scale: 1.01,
         transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } 
       }}
-      className={`group relative rounded-[2.5rem] p-8 md:p-10 shadow-soft border border-white/40 flex flex-col justify-between overflow-hidden ${className}`}
+      className={`group relative rounded-[2.5rem] p-6 md:p-8 lg:p-10 shadow-soft border border-white/40 flex flex-col justify-between overflow-hidden ${className}`}
       style={cardStyle}
       {...props}
     >
@@ -93,44 +92,80 @@ export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children,
   );
 });
 
+// --- CLOUDFLARE IMAGES INTEGRATION ENGINE ---
 export const OptimizedImage: React.FC<{ 
   src: string; 
   alt: string; 
   className?: string; 
   aspectRatio?: string;
   priority?: 'high' | 'low' | 'auto';
-}> = memo(({ src, alt, className = "", aspectRatio = "aspect-[16/10]", priority = "auto" }) => {
+  objectFit?: 'cover' | 'contain';
+}> = memo(({ src, alt, className = "", aspectRatio = "aspect-[16/10]", priority = "auto", objectFit = 'cover' }) => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const perf = usePerformance();
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "25% 0px", once: true });
+
+  const getCloudflareUrl = useCallback((width: number) => {
+    // Si la imagen ya viene de nuestro dominio de assets, aplicamos el pipeline de redimensionamiento de Cloudflare
+    // El formato esperado para Cloudflare Images (Free/Transform) es:
+    // /cdn-cgi/image/width=X,quality=Y,format=auto,fit=Z/FULL_PATH_TO_IMAGE
+    
+    // Asumimos que assets.jacilandia.mx es el dominio configurado en Cloudflare con R2
+    const baseTransform = "/cdn-cgi/image/";
+    const quality = perf === PerformanceProfile.LITE ? 60 : 85;
+    const options = `width=${width},quality=${quality},format=auto,fit=${objectFit}`;
+    
+    // Si la URL es externa, Cloudflare necesita la URL completa
+    // Si es interna, solo la ruta. Aquí lo manejamos de forma resiliente.
+    const cleanSrc = src.replace('https://assets.jacilandia.mx/', '');
+    const absolutePath = src.startsWith('http') ? src : `https://assets.jacilandia.mx/${cleanSrc}`;
+    
+    return `${baseTransform}${options}/${absolutePath}`;
+  }, [src, perf, objectFit]);
+
+  const srcSet = useMemo(() => {
+    const widths = [400, 800, 1200, 1600];
+    return widths.map(w => `${getCloudflareUrl(w)} ${w}w`).join(', ');
+  }, [getCloudflareUrl]);
 
   return (
     <div 
       ref={ref}
-      className={`relative overflow-hidden ${aspectRatio} bg-slate-100 ${className}`} 
+      className={`relative overflow-hidden ${aspectRatio} bg-slate-100/50 ${className}`} 
       style={{ 
         contain: 'paint',
         aspectRatio: aspectRatio.includes('[') ? aspectRatio.split('-')[1].replace('[','').replace(']','') : 'auto'
       }}
     >
+      {/* Skeleton / Placeholder de baja resolución */}
       {!isLoaded && (
-        <div className="absolute inset-0 bg-slate-200">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+        <div className="absolute inset-0 bg-slate-200/50">
+          {perf === PerformanceProfile.HIGH && (
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+          )}
         </div>
       )}
+
       {isInView && (
         <motion.img
-          src={src}
+          src={getCloudflareUrl(1200)}
+          srcSet={srcSet}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           alt={alt}
           onLoad={() => setIsLoaded(true)}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: isLoaded ? 1 : 0, scale: isLoaded ? 1 : 1.1 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full h-full object-cover"
+          initial={perf === PerformanceProfile.HIGH ? { opacity: 0, scale: 1.05, filter: 'blur(10px)' } : { opacity: 0 }}
+          animate={isLoaded ? { opacity: 1, scale: 1, filter: 'blur(0px)' } : { opacity: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className={`w-full h-full object-${objectFit} transform-gpu`}
           loading={priority === 'high' ? 'eager' : 'lazy'}
           decoding="async"
-          fetchPriority={priority}
-          style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
+          // @ts-ignore - Atributo experimental soportado por browsers modernos
+          fetchpriority={priority}
+          style={{ 
+            willChange: 'transform, opacity',
+            backfaceVisibility: 'hidden'
+          }}
         />
       )}
     </div>
@@ -145,48 +180,42 @@ export const FloatingMonster: React.FC<{
 }> = memo(({ monster, className = "", delay = 0, size = "size-32" }) => {
   const prefersReducedMotion = useReducedMotion();
   const perf = usePerformance();
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+  
+  const smoothVelocity = useSpring(scrollVelocity, { stiffness: 60, damping: 20 });
+  const velocityY = useTransform(smoothVelocity, [-3000, 3000], [40, -40]);
+  const velocityRotate = useTransform(smoothVelocity, [-3000, 3000], [-15, 15]);
 
+  // Usamos OptimizedImage internamente para los monstruos con fit contain
   if (perf === PerformanceProfile.LITE) {
     return (
       <img 
         src={JACI_SQUAD[monster]} 
-        alt={monster} 
-        className={`${size} object-contain ${className}`} 
+        alt="" 
+        className={`${size} object-contain ${className} drop-shadow-md`} 
       />
     );
   }
 
   return (
-    <motion.img
-      src={JACI_SQUAD[monster]}
-      alt={monster}
-      inherit={false}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ 
-        opacity: 1, 
-        y: prefersReducedMotion ? 0 : [0, -15, 0],
-        rotate: prefersReducedMotion ? 0 : [0, 5, -5, 0]
+    <motion.div
+      style={{ 
+        y: prefersReducedMotion ? 0 : velocityY, 
+        rotate: prefersReducedMotion ? 0 : velocityRotate,
+        willChange: 'transform'
       }}
-      transition={{
-        opacity: { duration: 0.8, delay },
-        y: { 
-          repeat: Infinity, 
-          repeatType: 'reverse', 
-          duration: 4, 
-          ease: "easeInOut",
-          delay: delay + 0.5 
-        },
-        rotate: { 
-          repeat: Infinity, 
-          repeatType: 'reverse', 
-          duration: 6, 
-          ease: "easeInOut",
-          delay: delay + 0.5
-        }
-      }}
-      className={`${size} object-contain select-none pointer-events-none drop-shadow-2xl ${className}`}
-      style={{ willChange: 'transform, opacity' }}
-    />
+      className={`${size} ${className} relative`}
+    >
+       <OptimizedImage 
+         src={JACI_SQUAD[monster]} 
+         alt={monster} 
+         className="w-full h-full !bg-transparent"
+         aspectRatio="aspect-square"
+         objectFit="contain"
+         priority={delay === 0 ? 'high' : 'auto'}
+       />
+    </motion.div>
   );
 });
 
@@ -203,8 +232,8 @@ export const GlassBadge: React.FC<{ icon: string; children: React.ReactNode; col
       className={`inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-white/60 shadow-sm mb-10 w-fit mx-auto lg:mx-0 ${perf === PerformanceProfile.HIGH && isInView ? 'bg-white/80 backdrop-blur-xl' : 'bg-white'} ${className}`}
       style={{ transform: 'translateZ(0)', contain: 'content' }}
     >
-      <span className={`material-symbols-outlined text-[18px] ${colorClass}`}>{icon}</span>
-      <span className="text-slate-500 text-[10px] font-black tracking-[0.2em] uppercase">{children}</span>
+      <span className={`material-symbols-outlined text-lg ${colorClass}`}>{icon}</span>
+      <span className="text-slate-500 text-[0.625rem] font-black tracking-[0.2em] uppercase">{children}</span>
     </motion.div>
   );
 });
@@ -250,42 +279,26 @@ export const Magnetic: React.FC<MagneticProps> = ({ children, pullStrength = DES
   );
 };
 
-export const ParallaxSection: React.FC<{ children?: React.ReactNode; speed?: number; className?: string }> = ({ children, speed = 1, className = "" }) => {
-  const ref = useRef(null);
-  const perf = usePerformance();
-  const isInView = useInView(ref, { margin: "25% 0px", once: false });
-  
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"]
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [0, -100 * speed]);
-  const smoothY = useSpring(y, { stiffness: 400, damping: 90, mass: 1 });
-
-  if (perf === PerformanceProfile.LITE || !isInView) {
-    return <div ref={ref} className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div ref={ref} style={{ y: smoothY, transition: 'none', willChange: 'transform' }} className={className}>
-      {children}
-    </motion.div>
-  );
-};
-
-export const ScrollReveal: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = memo(({ children, delay = 0, className = "" }) => {
+export const ScrollReveal: React.FC<{ children: React.ReactNode; delay?: number; className?: string; isText?: boolean }> = memo(({ children, delay = 0, className = "", isText = false }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "-10% 0px", once: true });
-  
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+  const perf = usePerformance();
+  const prefersReducedMotion = useReducedMotion();
+
+  const smoothVelocity = useSpring(scrollVelocity, { stiffness: 100, damping: 30 });
+  const skew = useTransform(smoothVelocity, [-4000, 4000], [-5, 5]);
+  const scale = useTransform(smoothVelocity, [-4000, 4000], [1.05, 0.95]);
+
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+      style={isText && perf === PerformanceProfile.HIGH && !prefersReducedMotion ? { skewY: skew, scaleY: scale } : {}}
       transition={{ ...DESIGN_SYSTEM.springs.gentle, delay, duration: 0.6 }}
       className={className}
-      style={{ transform: 'translateZ(0)', contain: 'layout' }}
     >
       {children}
     </motion.div>

@@ -1,33 +1,22 @@
 
-import React, { useState, useTransition, Suspense, useCallback, memo, lazy, createContext, useContext, useDeferredValue } from 'react';
+import React, { useState, useTransition, Suspense, useCallback, memo, lazy, createContext, useContext, useDeferredValue, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ViewState, DESIGN_SYSTEM, PerformanceProfile } from './types';
+import { ViewState, DESIGN_SYSTEM, PerformanceProfile, VIEW_THEMES } from './types';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 
-/**
- * Silicon Valley Standard: Main-Thread Task Scheduler
- * Optimization for React 19 concurrent rendering
- */
-const scheduler = {
-  yield: async () => {
-    if ('scheduler' in window && (window as any).scheduler.yield) {
-      return (window as any).scheduler.yield();
-    }
-    return new Promise(resolve => setTimeout(resolve, 0));
-  },
-  postTask: (task: () => void, priority: 'user-blocking' | 'user-visible' | 'background' = 'user-visible') => {
-    if ('scheduler' in window && (window as any).scheduler.postTask) {
-      return (window as any).scheduler.postTask(task, { priority });
-    }
-    return setTimeout(task, 0);
-  }
-};
+// --- GLOBAL DATA COORDINATOR ---
+const DataCacheContext = createContext<{
+  cache: Record<string, any>;
+  setCache: (key: string, data: any) => void;
+  prefetch: (key: string, fetcher: () => Promise<any>) => void;
+}>({ cache: {}, setCache: () => {}, prefetch: () => {} });
+
+export const useDataCache = () => useContext(DataCacheContext);
 
 const PerformanceContext = createContext<PerformanceProfile>(PerformanceProfile.HIGH);
 export const usePerformance = () => useContext(PerformanceContext);
 
-// Navigation Context for deep linking between views
 interface NavContextType {
   navigateTo: (view: ViewState) => void;
   currentView: ViewState;
@@ -61,96 +50,115 @@ const LevelsView = lazy(() => VIEW_LOADERS[ViewState.LEVELS]().then(m => ({ defa
 const RegisterView = lazy(() => VIEW_LOADERS[ViewState.REGISTER]().then(m => ({ default: m.RegisterView })));
 const DashboardView = lazy(() => VIEW_LOADERS[ViewState.DASHBOARD]().then(m => ({ default: m.DashboardView })));
 
-export const prewarmView = (view: ViewState) => {
-  const conn = (navigator as any).connection;
-  if (conn && (conn.saveData || /2g/.test(conn.effectiveType))) return;
-
-  scheduler.postTask(() => {
-    const loader = VIEW_LOADERS[view];
-    if (loader) loader();
-  }, 'background');
+// --- ATMOSPHERIC UTILS ---
+export const applyAtmosphere = (view: ViewState) => {
+  const theme = VIEW_THEMES[view];
+  const root = document.documentElement;
+  root.style.setProperty('--theme-primary', theme.primary);
+  root.style.setProperty('--theme-secondary', theme.secondary);
+  root.style.setProperty('--theme-accent', theme.accent);
 };
-
-const ViewRenderer = memo(({ view }: { view: ViewState }) => {
-  const deferredView = useDeferredValue(view);
-  
-  switch (deferredView) {
-    case ViewState.HOME: return <HomeView />;
-    case ViewState.ABOUT: return <AboutView />;
-    case ViewState.METHODOLOGY: return <MethodologyView />;
-    case ViewState.LEVELS: return <LevelsView />;
-    case ViewState.TESTIMONIALS: return <TestimonialsView />;
-    case ViewState.LOCATIONS: return <LocationsView />;
-    case ViewState.PRICING: return <PricingView />;
-    case ViewState.REGISTER: return <RegisterView />;
-    case ViewState.DASHBOARD: return <DashboardView />;
-    default: return <HomeView />;
-  }
-});
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
   const [isPending, startTransition] = useTransition();
+  const [perfProfile, setPerfProfile] = useState<PerformanceProfile>(PerformanceProfile.HIGH);
+  const [dataCache, setDataCache] = useState<Record<string, any>>({});
+  const mainContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Initial atmosphere
+    applyAtmosphere(currentView);
+    
+    const detectPerformance = () => {
+      const memory = (navigator as any).deviceMemory || 8;
+      const cores = navigator.hardwareConcurrency || 4;
+      const connection = (navigator as any).connection;
+      const isWeak = connection && (connection.saveData || /2g|3g/.test(connection.effectiveType));
+
+      if (memory < 4 || cores < 4 || isWeak) {
+        setPerfProfile(PerformanceProfile.LITE);
+        document.getElementById('mesh-bg')?.style.setProperty('display', 'none');
+      }
+    };
+    detectPerformance();
+  }, []);
+
+  const setCacheValue = useCallback((key: string, data: any) => {
+    setDataCache(prev => ({ ...prev, [key]: data }));
+  }, []);
+
+  const prefetchData = useCallback((key: string, fetcher: () => Promise<any>) => {
+    if (dataCache[key]) return;
+    fetcher().then(data => setCacheValue(key, data)).catch(() => {});
+  }, [dataCache, setCacheValue]);
 
   const handleViewChange = useCallback((view: ViewState) => {
     if (currentView === view) return;
     
-    // SPRINT CORE: Iniciamos la transición de estado sin tocar el scroll aún.
-    // Esto permite que la vista actual anime su salida desde su posición actual.
+    // Smooth transition of atmosphere BEFORE the react transition for perceived speed
+    applyAtmosphere(view);
+    
     startTransition(() => {
       setCurrentView(view);
     });
   }, [currentView]);
 
   return (
-    <PerformanceContext.Provider value={PerformanceProfile.HIGH}>
-      <NavigationContext.Provider value={{ currentView, navigateTo: handleViewChange }}>
-        <div className={`min-h-screen flex flex-col font-body selection:bg-primary/20 transition-colors duration-700 ${isPending ? 'bg-slate-50' : 'bg-surface'}`}>
-          <Navigation currentView={currentView} onChangeView={handleViewChange} />
-          
-          <main className="flex-grow relative overflow-x-clip">
-            <AnimatePresence 
-              mode="wait" 
-              initial={false}
-              onExitComplete={() => {
-                // SPRINT CORE: El reset de scroll sucede AQUÍ.
-                // Una vez que la vista anterior ha desaparecido por completo, 
-                // movemos el viewport al top antes de que la nueva vista entre.
-                window.scrollTo(0, 0);
-              }}
-            >
-              <motion.div
-                key={currentView}
-                initial={{ opacity: 0, y: 15, scale: 0.99, filter: 'blur(8px)' }}
-                animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                exit={{ 
-                  opacity: 0, 
-                  y: -15, 
-                  scale: 1.01, 
-                  filter: 'blur(8px)',
-                  transition: { 
-                    duration: 0.3, 
-                    ease: [0.32, 0, 0.67, 0] // Salida rápida y limpia
-                  } 
-                }}
-                transition={{ 
-                  duration: 0.5, 
-                  ease: [0.22, 1, 0.36, 1], // Entrada suave
-                  delay: 0.05 
-                }}
-                className="w-full will-change-[transform,opacity,filter]"
-              >
-                <Suspense fallback={null}>
-                  <ViewRenderer view={currentView} />
-                </Suspense>
-              </motion.div>
-            </AnimatePresence>
-          </main>
-          <Footer />
-        </div>
-      </NavigationContext.Provider>
-    </PerformanceContext.Provider>
+    <DataCacheContext.Provider value={{ cache: dataCache, setCache: setCacheValue, prefetch: prefetchData }}>
+      <PerformanceContext.Provider value={perfProfile}>
+        <NavigationContext.Provider value={{ currentView, navigateTo: handleViewChange }}>
+          <div className={`min-h-screen flex flex-col font-body selection:bg-primary/20 transition-colors duration-700 ${isPending ? 'bg-slate-50' : 'bg-surface'}`}>
+            <Navigation currentView={currentView} onChangeView={handleViewChange} />
+            
+            <main id="main-content" ref={mainContentRef} className="flex-grow relative overflow-x-clip outline-none">
+              <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo(0, 0)}>
+                <motion.div
+                  key={currentView}
+                  initial={perfProfile === PerformanceProfile.HIGH ? { opacity: 0, y: 15, scale: 0.99, filter: 'blur(8px)' } : { opacity: 0 }}
+                  animate={perfProfile === PerformanceProfile.HIGH ? { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' } : { opacity: 1 }}
+                  exit={perfProfile === PerformanceProfile.HIGH ? { opacity: 0, y: -15, scale: 1.01, filter: 'blur(8px)', transition: { duration: 0.3, ease: [0.32, 0, 0.67, 0] } } : { opacity: 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
+                  className="w-full will-change-[transform,opacity]"
+                >
+                  <Suspense fallback={null}>
+                    {(() => {
+                      const deferredView = useDeferredValue(currentView);
+                      switch (deferredView) {
+                        case ViewState.HOME: return <HomeView />;
+                        case ViewState.ABOUT: return <AboutView />;
+                        case ViewState.METHODOLOGY: return <MethodologyView />;
+                        case ViewState.LEVELS: return <LevelsView />;
+                        case ViewState.TESTIMONIALS: return <TestimonialsView />;
+                        case ViewState.LOCATIONS: return <LocationsView />;
+                        case ViewState.PRICING: return <PricingView />;
+                        case ViewState.REGISTER: return <RegisterView />;
+                        case ViewState.DASHBOARD: return <DashboardView />;
+                        default: return <HomeView />;
+                      }
+                    })()}
+                  </Suspense>
+                </motion.div>
+              </AnimatePresence>
+            </main>
+            <Footer />
+          </div>
+        </NavigationContext.Provider>
+      </PerformanceContext.Provider>
+    </DataCacheContext.Provider>
   );
+};
+
+export const prewarmView = (view: ViewState) => {
+  const prewarm = () => {
+    const loader = VIEW_LOADERS[view];
+    if (loader) loader();
+  };
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(prewarm, { timeout: 2000 });
+  } else {
+    setTimeout(prewarm, 100);
+  }
 };
 
 export default App;

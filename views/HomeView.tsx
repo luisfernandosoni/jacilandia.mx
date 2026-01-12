@@ -49,9 +49,9 @@ export const HomeView: React.FC = () => {
           </motion.div>
         </Magnetic>
 
-        {/* Hero Title Standardized */}
+        {/* Hero Title Standardized with Momentum Typography */}
         <div className="relative w-full max-w-5xl mx-auto mb-16 flex flex-col items-center px-4">
-          <ScrollReveal className="w-full flex flex-col items-center">
+          <ScrollReveal isText className="w-full flex flex-col items-center">
             <GlassBadge icon="auto_awesome" colorClass="text-primary" className="!mx-auto">
               Bienvenidos a JACI
             </GlassBadge>
@@ -64,14 +64,16 @@ export const HomeView: React.FC = () => {
             </h1>
           </ScrollReveal>
 
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className={`${DESIGN_SYSTEM.typography.body} max-w-2xl mx-auto mt-10 px-4 text-center`}
-          >
-            Descubre cómo aprendemos jugando y transformamos la curiosidad en un súper poder que dura para toda la vida.
-          </motion.p>
+          <ScrollReveal isText delay={0.2} className="w-full">
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className={`${DESIGN_SYSTEM.typography.body} max-w-2xl mx-auto mt-10 px-4 text-center`}
+            >
+              Descubre cómo aprendemos jugando y transformamos la curiosidad en un súper poder que dura para toda la vida.
+            </motion.p>
+          </ScrollReveal>
         </div>
 
         {/* Action Button - Linked to Methodology */}
