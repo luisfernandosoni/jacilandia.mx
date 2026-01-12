@@ -181,7 +181,7 @@ export const MethodologyView: React.FC = () => {
           </div>
         </div>
 
-        {/* SECTION 4: NUESTROS PROGRAMAS */}
+        {/* SECTION 4: NUESTROS PROGRAMAS - COMPACTED SPRINT */}
         <div className="mb-48 flex flex-col items-center px-4">
           <ScrollReveal>
             <h2 className={DESIGN_SYSTEM.typography.h2 + " mb-16 md:mb-24 text-center"}>Nuestros <span className="text-jaci-green">Programas</span></h2>
@@ -218,20 +218,20 @@ export const MethodologyView: React.FC = () => {
               }
             ].map((prog, i) => (
               <ScrollReveal key={i} delay={i * 0.1}>
-                <InteractionCard borderColor={prog.color} className="h-full group !pb-24">
-                  <div className="flex justify-between items-start mb-10">
+                <InteractionCard borderColor={prog.color} className="h-full group !pb-10">
+                  <div className="flex justify-between items-start mb-6">
                     <div className="size-14 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-900 border border-slate-100">
                       <span className="material-symbols-outlined text-2xl" style={{ color: prog.color }}>{prog.icon}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center gap-4 mb-3">
                      <h4 className="text-xl md:text-2xl font-black font-display text-slate-900 leading-tight">{prog.name}</h4>
                   </div>
-                  <p className="text-slate-500 text-sm leading-relaxed mb-12 font-body flex-grow">
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6 font-body flex-grow">
                     {prog.desc}
                   </p>
-                  <div className="flex flex-col gap-4">
-                    <div className="flex justify-center -mb-8 opacity-60 group-hover:opacity-100 transition-all duration-500 transform group-hover:-translate-y-2">
+                  <div className="flex flex-col items-center">
+                    <div className="flex justify-center opacity-80 group-hover:opacity-100 transition-all duration-500 transform group-hover:-translate-y-2">
                       <FloatingMonster monster={prog.monster as any} size="size-24 md:size-32" />
                     </div>
                   </div>
