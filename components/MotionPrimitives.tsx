@@ -120,8 +120,8 @@ export const OptimizedImage: React.FC<{
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "50% 0px", once: true }); 
 
-  // Detectamos si es un PNG para forzar transparencia total
-  const needsTransparency = isTransparent || src.toLowerCase().endsWith('.png');
+  // Forzamos transparencia si el asset es PNG o se marca como tal
+  const needsTransparency = isTransparent || src.toLowerCase().includes('.png');
   
   const srcSet = useMemo(() => {
     return `
@@ -145,6 +145,21 @@ export const OptimizedImage: React.FC<{
         backgroundColor: needsTransparency ? 'transparent' : undefined
       }}
     >
+      {/* 
+        Eliminamos el placeholder para assets transparentes. 
+        El "fondo blanco" solía ser el placeholder cargando o el bg-slate-100.
+      */}
+      {!needsTransparency && (
+        <div 
+          className="absolute inset-0 z-0 transition-opacity duration-500 ease-out"
+          style={{ 
+            backgroundColor: '#f1f5f9', // bg-slate-100
+            opacity: isLoaded ? 0 : 1
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       {(isInView || priority === 'high') && (
         <motion.img
           src={getCloudflareImageUrl(src, { width: 1280, fit: objectFit })}
@@ -154,7 +169,7 @@ export const OptimizedImage: React.FC<{
           onLoad={() => setIsLoaded(true)}
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoaded ? 1 : 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className={`relative z-10 w-full h-full object-${objectFit} transform-gpu`}
           loading={priority === 'high' ? 'eager' : 'lazy'}
           decoding="async"
@@ -203,12 +218,12 @@ export const FloatingMonster: React.FC<{
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.2, y: 15 }}
+      initial={{ opacity: 0, scale: 0.85, y: 10 }} // Menos viaje de escala para mayor velocidad percibida
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ 
         delay: delay, 
-        duration: 0.45, 
-        ease: [0.23, 1, 0.32, 1], // Power4.easeOut equivalent for snap
+        duration: 0.3, // Reducido de 0.45 para una entrada instantánea
+        ease: [0.16, 1, 0.3, 1], // Curve para pop rápido
       }}
       style={{ 
         translateY: prefersReducedMotion ? 0 : velocityY, 
@@ -223,8 +238,8 @@ export const FloatingMonster: React.FC<{
           rotate: [0, 4, -4, 0]
         }}
         transition={prefersReducedMotion ? {} : {
-          y: { ...DESIGN_SYSTEM.springs.float, delay: delay + 0.3 },
-          rotate: { ...DESIGN_SYSTEM.springs.float, delay: delay + 0.3, duration: 5 }
+          y: { ...DESIGN_SYSTEM.springs.float, delay: delay + 0.1 },
+          rotate: { ...DESIGN_SYSTEM.springs.float, delay: delay + 0.1, duration: 5 }
         }}
         className="w-full h-full"
       >
@@ -235,8 +250,7 @@ export const FloatingMonster: React.FC<{
           aspectRatio="aspect-square"
           objectFit="contain"
           isTransparent={true}
-          // Fix: Type 'true' is not assignable to type '"auto" | "high" | "low"'. Using 'high' to match original logic and satisfy the union type.
-          priority={priority ? 'high' : 'high'} // Forzar prioridad para monstruos
+          priority="high" // Forzamos carga prioritaria para monstruos
           sizes={`(max-width: 768px) 150px, 300px`}
         />
       </motion.div>

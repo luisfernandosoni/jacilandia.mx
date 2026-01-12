@@ -1,22 +1,14 @@
-
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { ViewContainer, InteractionCard, GlassBadge, ScrollReveal, Magnetic, OptimizedImage } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
+import { useInView } from 'framer-motion';
 
-// Extendemos el objeto window para TypeScript y definimos ImportMeta para Vite
+// Extendemos el objeto window para TypeScript
 declare global {
   interface Window {
     google: any;
     initMapJaci?: () => void;
     gm_authFailure?: () => void;
-  }
-
-  interface ImportMetaEnv {
-    readonly VITE_GOOGLE_MAPS_API_KEY: string;
-  }
-
-  interface ImportMeta {
-    readonly env: ImportMetaEnv;
   }
 }
 
@@ -32,7 +24,7 @@ interface LocationConfig {
   embedUrl: string;
   coordinates: { lat: number; lng: number };
   pov: { heading: number; pitch: number };
-  panoId?: string; // ID específico del panorama para precisión exacta
+  panoId?: string;
   fallbackImage: string;
 }
 
@@ -71,11 +63,15 @@ const LOCATIONS: LocationConfig[] = [
 
 const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isApiLoaded, setIsApiLoaded] = useState(false);
+  const [isLive, setIsLive] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  // Usamos useInView para detectar cuándo el usuario se acerca a la card
+  const isInView = useInView(containerRef, { margin: "200px 0px", once: true });
 
   const initPanorama = useCallback(() => {
-    if (!containerRef.current || !window.google || !window.google.maps) return;
+    if (!containerRef.current || !window.google?.maps) return;
 
     try {
       const panorama = new window.google.maps.StreetViewPanorama(containerRef.current, {
@@ -97,9 +93,9 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
       });
 
       panorama.addListener('status_changed', () => {
-        const status = panorama.getStatus();
-        if (status === 'OK') {
-          setIsLoading(false);
+        if (panorama.getStatus() === 'OK') {
+          // Pequeño delay adicional para asegurar que el canvas se pintó
+          setTimeout(() => setIsLive(true), 150);
         } else {
           setHasError(true);
         }
@@ -110,58 +106,84 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
   }, [location]);
 
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      setHasError(true);
-      return;
-    }
+    // Solo disparamos la carga si el componente está en el viewport
+    // y después de un delay que permita que las animaciones de entrada terminen (stutter prevention)
+    if (!isInView || isApiLoaded) return;
 
-    window.gm_authFailure = () => setHasError(true);
-
-    if (window.google && window.google.maps) {
-      initPanorama();
-    } else {
-      const scriptId = 'google-maps-loader';
-      if (!document.getElementById(scriptId)) {
-        const script = document.createElement('script');
-        script.id = scriptId;
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapJaci&loading=async`;
-        script.async = true;
-        script.defer = true;
-        window.initMapJaci = () => window.dispatchEvent(new Event('google-maps-ready'));
-        script.onerror = () => setHasError(true);
-        document.head.appendChild(script);
+    const timer = setTimeout(() => {
+      // Fix: TypeScript error 'Property env does not exist on type ImportMeta'.
+      // Vite handles import.meta.env at build-time. We suppress this check to allow compilation.
+      // @ts-ignore
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        setHasError(true);
+        return;
       }
-      
-      const handleReady = () => initPanorama();
-      window.addEventListener('google-maps-ready', handleReady);
-      return () => window.removeEventListener('google-maps-ready', handleReady);
-    }
-  }, [initPanorama]);
 
-  if (hasError) {
-    return (
-      <div className="w-full h-full relative group">
+      window.gm_authFailure = () => setHasError(true);
+
+      const loadScript = () => {
+        if (window.google?.maps) {
+          setIsApiLoaded(true);
+          initPanorama();
+          return;
+        }
+
+        const scriptId = 'google-maps-loader';
+        if (!document.getElementById(scriptId)) {
+          const script = document.createElement('script');
+          script.id = scriptId;
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async`;
+          script.async = true;
+          script.defer = true;
+          window.initMapJaci = () => {
+            window.dispatchEvent(new Event('google-maps-ready'));
+          };
+          script.onerror = () => setHasError(true);
+          document.head.appendChild(script);
+        }
+        
+        const handleReady = () => {
+          setIsApiLoaded(true);
+          initPanorama();
+        };
+
+        window.addEventListener('google-maps-ready', handleReady, { once: true });
+      };
+
+      loadScript();
+    }, 800); // 800ms de buffer para dejar que Framer Motion respire
+
+    return () => clearTimeout(timer);
+  }, [isInView, isApiLoaded, initPanorama]);
+
+  return (
+    <div className="w-full h-full relative bg-slate-100 overflow-hidden">
+      {/* CAPA 1: Fallback Estático (Siempre presente como base para evitar saltos) */}
+      <div className="absolute inset-0 z-0">
         <OptimizedImage 
           src={location.fallbackImage} 
           alt={location.name} 
-          className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700" 
+          className="w-full h-full object-cover grayscale-[15%]" 
           aspectRatio="aspect-video"
+          priority="high"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
       </div>
-    );
-  }
 
-  return (
-    <div className="w-full h-full relative bg-slate-200">
-      <div ref={containerRef} className="w-full h-full absolute inset-0 z-0" />
-      {isLoading && (
-        <div className="absolute inset-0 z-10 bg-slate-100 animate-pulse flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-500 rounded-full animate-spin" />
+      {/* CAPA 2: Street View Interactivo (Fade-in cuando está listo) */}
+      <div 
+        ref={containerRef} 
+        className={`w-full h-full absolute inset-0 z-10 transition-opacity duration-700 ease-in-out ${isLive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+      />
+
+      {/* Loader sutil solo si estamos intentando cargar */}
+      {isInView && !isLive && !hasError && (
+        <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <span className="text-[8px] font-black uppercase tracking-widest text-white/60">Activando Vista...</span>
         </div>
       )}
-      <div className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
     </div>
   );
 };
@@ -191,20 +213,20 @@ export const LocationsView: React.FC = () => {
               <InteractionCard borderColor={loc.color} className="!p-0 h-full overflow-hidden group">
                 <div className="flex flex-col h-full">
                   
-                  {/* Street View Container Interactivo */}
-                  <div className="w-full relative aspect-video bg-slate-100 border-b border-white/20 overflow-hidden">
+                  {/* Street View Container Optimizado */}
+                  <div className="w-full relative aspect-video bg-slate-100 border-b border-white/20 overflow-hidden shadow-inner">
                     <StreetView location={loc} />
                     
                     {/* Badge Flotante */}
-                    <div className="absolute top-8 left-8 z-30 pointer-events-none">
-                      <div className="bg-white/95 backdrop-blur-xl px-4 py-2 rounded-full shadow-lg flex items-center gap-2 border border-white/20">
+                    <div className="absolute top-6 left-6 z-30 pointer-events-none">
+                      <div className="bg-white/95 backdrop-blur-xl px-4 py-2 rounded-full shadow-xl flex items-center gap-2 border border-white/20">
                         <span className={`w-2 h-2 rounded-full animate-pulse`} style={{ backgroundColor: loc.color }}></span>
-                        <span className={DESIGN_SYSTEM.typography.label + " !text-slate-800"}>{loc.label}</span>
+                        <span className={DESIGN_SYSTEM.typography.label + " !text-slate-800 !text-[9px]"}>{loc.label}</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="p-8 md:p-10 flex flex-col flex-1 gap-10">
+                  <div className="p-8 md:p-10 flex flex-col flex-1 gap-8">
                     <div>
                       <h3 className={DESIGN_SYSTEM.typography.h3 + " mb-6"}>{loc.name}</h3>
                       <div className="flex items-start gap-4 p-5 bg-slate-50/50 rounded-2xl border border-slate-100 shadow-sm">
@@ -212,15 +234,14 @@ export const LocationsView: React.FC = () => {
                           <span className="material-symbols-outlined filled" style={{ color: loc.color }}>location_on</span>
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-900 text-lg mb-1 leading-tight">{loc.address}</span>
+                          <span className="font-bold text-slate-900 text-lg mb-0.5 leading-tight">{loc.address}</span>
                           <span className="text-slate-500 font-body text-sm leading-relaxed">{loc.subtext}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Static Map Container */}
-                    <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border-4 border-white shadow-sm group/map">
-                      {/* Master Link Overlay */}
+                    {/* Static Map Container - Cargado solo en interacción */}
+                    <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border-4 border-white shadow-soft group/map">
                       <a 
                         href={loc.masterUrl}
                         target="_blank"
