@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-// Fix: Removed ParallaxSection import as it is not exported from MotionPrimitives
 import { ScrollReveal, InteractionCard, ViewContainer, GlassBadge, Magnetic, FloatingMonster, OptimizedImage } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
@@ -59,7 +58,28 @@ export const MethodologyView: React.FC = () => {
           </div>
         </div>
 
-        {/* SECTION 2: DNA VALUES (Updated to show only the circular badges) */}
+        {/* SECTION 2: EL MÉTODO JACI */}
+        <div className="mb-48 max-w-5xl mx-auto px-4 relative">
+            <ScrollReveal>
+              <div className="flex flex-col lg:flex-row items-center justify-center gap-8 md:gap-12 text-center lg:text-left">
+                <div className="flex flex-col items-center lg:items-start max-w-3xl">
+                  <GlassBadge icon="palette" colorClass="text-jaci-purple">La Práctica</GlassBadge>
+                  <h2 className={DESIGN_SYSTEM.typography.h2}>El <span className="text-jaci-yellow">Método</span> JACI</h2>
+                  <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
+                      Cada área del desarrollo se nutre con experiencias vivas. No memorizamos conceptos sueltos, construimos significados reales basados en la curiosidad y la experimentación constante.
+                  </p>
+                </div>
+                
+                {/* Monster: LY */}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-125 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <FloatingMonster monster="LY" size="size-48 md:size-64" className="relative z-10" />
+                </div>
+              </div>
+            </ScrollReveal>
+        </div>
+
+        {/* SECTION 3: NUESTRO ADN */}
         <div className="mb-48">
           <div className="text-center mb-20 flex flex-col items-center">
             <ScrollReveal>
@@ -86,7 +106,7 @@ export const MethodologyView: React.FC = () => {
                   <div>
                     <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Activación Neuronal</h4>
                     <p className="text-slate-500 text-sm leading-relaxed font-body">
-                      Estimulamos las conexiones cerebrales a través del movimiento y retos cognitivos diseñados para despertar la agilidad mental desde etapas tempranas.
+                      Estimulamos las conexiones cerebrales a través del movimiento y retos cognitivos diseñados para despertar la agilidad mental.
                     </p>
                   </div>
                 </div>
@@ -108,7 +128,7 @@ export const MethodologyView: React.FC = () => {
                   <div>
                     <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Desarrollo Emocional</h4>
                     <p className="text-slate-500 text-sm leading-relaxed font-body">
-                      Un entorno seguro donde aprenden a identificar y gestionar sus sentimientos, construyendo una inteligencia emocional sólida y una autoestima blindada.
+                      Un entorno seguro donde aprenden a gestionar sus sentimientos, construyendo inteligencia emocional y autoestima.
                     </p>
                   </div>
                 </div>
@@ -130,7 +150,7 @@ export const MethodologyView: React.FC = () => {
                   <div>
                     <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Habilidades de Lenguaje</h4>
                     <p className="text-slate-500 text-sm leading-relaxed font-body">
-                      Dominio del español y lectura acelerada. Transformamos las letras en herramientas de comunicación poderosa y puertas abiertas a mundos infinitos.
+                      Dominio del español y lectura acelerada. Transformamos las letras en herramientas de comunicación poderosa.
                     </p>
                   </div>
                 </div>
@@ -152,7 +172,7 @@ export const MethodologyView: React.FC = () => {
                   <div>
                     <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Pensamiento Lógico</h4>
                     <p className="text-slate-500 text-sm leading-relaxed font-body">
-                      Matemáticas divertidas y cálculo mental ágil. Resolvemos problemas reales con la seguridad de quien domina los números de forma natural y lúdica.
+                      Matemáticas divertidas y cálculo mental ágil. Resolvemos problemas reales con la seguridad de dominar los números.
                     </p>
                   </div>
                 </div>
@@ -161,85 +181,68 @@ export const MethodologyView: React.FC = () => {
           </div>
         </div>
 
-        {/* SECTION 3: DEEP DIVE (The Methodology) */}
-        <div className="mb-32 max-w-5xl mx-auto px-4 relative">
-            <ScrollReveal>
-              <div className="flex flex-col lg:flex-row items-center justify-center gap-8 md:gap-12 text-center lg:text-left">
-                <div className="flex flex-col items-center lg:items-start max-w-3xl">
-                  <GlassBadge icon="palette" colorClass="text-jaci-purple">La Práctica</GlassBadge>
-                  <h2 className={DESIGN_SYSTEM.typography.h2}>El <span className="text-jaci-yellow">Método</span> JACI</h2>
-                  <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
-                      Cada área del desarrollo se nutre con experiencias vivas. No memorizamos conceptos sueltos, construimos significados reales.
+        {/* SECTION 4: NUESTROS PROGRAMAS */}
+        <div className="mb-48 flex flex-col items-center px-4">
+          <ScrollReveal>
+            <h2 className={DESIGN_SYSTEM.typography.h2 + " mb-16 md:mb-24 text-center"}>Nuestros <span className="text-jaci-green">Programas</span></h2>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
+            {[
+              { 
+                name: 'Monstruocerebro en acción', 
+                monster: 'TUFIN', 
+                color: DESIGN_SYSTEM.colors.primary, 
+                icon: 'psychology',
+                desc: 'Neurodesarrollo dinámico y gimnasia cerebral para potenciar las capacidades cognitivas natas.'
+              },
+              { 
+                name: 'Habilidades lectoras', 
+                monster: 'POSITIVIN', 
+                color: DESIGN_SYSTEM.colors.pink, 
+                icon: 'menu_book',
+                desc: 'Fluidez y comprensión profunda que transforman la lectura en un hábito de gozo y aprendizaje.'
+              },
+              { 
+                name: 'Gamificación', 
+                monster: 'POMPIN', 
+                color: DESIGN_SYSTEM.colors.yellow, 
+                icon: 'videogame_asset',
+                desc: 'Usamos personajes y anclajes visuales. El aprendizaje es una aventura, no una obligación.'
+              },
+              { 
+                name: 'Disciplina Positiva para Papás', 
+                monster: 'KIKIN', 
+                color: DESIGN_SYSTEM.colors.green, 
+                icon: 'family_restroom',
+                desc: 'Te acompañamos con herramientas prácticas para crear armonía y conexión profunda en casa.'
+              }
+            ].map((prog, i) => (
+              <ScrollReveal key={i} delay={i * 0.1}>
+                <InteractionCard borderColor={prog.color} className="h-full group !pb-24">
+                  <div className="flex justify-between items-start mb-10">
+                    <div className="size-14 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-900 border border-slate-100">
+                      <span className="material-symbols-outlined text-2xl" style={{ color: prog.color }}>{prog.icon}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 mb-6">
+                     <h4 className="text-xl md:text-2xl font-black font-display text-slate-900 leading-tight">{prog.name}</h4>
+                  </div>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-12 font-body flex-grow">
+                    {prog.desc}
                   </p>
-                </div>
-                
-                {/* Monster: LY */}
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-125 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <FloatingMonster monster="LY" size="size-48 md:size-64" className="relative z-10" />
-                </div>
-              </div>
-            </ScrollReveal>
-        </div>
-
-        {/* Benefit Layout */}
-        <div className="space-y-32 md:space-y-48 mb-48">
-          
-          {/* Benefit 1: Heart & Mind */}
-          <ScrollReveal>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center px-4">
-              <div className="lg:col-span-8 order-2 lg:order-1">
-                <InteractionCard borderColor={DESIGN_SYSTEM.colors.purple} className="h-full">
-                  <div className="flex flex-col items-start">
-                    <div className="w-16 h-16 bg-jaci-purple-soft text-jaci-purple rounded-2xl flex items-center justify-center border border-jaci-purple/20 mb-8">
-                      <span className="material-symbols-outlined text-3xl filled">psychology</span>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-center -mb-8 opacity-60 group-hover:opacity-100 transition-all duration-500 transform group-hover:-translate-y-2">
+                      <FloatingMonster monster={prog.monster as any} size="size-24 md:size-32" />
                     </div>
-                    <h3 className="text-3xl md:text-5xl font-black font-display text-slate-900 mb-6 tracking-tight">Corazón y Mente</h3>
-                    <p className="text-slate-600 text-lg md:text-2xl leading-relaxed font-body">
-                      La intelligence emocional es nuestro núcleo. Enseñamos a gestionar emociones, creando niños seguros, autónomos y empáticos.
-                    </p>
                   </div>
                 </InteractionCard>
-              </div>
-              <div className="lg:col-span-4 order-1 lg:order-2 flex justify-center lg:justify-end">
-                {/* Monster: BUW */}
-                <div className="relative">
-                  <div className="absolute inset-0 bg-jaci-purple/10 blur-3xl rounded-full scale-150" />
-                  <FloatingMonster monster="BUW" size="size-48 md:size-64" className="relative z-10" />
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          {/* Benefit 2: Active Explorers */}
-          <ScrollReveal>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center px-4">
-              <div className="lg:col-span-4 flex justify-center lg:justify-start">
-                {/* Monster: PEPE */}
-                <div className="relative">
-                  <div className="absolute inset-0 bg-jaci-yellow/10 blur-3xl rounded-full scale-150" />
-                  <FloatingMonster monster="PEPE" size="size-48 md:size-64" className="relative z-10" />
-                </div>
-              </div>
-              <div className="lg:col-span-8">
-                <InteractionCard borderColor={DESIGN_SYSTEM.colors.yellow} className="h-full">
-                  <div className="flex flex-col items-start">
-                    <div className="w-16 h-16 bg-jaci-yellow-soft text-jaci-yellow rounded-2xl flex items-center justify-center border border-jaci-yellow/20 mb-8">
-                      <span className="material-symbols-outlined text-3xl filled">explore</span>
-                    </div>
-                    <h3 className="text-3xl md:text-5xl font-black font-display text-slate-900 mb-6 tracking-tight">Exploradores Activos</h3>
-                    <p className="text-slate-600 text-lg md:text-2xl leading-relaxed font-body">
-                      El campus es un laboratorio de vida. Trepar, tocar y experimentar no son actividades extra, son los pilares fundamentales.
-                    </p>
-                  </div>
-                </InteractionCard>
-              </div>
-            </div>
-          </ScrollReveal>
+              </ScrollReveal>
+            ))}
+          </div>
         </div>
 
-        {/* SECTION 4: SOCIAL PROOF (From AboutView) */}
-        <div className="relative mb-48">
+        {/* SECTION 5: SOCIAL PROOF */}
+        <div className="relative mb-32">
           <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 to-jaci-pink/10 rounded-[4.5rem] blur-2xl"></div>
           <div className="relative bg-white/80 backdrop-blur-xl rounded-[4rem] p-10 md:p-16 shadow-soft border border-white overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -276,50 +279,6 @@ export const MethodologyView: React.FC = () => {
           </div>
         </div>
 
-        {/* SECTION 5: PROGRAMS GRID */}
-        <div className="mb-20 flex flex-col items-center px-4">
-          <ScrollReveal>
-            <h2 className={DESIGN_SYSTEM.typography.h2 + " mb-16 md:mb-24 text-center"}>Nuestros <span className="text-jaci-green">Programas</span></h2>
-          </ScrollReveal>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-            {[
-              { name: 'Estimulación', monster: 'TUFIN' },
-              { name: 'Preescolar JACI', monster: 'POSITIVIN' },
-              { name: 'Summer Camp', monster: 'POMPIN' }
-            ].map((prog, i) => {
-              const colors = [DESIGN_SYSTEM.colors.primary, DESIGN_SYSTEM.colors.pink, DESIGN_SYSTEM.colors.yellow];
-              return (
-                <ScrollReveal key={i} delay={i * 0.1}>
-                  <InteractionCard borderColor={colors[i]} className="h-full group !pb-24">
-                    <div className="flex justify-between items-start mb-10">
-                      <div className="size-14 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-900 border border-slate-100">
-                        <span className="material-symbols-outlined text-2xl" style={{ color: colors[i] }}>{i === 0 ? 'child_care' : i === 1 ? 'school' : 'sunny'}</span>
-                      </div>
-                      <span className={DESIGN_SYSTEM.typography.label}>{i === 0 ? '0-2 años' : i === 1 ? '3-5 años' : 'Vacacional'}</span>
-                    </div>
-                    <div className="flex items-center gap-4 mb-6">
-                       <h4 className="text-xl md:text-2xl font-black font-display text-slate-900">{prog.name}</h4>
-                    </div>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-12 font-body flex-grow">
-                      {i === 0 ? 'Un despertar de los sentidos en un entorno lleno de amor y seguridad.' : 
-                       i === 1 ? 'Donde la magia sucede. Preparación académica balanceada con juego libre estructurado.' :
-                       'Aventura total bajo el sol con experimentos científicos, arte y muchísima diversión.'}
-                    </p>
-                    <div className="flex flex-col gap-4">
-                      {/* Monsters: TUFIN, POSITIVIN, POMPIN */}
-                      <div className="flex justify-center -mb-8 opacity-60 group-hover:opacity-100 transition-all duration-500 transform group-hover:-translate-y-2">
-                        <FloatingMonster monster={prog.monster as any} size="size-20 md:size-28" />
-                      </div>
-                      <button className="w-full py-5 border-2 border-slate-100 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-500">
-                        Ver Detalles
-                      </button>
-                    </div>
-                  </InteractionCard>
-                </ScrollReveal>
-              );
-            })}
-          </div>
-        </div>
       </ViewContainer>
     </div>
   );
