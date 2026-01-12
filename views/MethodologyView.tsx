@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ScrollReveal, InteractionCard, ViewContainer, GlassBadge, Magnetic, FloatingMonster, OptimizedImage } from '../components/MotionPrimitives';
@@ -181,7 +180,7 @@ export const MethodologyView: React.FC = () => {
           </div>
         </div>
 
-        {/* SECTION 4: NUESTROS PROGRAMAS - COMPACTED SPRINT */}
+        {/* SECTION 4: NUESTROS PROGRAMAS - ACTUALIZADO SPRINT 4 */}
         <div className="mb-48 flex flex-col items-center px-4">
           <ScrollReveal>
             <h2 className={DESIGN_SYSTEM.typography.h2 + " mb-16 md:mb-24 text-center"}>Nuestros <span className="text-jaci-green">Programas</span></h2>
@@ -190,7 +189,7 @@ export const MethodologyView: React.FC = () => {
             {[
               { 
                 name: 'Monstruocerebro en acción', 
-                monster: 'TUFIN', 
+                image: 'https://assets.jacilandia.mx/Monstruocerebro.png', 
                 color: DESIGN_SYSTEM.colors.primary, 
                 icon: 'psychology',
                 desc: 'Neurodesarrollo dinámico y gimnasia cerebral para potenciar las capacidades cognitivas natas.'
@@ -232,7 +231,17 @@ export const MethodologyView: React.FC = () => {
                   </p>
                   <div className="flex flex-col items-center">
                     <div className="flex justify-center opacity-80 group-hover:opacity-100 transition-all duration-500 transform group-hover:-translate-y-2">
-                      <FloatingMonster monster={prog.monster as any} size="size-24 md:size-32" />
+                      {prog.image ? (
+                        <OptimizedImage 
+                          src={prog.image} 
+                          alt={prog.name} 
+                          className="size-24 md:size-32 rounded-2xl shadow-lg !bg-transparent"
+                          aspectRatio="aspect-square"
+                          objectFit="cover"
+                        />
+                      ) : (
+                        <FloatingMonster monster={prog.monster as any} size="size-24 md:size-32" />
+                      )}
                     </div>
                   </div>
                 </InteractionCard>
