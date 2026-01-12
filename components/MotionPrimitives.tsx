@@ -9,6 +9,7 @@ interface ViewContainerProps extends HTMLMotionProps<'section'> {
   className?: string;
 }
 
+// Fix: Added ViewContainerProps generic to React.FC to resolve children and className missing in type definition
 export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, className = "", ...props }) => (
   <motion.section
     initial="hidden"
@@ -92,7 +93,6 @@ export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children,
   );
 });
 
-// --- CLOUDFLARE EDGE TRANSFORMER ENGINE ---
 export const OptimizedImage: React.FC<{ 
   src: string; 
   alt: string; 
@@ -100,17 +100,15 @@ export const OptimizedImage: React.FC<{
   aspectRatio?: string;
   priority?: 'high' | 'low' | 'auto';
   objectFit?: 'cover' | 'contain';
-  sizes?: string; // Atributo manual para ayudar al navegador
+  sizes?: string;
 }> = memo(({ src, alt, className = "", aspectRatio = "aspect-[16/10]", priority = "auto", objectFit = 'cover', sizes }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const perf = usePerformance();
   const ref = useRef(null);
-  // Margin expandido al 50% para empezar a cargar antes de que el usuario llegue
   const isInView = useInView(ref, { margin: "50% 0px", once: true }); 
 
   const getTransformUrl = useCallback((width: number, blur: number = 0) => {
     const baseTransform = "/cdn-cgi/image/";
-    // Si la pantalla es pequeña (width < 600), forzamos calidad un poco menor para velocidad extrema
     const quality = width < 600 ? 75 : (perf === PerformanceProfile.LITE ? 60 : 85);
     const blurParam = blur > 0 ? `,blur=${blur}` : '';
     const options = `width=${width},quality=${quality},format=auto,fit=${objectFit}${blurParam}`;
@@ -122,11 +120,8 @@ export const OptimizedImage: React.FC<{
     return `${baseTransform}${options}/${sourceImage}`;
   }, [src, perf, objectFit]);
 
-  // LIP (Low Intensity Preview): Imagen de 30px, Blur de 20px. Pesa ~400 bytes.
   const placeholderUrl = useMemo(() => getTransformUrl(30, 20), [getTransformUrl]);
   
-  // SrcSet Generado Inteligentemente
-  // El navegador usa esto para elegir QUÉ descargar basándose en el ancho de SU ventana y la densidad de píxeles (DPR).
   const srcSet = useMemo(() => {
     return `
       ${getTransformUrl(400)} 400w,
@@ -137,8 +132,6 @@ export const OptimizedImage: React.FC<{
     `;
   }, [getTransformUrl]);
 
-  // Sizes por defecto si no se proveen. 
-  // "Si la pantalla es menor a 768px, la imagen ocupa el 100% del ancho. Si es mayor, ocupa el 50% (diseño a 2 columnas típico)"
   const defaultSizes = sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw";
 
   return (
@@ -147,38 +140,34 @@ export const OptimizedImage: React.FC<{
       className={`relative overflow-hidden ${aspectRatio} bg-slate-100 ${className}`} 
       style={{ 
         contain: 'paint',
-        // Evita Layout Shift reservando el espacio exacto
         aspectRatio: aspectRatio.includes('[') ? aspectRatio.split('-')[1].replace('[','').replace(']','') : 'auto'
       }}
     >
-      {/* 1. Instant Blur Layer (Base64 placeholder o tiny fetch) */}
       <div 
         className="absolute inset-0 z-0 transition-opacity duration-700 ease-out"
         style={{ 
           backgroundImage: `url('${placeholderUrl}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'scale(1.1)', // Esconde bordes del blur
+          filter: 'scale(1.1)',
           opacity: isLoaded ? 0 : 1
         }}
         aria-hidden="true"
       />
 
-      {/* 2. Main Image Layer */}
-      {/* Solo renderizamos el tag <img> si está cerca del viewport (Lazy) O si es prioridad alta (Eager) */}
       {(isInView || priority === 'high') && (
         <motion.img
-          src={getTransformUrl(1280)} // Fallback para navegadores viejos
+          src={getTransformUrl(1280)}
           srcSet={srcSet}
           sizes={defaultSizes}
           alt={alt}
           onLoad={() => setIsLoaded(true)}
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoaded ? 1 : 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }} // Transición rápida
+          transition={{ duration: 0.4, ease: "easeOut" }}
           className={`relative z-10 w-full h-full object-${objectFit} transform-gpu`}
           loading={priority === 'high' ? 'eager' : 'lazy'}
-          decoding="async" // Permite al navegador decodificar la imagen en otro hilo sin bloquear el scroll
+          decoding="async"
           // @ts-ignore
           fetchpriority={priority}
           style={{ 
@@ -196,7 +185,7 @@ export const FloatingMonster: React.FC<{
   className?: string;
   delay?: number;
   size?: string;
-  priority?: boolean; // Nuevo prop para forzar carga inmediata en Home
+  priority?: boolean;
 }> = memo(({ monster, className = "", delay = 0, size = "size-32", priority = false }) => {
   const prefersReducedMotion = useReducedMotion();
   const perf = usePerformance();
@@ -204,7 +193,7 @@ export const FloatingMonster: React.FC<{
   const scrollVelocity = useVelocity(scrollY);
   
   const smoothVelocity = useSpring(scrollVelocity, { stiffness: 60, damping: 20 });
-  const velocityY = useTransform(smoothVelocity, [-3000, 3000], [40, -40]);
+  const velocityY = useTransform(smoothVelocity, [-3000, 3000], [60, -60]);
   const velocityRotate = useTransform(smoothVelocity, [-3000, 3000], [-15, 15]);
 
   if (perf === PerformanceProfile.LITE) {
@@ -220,22 +209,42 @@ export const FloatingMonster: React.FC<{
 
   return (
     <motion.div
+      initial={{ opacity: 0, scale: 0.5, y: 50 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ 
+        delay: delay * 0.5, 
+        duration: 1, 
+        ease: [0.22, 1, 0.36, 1],
+        scale: { ...DESIGN_SYSTEM.springs.bouncy, delay: delay * 0.5 }
+      }}
       style={{ 
-        y: prefersReducedMotion ? 0 : velocityY, 
+        translateY: prefersReducedMotion ? 0 : velocityY, 
         rotate: prefersReducedMotion ? 0 : velocityRotate,
         willChange: 'transform'
       }}
       className={`${size} ${className} relative`}
     >
-       <OptimizedImage 
-         src={JACI_SQUAD[monster]} 
-         alt={monster} 
-         className="w-full h-full !bg-transparent"
-         aspectRatio="aspect-square"
-         objectFit="contain"
-         priority={priority ? 'high' : 'auto'}
-         sizes={`(max-width: 768px) 150px, 300px`} // Tamaños muy específicos para monstruos
-       />
+      <motion.div
+        animate={prefersReducedMotion ? {} : {
+          y: [0, -20, 0],
+          rotate: [0, 5, -5, 0]
+        }}
+        transition={prefersReducedMotion ? {} : {
+          y: { ...DESIGN_SYSTEM.springs.float, delay },
+          rotate: { ...DESIGN_SYSTEM.springs.float, delay, duration: 6 }
+        }}
+        className="w-full h-full"
+      >
+        <OptimizedImage 
+          src={JACI_SQUAD[monster]} 
+          alt={monster} 
+          className="w-full h-full !bg-transparent"
+          aspectRatio="aspect-square"
+          objectFit="contain"
+          priority={priority ? 'high' : 'auto'}
+          sizes={`(max-width: 768px) 150px, 300px`}
+        />
+      </motion.div>
     </motion.div>
   );
 });
