@@ -15,10 +15,10 @@ export const AboutView: React.FC = () => {
 
       <ViewContainer className="pt-20 lg:pt-32 pb-40">
         
-        {/* NUESTRA HISTORIA BADGE - Movido arriba del grid para permitir alineación perfecta abajo */}
-        <div className="flex justify-start mb-12 lg:mb-16">
+        {/* NUESTRA HISTORIA BADGE - Ahora centrado para balance compositivo */}
+        <div className="flex justify-center mb-12 lg:mb-16">
           <ScrollReveal>
-            <GlassBadge icon="history_edu" colorClass="text-jaci-purple">Nuestra Historia</GlassBadge>
+            <GlassBadge icon="history_edu" colorClass="text-jaci-purple" className="!mx-auto">Nuestra Historia</GlassBadge>
           </ScrollReveal>
         </div>
 
