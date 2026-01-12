@@ -30,21 +30,18 @@ const SOCIAL_LINKS = [
     url: 'https://www.tiktok.com/@juegaaprendeyconfiaenti',
     icon: (
       <svg className="w-5 h-5 overflow-visible" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Capa Cyan desplazada a la izquierda */}
         <path 
           className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           d="M16.6 5.82a4.27 4.27 0 0 1-1.06-2.82h-3.07v12.47a3.85 3.85 0 0 1-4.47 3.77 3.89 3.89 0 0 1-3.31-3.86 3.89 3.89 0 0 1 3.89-3.89c.34 0 .65.04.95.11V8.55a6.97 6.97 0 0 0-1.39-.14A6.93 6.93 0 0 0 1.22 15.35a6.92 6.92 0 0 0 6.91 6.92 6.92 6.92 0 0 0 6.93-6.91V8.56a7.26 7.26 0 0 0 4.67 1.67V7.16a4.23 4.23 0 0 1-3.13-1.34Z" 
           fill="#25F4EE"
           transform="translate(-1, 0)"
         />
-        {/* Capa Magenta desplazada a la derecha */}
         <path 
           className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           d="M16.6 5.82a4.27 4.27 0 0 1-1.06-2.82h-3.07v12.47a3.85 3.85 0 0 1-4.47 3.77 3.89 3.89 0 0 1-3.31-3.86 3.89 3.89 0 0 1 3.89-3.89c.34 0 .65.04.95.11V8.55a6.97 6.97 0 0 0-1.39-.14A6.93 6.93 0 0 0 1.22 15.35a6.92 6.92 0 0 0 6.91 6.92 6.92 6.92 0 0 0 6.93-6.91V8.56a7.26 7.26 0 0 0 4.67 1.67V7.16a4.23 4.23 0 0 1-3.13-1.34Z" 
           fill="#FE2C55"
           transform="translate(1, 0)"
         />
-        {/* Capa Principal que hereda currentColor */}
         <path 
           d="M16.6 5.82a4.27 4.27 0 0 1-1.06-2.82h-3.07v12.47a3.85 3.85 0 0 1-4.47 3.77 3.89 3.89 0 0 1-3.31-3.86 3.89 3.89 0 0 1 3.89-3.89c.34 0 .65.04.95.11V8.55a6.97 6.97 0 0 0-1.39-.14A6.93 6.93 0 0 0 1.22 15.35a6.92 6.92 0 0 0 6.91 6.92 6.92 6.92 0 0 0 6.93-6.91V8.56a7.26 7.26 0 0 0 4.67 1.67V7.16a4.23 4.23 0 0 1-3.13-1.34Z" 
           fill="currentColor" 
@@ -67,12 +64,13 @@ const SOCIAL_LINKS = [
 
 const NAV_LINKS = [
   { label: 'Inicio', view: ViewState.HOME },
-  { label: 'Privacidad', view: ViewState.PRIVACY },
-  { label: 'Contacto', view: ViewState.REGISTER },
+  { label: 'Aviso de Privacidad', view: ViewState.PRIVACY },
+  { label: 'Inscripciones Xalapa', view: ViewState.REGISTER },
 ];
 
 export const Footer: React.FC = () => {
   const { navigateTo } = useNavigation();
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-white/50 backdrop-blur-sm border-t border-gray-200 mt-auto overflow-hidden">
@@ -86,11 +84,14 @@ export const Footer: React.FC = () => {
             >
               <img 
                 src="https://assets.jacilandia.mx/LOGO_H_Color.png" 
-                alt="JACI" 
+                alt="JACI Xalapa" 
                 className="h-20 w-auto object-contain transition-all duration-500 group-hover:scale-105"
               />
             </div>
-            <p className="text-gray-400 text-xs font-body mt-2 tracking-tight">© 2026 JACI. Monstruomentes Brillantes.</p>
+            <p className="text-gray-400 text-[10px] font-body mt-2 tracking-tight text-center md:text-left leading-relaxed">
+              © {currentYear} JACI | Monstruomentes Brillantes.<br/>
+              Av. Manuel Ávila Camacho 33, Centro, 91000 Xalapa, Ver.
+            </p>
           </div>
           
           {/* Navigation Links */}
@@ -115,7 +116,7 @@ export const Footer: React.FC = () => {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={social.name}
+                  aria-label={`${social.name} JACI Xalapa`}
                   className={`group w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-400 transition-all duration-500 border border-transparent hover:border-white/10 ${social.hoverClass}`}
                 >
                   {social.icon}

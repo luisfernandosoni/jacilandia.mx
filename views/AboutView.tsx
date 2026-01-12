@@ -6,7 +6,7 @@ import { DESIGN_SYSTEM } from '../types';
 
 export const AboutView: React.FC = () => {
   return (
-    <div className="relative w-full overflow-hidden min-h-screen">
+    <div className="relative w-full overflow-hidden min-h-screen" lang="es">
       {/* Background Subtle Elements */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none -z-10">
         <div className="absolute top-[10%] right-[-5%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
@@ -22,7 +22,6 @@ export const AboutView: React.FC = () => {
           <div className="lg:col-span-5 order-2 lg:order-1 relative">
             <ScrollReveal>
               <div className="relative group">
-                {/* Aura */}
                 <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 via-white/0 to-jaci-pink/20 rounded-[3.5rem] blur-2xl group-hover:blur-3xl transition-all duration-700" />
                 
                 <div className="relative rounded-[3rem] overflow-hidden border-[8px] border-white shadow-soft bg-slate-50 aspect-[4/5]">
@@ -42,7 +41,7 @@ export const AboutView: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-slate-900 font-black font-display text-lg leading-none">Jessica Cadenas</p>
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Fundadora & Directora</p>
+                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Fundadora de JACI</p>
                       </div>
                     </div>
                   </div>
@@ -59,36 +58,36 @@ export const AboutView: React.FC = () => {
           {/* Content Column */}
           <div className="lg:col-span-7 order-1 lg:order-2">
             <ScrollReveal delay={0.2}>
-              <GlassBadge icon="person_celebrate" colorClass="text-jaci-purple">Nuestra Historia</GlassBadge>
+              <GlassBadge icon="history_edu" colorClass="text-jaci-purple">Nuestra Historia</GlassBadge>
               <h1 className={DESIGN_SYSTEM.typography.h1 + " mt-8 mb-8"}>
                 La <span className="text-transparent bg-clip-text bg-gradient-to-r from-jaci-purple to-primary">mente</span> detrás.
               </h1>
               
               <div className="space-y-6 text-lg md:text-xl text-slate-500 font-body leading-relaxed">
                 <p>
-                  <span className="text-slate-900 font-bold">¿Quién está detrás de JACI?</span> Soy Jessica Cadenas y hace 8 años tuve una revelación: los niños no fallan por falta de capacidad, fallan por falta de confianza y metodología.
+                  <span className="text-slate-900 font-bold">¿Quién está detrás de JACI?</span> Soy Jessica Cadenas y hace 8 años tuve una revelación: los niños no fallan por falta de capacidad, fallan por falta de confianza y metodología adaptada a su neurodesarrollo.
                 </p>
                 <p>
-                  JACI nació de la inquietud de fusionar el <span className="text-jaci-pink font-bold underline decoration-jaci-pink/30 underline-offset-4">juego</span> con el aprendizaje riguroso.
+                  JACI nació en Xalapa, Veracruz, con la inquietud de fusionar el <span className="text-jaci-pink font-bold underline decoration-jaci-pink/30 underline-offset-4">juego</span> con el aprendizaje riguroso.
                 </p>
               </div>
 
-              {/* Stats Grid - Enhanced Legibility */}
+              {/* Stats Grid - ORDEN REESTABLECIDO: Xalapa en la última tarjeta */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-12">
-                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-500 group/stat">
-                  <span className="material-symbols-outlined text-4xl text-primary mb-4 filled group-hover/stat:scale-110 transition-transform">flag</span>
-                  <h4 className="font-black font-display text-slate-900 text-2xl mb-2">Pioneros</h4>
-                  <p className="text-sm text-slate-700 font-bold font-body leading-snug">Creadores de un método funcional para enseñar a leer.</p>
+                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-jaci-green/20 transition-all duration-500 group/stat flex flex-col min-w-0 overflow-hidden">
+                  <span className="material-symbols-outlined text-4xl text-jaci-green mb-6 filled group-hover/stat:scale-110 transition-transform">trending_up</span>
+                  <h4 className="font-black font-display text-slate-900 text-[clamp(1.1rem,2.5vw,1.5rem)] mb-4 leading-tight tracking-tight break-words hyphens-auto">Resultados Reales</h4>
+                  <p className="text-sm text-slate-600 font-medium font-body leading-relaxed">Más de 2,000 niños han desbloqueado su máximo potencial con nosotros.</p>
                 </div>
-                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-jaci-green/20 transition-all duration-500 group/stat">
-                  <span className="material-symbols-outlined text-4xl text-jaci-green mb-4 filled group-hover/stat:scale-110 transition-transform">trending_up</span>
-                  <h4 className="font-black font-display text-slate-900 text-2xl mb-2">Resultados</h4>
-                  <p className="text-sm text-slate-700 font-bold font-body leading-snug">+2,000 niños han desbloqueado su potencial.</p>
+                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-jaci-purple/20 transition-all duration-500 group/stat flex flex-col min-w-0 overflow-hidden">
+                  <span className="material-symbols-outlined text-4xl text-jaci-purple mb-6 filled group-hover/stat:scale-110 transition-transform">psychology_alt</span>
+                  <h4 className="font-black font-display text-slate-900 text-[clamp(1.1rem,2.5vw,1.5rem)] mb-4 leading-tight tracking-tight break-words hyphens-auto">Experta en Neurodesarrollo</h4>
+                  <p className="text-sm text-slate-600 font-medium font-body leading-relaxed">Mi enfoque mezcla la activación neuronal con el corazón, creando una generación de niños felices y capaces.</p>
                 </div>
-                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-jaci-purple/20 transition-all duration-500 group/stat">
-                  <span className="material-symbols-outlined text-4xl text-jaci-purple mb-4 filled group-hover/stat:scale-110 transition-transform">psychology</span>
-                  <h4 className="font-black font-display text-slate-900 text-2xl mb-2">Expertise</h4>
-                  <p className="text-sm text-slate-700 font-bold font-body leading-snug">Enfoque en activación neuronal y neurodesarrollo.</p>
+                <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-500 group/stat flex flex-col min-w-0 overflow-hidden">
+                  <span className="material-symbols-outlined text-4xl text-primary mb-6 filled group-hover/stat:scale-110 transition-transform">emoji_events</span>
+                  <h4 className="font-black font-display text-slate-900 text-[clamp(1.1rem,2.5vw,1.5rem)] mb-4 leading-tight tracking-tight break-words hyphens-auto">Pioneros en Xalapa</h4>
+                  <p className="text-sm text-slate-600 font-medium font-body leading-relaxed">Creadores de un método divertido y funcional para enseñar a leer.</p>
                 </div>
               </div>
             </ScrollReveal>
@@ -99,13 +98,12 @@ export const AboutView: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <ScrollReveal>
             <div className="text-center mb-16">
-              <h2 className={DESIGN_SYSTEM.typography.h2}>Formación de <span className="text-jaci-pink">Clase Mundial</span></h2>
-              <p className={DESIGN_SYSTEM.typography.body + " mt-4"}>La excelencia académica es nuestra base para innovar.</p>
+              <h2 className={DESIGN_SYSTEM.typography.h2}>Formación de <span className="text-jaci-pink">clase mundial</span> en Xalapa</h2>
+              <p className={DESIGN_SYSTEM.typography.body + " mt-4"}>Nuestra fundadora es egresada de la Benemérita Escuela Normal Veracruzana.</p>
             </div>
           </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-            {/* Academic Column */}
             <ScrollReveal delay={0.1}>
               <InteractionCard borderColor={DESIGN_SYSTEM.colors.primary} className="h-full bg-slate-50/30">
                 <div className="flex items-center gap-4 mb-10">
@@ -121,7 +119,7 @@ export const AboutView: React.FC = () => {
                         <span className="material-symbols-outlined text-xl filled">history_edu</span>
                       </div>
                       <div>
-                        <span className="text-slate-900 font-black font-display text-base block mb-0.5">Licenciatura en Educación Especial</span>
+                        <span className="text-slate-900 font-black font-display text-base block mb-0.5">Educación Especial</span>
                         <span className="text-slate-500 text-xs font-bold uppercase tracking-wider block">Benemérita Escuela Normal Veracruzana</span>
                       </div>
                    </li>
@@ -132,7 +130,7 @@ export const AboutView: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-slate-900 font-black font-display text-base block mb-0.5">Master Internacional en Psicología Infantojuvenil</span>
-                        <span className="text-jaci-purple text-xs font-bold uppercase tracking-wider block">(Cursando)</span>
+                        <span className="text-jaci-purple text-xs font-bold uppercase tracking-wider block">(Especialización Global)</span>
                       </div>
                    </li>
 
@@ -155,7 +153,6 @@ export const AboutView: React.FC = () => {
               </InteractionCard>
             </ScrollReveal>
 
-            {/* Certifications & Standards Column */}
             <div className="flex flex-col gap-8">
               <ScrollReveal delay={0.2}>
                 <InteractionCard borderColor={DESIGN_SYSTEM.colors.green} className="bg-slate-50/30">

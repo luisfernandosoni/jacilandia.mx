@@ -34,7 +34,7 @@ export const HomeView: React.FC = () => {
                  layoutId={DESIGN_SYSTEM.layoutIds.BRAND_IDENTITY}
                  transition={DESIGN_SYSTEM.springs.identity}
                  src="https://assets.jacilandia.mx/JACI_Color.png" 
-                 alt="JACI Icon" 
+                 alt="JACI Xalapa" 
                  // @ts-ignore
                  fetchpriority="high"
                  className="w-full h-full object-contain relative z-10"
@@ -54,8 +54,8 @@ export const HomeView: React.FC = () => {
         {/* Hero Title Standardized with Momentum Typography */}
         <div className="relative w-full max-w-5xl mx-auto mb-16 flex flex-col items-center px-4">
           <ScrollReveal isText className="w-full flex flex-col items-center">
-            <GlassBadge icon="auto_awesome" colorClass="text-primary" className="!mx-auto">
-              Bienvenidos a JACI
+            <GlassBadge icon="location_on" colorClass="text-primary" className="!mx-auto">
+              La mejor educación infantil en Xalapa
             </GlassBadge>
             <h1 className={`${DESIGN_SYSTEM.typography.h1} w-full text-center mt-6`}>
               En JACI creamos las <br className="hidden sm:block" />
@@ -73,7 +73,7 @@ export const HomeView: React.FC = () => {
               transition={{ delay: 0.8 }}
               className={`${DESIGN_SYSTEM.typography.body} max-w-2xl mx-auto mt-10 px-4 text-center`}
             >
-              Descubre cómo aprendemos jugando y transformamos la curiosidad en un súper poder que dura para toda la vida.
+              Ubicados en el corazón de Xalapa, Veracruz, transformamos la curiosidad en un súper poder que prepara a tus hijos para los retos del mañana.
             </motion.p>
           </ScrollReveal>
         </div>
@@ -89,7 +89,7 @@ export const HomeView: React.FC = () => {
               onClick={() => navigateTo(ViewState.METHODOLOGY)}
               className="px-10 py-5 bg-slate-900 text-white rounded-full text-lg font-bold shadow-2xl hover:bg-slate-800 transition-all transform hover:scale-105 active:scale-95 font-display"
             >
-              Conoce el Método
+              Conoce el Método JACI
             </button>
           </Magnetic>
         </motion.div>

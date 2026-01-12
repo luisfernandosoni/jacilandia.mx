@@ -63,7 +63,7 @@ export const LevelsView: React.FC = () => {
   ];
 
   return (
-    <div className="w-full pb-32">
+    <div className="w-full pb-32" lang="es">
       <ViewContainer className="!px-3 sm:!px-5 md:!px-16">
         {/* Header */}
         <div className="text-center max-w-4xl mx-auto mb-16 md:mb-28 flex flex-col items-center pt-8">
@@ -79,22 +79,20 @@ export const LevelsView: React.FC = () => {
           </ScrollReveal>
         </div>
 
-        {/* Improved Grid Layout - Tight margins for mobile visibility */}
+        {/* Grid Layout - REFORZADO */}
         <div className="flex flex-wrap justify-center gap-5 md:gap-10">
           {levels.map((level, i) => (
-            <div key={level.id} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.33%-27px)] flex-grow-0 shrink-0">
+            <div key={level.id} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.33%-27px)] flex-grow-0 shrink-0 min-w-0">
               <ScrollReveal delay={i * 0.05}>
-                <InteractionCard borderColor={level.color} className="h-full !p-0 group !border-l-[6px]">
+                <InteractionCard borderColor={level.color} className="h-full !p-0 group !border-l-[6px] overflow-hidden">
                   <div className="flex flex-col h-full bg-white relative pt-20 sm:pt-24 md:pt-28">
                     
-                    {/* Level Category Badge */}
                     <div className="absolute top-5 right-5 sm:top-6 sm:right-6 md:top-8 md:right-8 z-30">
                       <div className="bg-slate-50/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[9px] md:text-xs font-black uppercase tracking-widest text-slate-500 shadow-sm border border-white">
                         {level.subtitle}
                       </div>
                     </div>
 
-                    {/* Monster Container */}
                     <div className="h-28 sm:h-32 md:h-40 relative flex items-center justify-center overflow-visible mb-2 sm:mb-4">
                       <FloatingMonster 
                         monster={level.monster as any} 
@@ -102,9 +100,7 @@ export const LevelsView: React.FC = () => {
                       />
                     </div>
 
-                    {/* Content Section with Fluid Typography */}
                     <div className="p-5 sm:p-6 md:p-10 pt-4 md:pt-6 flex flex-col flex-1 relative z-10">
-                      {/* Ghost Numbering - Adjusted z-index and opacity to not interfere with content */}
                       <span className="absolute right-4 top-[20%] -translate-y-1/2 text-[clamp(6rem,15vw,11rem)] font-black text-slate-200/20 select-none pointer-events-none tracking-tighter z-0" aria-hidden="true">
                         {level.id}
                       </span>
@@ -113,9 +109,9 @@ export const LevelsView: React.FC = () => {
                         <div className="size-12 sm:size-14 md:size-16 rounded-2xl bg-white shadow-soft flex items-center justify-center border border-slate-100 shrink-0 mt-0.5">
                           <span className="material-symbols-outlined text-2xl sm:text-3xl md:text-4xl filled" style={{ color: level.color }}>{level.icon}</span>
                         </div>
-                        <div className="flex flex-col min-w-0 flex-1">
-                          {/* Fluid Title: REMOVED overflow-hidden for accessibility safety */}
-                          <h3 className="text-[clamp(1.75rem,3.5vw,3rem)] md:text-5xl font-black font-display text-slate-900 leading-[0.85] tracking-tight uppercase break-words hyphens-auto text-balance">
+                        <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
+                          {/* ESCALA TIPOGRÁFICA REFINADA PARA RESILIENCIA EXTREMA */}
+                          <h3 className="text-[clamp(1.2rem,4.5vw,2rem)] font-black font-display text-slate-900 leading-[0.95] tracking-tight uppercase break-words hyphens-auto text-balance">
                             {level.title}
                           </h3>
                           <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] mt-2 md:mt-3" style={{ color: level.color }}>
@@ -128,15 +124,13 @@ export const LevelsView: React.FC = () => {
                         {level.desc}
                       </p>
 
-                      {/* Mantra Box */}
                       <div className="mb-6 sm:mb-8 p-5 sm:p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-100/50 border border-slate-200/30 relative z-10 text-center">
                          <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-3 md:mb-4">Mantra Maestro</span>
-                         <p className="text-base sm:text-lg md:text-2xl font-display font-black text-slate-900 leading-tight text-balance">
+                         <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-display font-black text-slate-900 leading-tight text-balance italic">
                            “{level.mantra}”
                          </p>
                       </div>
 
-                      {/* Result Row */}
                       <div className="relative z-10">
                          <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-3 md:mb-4">Impacto Directo</span>
                          <div className="flex items-center gap-3 sm:gap-4 bg-slate-50/80 p-3 sm:p-4 md:p-5 rounded-2xl md:rounded-3xl border border-slate-100/80">
