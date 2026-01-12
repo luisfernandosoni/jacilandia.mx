@@ -3,14 +3,17 @@ import { motion, HTMLMotionProps, useSpring, useScroll, useTransform, useReduced
 import { DESIGN_SYSTEM, PerformanceProfile, JACI_SQUAD } from '../types';
 import { usePerformance } from '../App';
 
-// Utilidad global para optimización de imágenes vía Cloudflare
-export const getCloudflareImageUrl = (src: string, options: { width: number, quality?: number, fit?: string, blur?: number }) => {
+// Utilidad global optimizada para Cloudflare Images con soporte para LQIP
+export const getCloudflareImageUrl = (src: string, options: { width: number, quality?: number, fit?: string, blur?: number, metadata?: 'none' | 'keep' }) => {
   if (!src) return '';
   const baseTransform = "/cdn-cgi/image/";
   const quality = options.quality || 85;
   const fit = options.fit || 'contain';
+  const metadata = options.metadata || 'none';
   const blurParam = options.blur ? `,blur=${options.blur}` : '';
-  const config = `width=${options.width},quality=${quality},format=auto,fit=${fit}${blurParam}`;
+  
+  // Agregamos metadata=none para ahorrar hasta un 5-10% de peso en headers EXIF
+  const config = `width=${options.width},quality=${quality},format=auto,fit=${fit},metadata=${metadata}${blurParam}`;
   
   const cleanPath = src.replace('https://assets.jacilandia.mx', '');
   const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
@@ -118,11 +121,17 @@ export const OptimizedImage: React.FC<{
   const [isLoaded, setIsLoaded] = useState(false);
   const perf = usePerformance();
   const ref = useRef(null);
-  const isInView = useInView(ref, { margin: "50% 0px", once: true }); 
+  
+  // ESTRATEGIA: Margen de 100% para empezar a cargar mucho antes de que sea visible
+  const isInView = useInView(ref, { margin: "100% 0px", once: true }); 
 
-  // Forzamos transparencia si el asset es PNG o se marca como tal
   const needsTransparency = isTransparent || src.toLowerCase().includes('.png');
   
+  // Versión de bajísima calidad (LQIP) para carga instantánea
+  const lqipUrl = useMemo(() => {
+    return getCloudflareImageUrl(src, { width: 32, quality: 20, blur: 50, fit: objectFit });
+  }, [src, objectFit]);
+
   const srcSet = useMemo(() => {
     return `
       ${getCloudflareImageUrl(src, { width: 400, fit: objectFit })} 400w,
@@ -138,28 +147,24 @@ export const OptimizedImage: React.FC<{
   return (
     <div 
       ref={ref}
-      className={`relative overflow-hidden ${aspectRatio} ${needsTransparency ? 'bg-transparent' : 'bg-slate-100'} ${className}`} 
+      className={`relative overflow-hidden ${aspectRatio} ${className}`} 
       style={{ 
         contain: 'paint',
-        aspectRatio: aspectRatio.includes('[') ? aspectRatio.split('-')[1].replace('[','').replace(']','') : 'auto',
-        backgroundColor: needsTransparency ? 'transparent' : undefined
+        backgroundColor: needsTransparency ? 'transparent' : '#f8fafc'
       }}
     >
-      {/* 
-        Eliminamos el placeholder para assets transparentes. 
-        El "fondo blanco" solía ser el placeholder cargando o el bg-slate-100.
-      */}
+      {/* CAPA 1: LQIP (Low Quality Image Placeholder) - Siempre visible hasta que cargue la final */}
       {!needsTransparency && (
-        <div 
-          className="absolute inset-0 z-0 transition-opacity duration-500 ease-out"
-          style={{ 
-            backgroundColor: '#f1f5f9', // bg-slate-100
-            opacity: isLoaded ? 0 : 1
-          }}
+        <img 
+          src={lqipUrl} 
+          alt="" 
           aria-hidden="true"
+          className={`absolute inset-0 w-full h-full object-${objectFit} transition-opacity duration-700 ease-in-out z-0 ${isLoaded ? 'opacity-0' : 'opacity-100'}`}
+          style={{ filter: 'blur(20px)', transform: 'scale(1.1)' }}
         />
       )}
 
+      {/* CAPA 2: Imagen Final con Cross-fade */}
       {(isInView || priority === 'high') && (
         <motion.img
           src={getCloudflareImageUrl(src, { width: 1280, fit: objectFit })}
@@ -167,18 +172,20 @@ export const OptimizedImage: React.FC<{
           sizes={defaultSizes}
           alt={alt}
           onLoad={() => setIsLoaded(true)}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isLoaded ? 1 : 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          initial={{ opacity: 0, filter: 'blur(10px)' }}
+          animate={{ 
+            opacity: isLoaded ? 1 : 0,
+            filter: isLoaded ? 'blur(0px)' : 'blur(10px)'
+          }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className={`relative z-10 w-full h-full object-${objectFit} transform-gpu`}
           loading={priority === 'high' ? 'eager' : 'lazy'}
           decoding="async"
           // @ts-ignore
           fetchpriority={priority}
           style={{ 
-            willChange: 'opacity',
+            willChange: 'opacity, filter',
             backfaceVisibility: 'hidden',
-            backgroundColor: 'transparent'
           }}
         />
       )}
@@ -205,25 +212,14 @@ export const FloatingMonster: React.FC<{
 
   const finalSrc = src || (monster ? JACI_SQUAD[monster] : "");
 
-  if (perf === PerformanceProfile.LITE) {
-    return (
-      <img 
-        src={getCloudflareImageUrl(finalSrc, { width: 300, fit: 'contain' })} 
-        alt="" 
-        className={`${size} object-contain ${className} drop-shadow-md`} 
-        loading={priority ? "eager" : "lazy"}
-      />
-    );
-  }
-
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.85, y: 10 }} // Menos viaje de escala para mayor velocidad percibida
-      animate={{ opacity: 1, scale: 1, y: 0 }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
       transition={{ 
         delay: delay, 
-        duration: 0.3, // Reducido de 0.45 para una entrada instantánea
-        ease: [0.16, 1, 0.3, 1], // Curve para pop rápido
+        duration: 0.3, 
+        ease: [0.16, 1, 0.3, 1],
       }}
       style={{ 
         translateY: prefersReducedMotion ? 0 : velocityY, 
@@ -250,7 +246,7 @@ export const FloatingMonster: React.FC<{
           aspectRatio="aspect-square"
           objectFit="contain"
           isTransparent={true}
-          priority="high" // Forzamos carga prioritaria para monstruos
+          priority={priority ? "high" : "auto"}
           sizes={`(max-width: 768px) 150px, 300px`}
         />
       </motion.div>
