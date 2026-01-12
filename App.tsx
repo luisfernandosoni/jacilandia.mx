@@ -38,6 +38,7 @@ const VIEW_LOADERS: Record<ViewState, () => Promise<any>> = {
   [ViewState.PRICING]: () => import('./views/PricingView'),
   [ViewState.REGISTER]: () => import('./views/RegisterView'),
   [ViewState.DASHBOARD]: () => import('./views/DashboardView'),
+  [ViewState.PRIVACY]: () => import('./views/PrivacyView'),
 };
 
 const HomeView = lazy(() => VIEW_LOADERS[ViewState.HOME]().then(m => ({ default: m.HomeView })));
@@ -49,6 +50,7 @@ const PricingView = lazy(() => VIEW_LOADERS[ViewState.PRICING]().then(m => ({ de
 const LevelsView = lazy(() => VIEW_LOADERS[ViewState.LEVELS]().then(m => ({ default: m.LevelsView })));
 const RegisterView = lazy(() => VIEW_LOADERS[ViewState.REGISTER]().then(m => ({ default: m.RegisterView })));
 const DashboardView = lazy(() => VIEW_LOADERS[ViewState.DASHBOARD]().then(m => ({ default: m.DashboardView })));
+const PrivacyView = lazy(() => VIEW_LOADERS[ViewState.PRIVACY]().then(m => ({ default: m.PrivacyView })));
 
 // --- ATMOSPHERIC UTILS ---
 export const applyAtmosphere = (view: ViewState) => {
@@ -60,40 +62,28 @@ export const applyAtmosphere = (view: ViewState) => {
 };
 
 // --- PREDICTIVE ASSET WARMER ---
-// Esta utilidad "golpea" las URLs de Cloudflare en segundo plano.
-// No descarga la imagen completa para no gastar datos, solo fuerza a Cloudflare a generar la transformación.
 const warmUpAssets = (perf: PerformanceProfile) => {
   if (typeof window === 'undefined') return;
 
-  // Lista de Assets Críticos de otras vistas que queremos pre-calentar
   const CRITICAL_ASSETS = [
-    JACI_SQUAD.GULY, // Metodología
-    JACI_SQUAD.LY,   // Metodología
-    JACI_SQUAD.POMPIN, // About / Levels
-    JACI_SQUAD.PEPE, // Levels
-    "https://assets.jacilandia.mx/JessydeJACI.jpg" // About
+    JACI_SQUAD.GULY, JACI_SQUAD.LY, JACI_SQUAD.POMPIN, JACI_SQUAD.PEPE,
+    "https://assets.jacilandia.mx/JessydeJACI.jpg"
   ];
 
-  // Helper para generar URL de Cloudflare
   const getUrl = (src: string, width: number) => {
     const cleanPath = src.replace('https://assets.jacilandia.mx', '');
     const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
     const sourceImage = src.includes('jacilandia.mx') ? `https://assets.jacilandia.mx${finalPath}` : src;
-    const quality = perf === PerformanceProfile.LITE ? 60 : 75; // Calidad media para el warm-up
+    const quality = perf === PerformanceProfile.LITE ? 60 : 75;
     return `/cdn-cgi/image/width=${width},quality=${quality},format=auto/${sourceImage}`;
   };
 
   const task = () => {
     CRITICAL_ASSETS.forEach(src => {
-      // Pre-calentamos tamaños comunes: Móvil (400) y Desktop (1280)
-      // Usamos fetch con priority: 'low' para no bloquear la red principal
       [400, 1280].forEach(width => {
         const url = getUrl(src, width);
-        // fetch(url, { priority: 'low', mode: 'no-cors' }).catch(() => {});
-        // Nota: new Image() es más compatible para cache warming que fetch en algunos navegadores
         const img = new Image();
         img.src = url; 
-        // No necesitamos adjuntarla al DOM, solo pedirla.
       });
     });
   };
@@ -112,9 +102,19 @@ const App: React.FC = () => {
   const [dataCache, setDataCache] = useState<Record<string, any>>({});
   const mainContentRef = useRef<HTMLDivElement>(null);
 
+  const handleViewChange = useCallback((view: ViewState) => {
+    if (currentView === view) return;
+    applyAtmosphere(view);
+    startTransition(() => {
+      setCurrentView(view);
+    });
+  }, [currentView]);
+
   useEffect(() => {
+    // Initial atmosphere
     applyAtmosphere(currentView);
     
+    // Performance detection
     const detectPerformance = () => {
       const memory = (navigator as any).deviceMemory || 8;
       const cores = navigator.hardwareConcurrency || 4;
@@ -125,11 +125,17 @@ const App: React.FC = () => {
         setPerfProfile(PerformanceProfile.LITE);
         document.getElementById('mesh-bg')?.style.setProperty('display', 'none');
       } else {
-        // Solo lanzamos el warm-up en dispositivos decentes
         warmUpAssets(PerformanceProfile.HIGH);
       }
     };
     detectPerformance();
+
+    // URL View listener for jacilandia.mx/privacidad style (using params for SPA)
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view') as ViewState;
+    if (viewParam && Object.values(ViewState).includes(viewParam)) {
+      handleViewChange(viewParam);
+    }
   }, []);
 
   const setCacheValue = useCallback((key: string, data: any) => {
@@ -140,14 +146,6 @@ const App: React.FC = () => {
     if (dataCache[key]) return;
     fetcher().then(data => setCacheValue(key, data)).catch(() => {});
   }, [dataCache, setCacheValue]);
-
-  const handleViewChange = useCallback((view: ViewState) => {
-    if (currentView === view) return;
-    applyAtmosphere(view);
-    startTransition(() => {
-      setCurrentView(view);
-    });
-  }, [currentView]);
 
   return (
     <DataCacheContext.Provider value={{ cache: dataCache, setCache: setCacheValue, prefetch: prefetchData }}>
@@ -179,6 +177,7 @@ const App: React.FC = () => {
                         case ViewState.PRICING: return <PricingView />;
                         case ViewState.REGISTER: return <RegisterView />;
                         case ViewState.DASHBOARD: return <DashboardView />;
+                        case ViewState.PRIVACY: return <PrivacyView />;
                         default: return <HomeView />;
                       }
                     })()}
