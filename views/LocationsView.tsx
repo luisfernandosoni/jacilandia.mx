@@ -140,7 +140,8 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
       if (!document.getElementById(scriptId)) {
         const script = document.createElement('script');
         script.id = scriptId;
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapJaci`;
+        // CRITICAL UPDATE: Añadido `&loading=async` para eliminar el warning de consola y mejorar performance
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapJaci&loading=async`;
         script.async = true;
         script.defer = true;
         

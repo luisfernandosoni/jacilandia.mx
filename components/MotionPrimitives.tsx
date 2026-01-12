@@ -112,9 +112,13 @@ export const OptimizedImage: React.FC<{
     
     const cleanPath = src.replace('https://assets.jacilandia.mx', '');
     const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+    
+    // Si la URL es externa (no jacilandia.mx), la usamos tal cual.
+    // IMPORTANTE: Codificamos la URL fuente para asegurar que los caracteres especiales (como comas en Google Photos)
+    // no rompan el parsing del atributo srcset del navegador.
     const sourceImage = src.includes('jacilandia.mx') ? `https://assets.jacilandia.mx${finalPath}` : src;
     
-    return `${baseTransform}${options}/${sourceImage}`;
+    return `${baseTransform}${options}/${encodeURIComponent(sourceImage)}`;
   }, [src, perf, objectFit]);
 
   const placeholderUrl = useMemo(() => getTransformUrl(30, 20), [getTransformUrl]);
