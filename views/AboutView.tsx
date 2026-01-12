@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ViewContainer, ScrollReveal, InteractionCard, GlassBadge, OptimizedImage, FloatingMonster } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
@@ -15,8 +15,15 @@ export const AboutView: React.FC = () => {
 
       <ViewContainer className="pt-20 lg:pt-32 pb-40">
         
-        {/* SECTION 1: FOUNDER HERO */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center mb-40">
+        {/* NUESTRA HISTORIA BADGE - Movido arriba del grid para permitir alineación perfecta abajo */}
+        <div className="flex justify-start mb-12 lg:mb-16">
+          <ScrollReveal>
+            <GlassBadge icon="history_edu" colorClass="text-jaci-purple">Nuestra Historia</GlassBadge>
+          </ScrollReveal>
+        </div>
+
+        {/* SECTION 1: FOUNDER HERO - Alineación perfecta entre imagen y texto */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start mb-40">
           
           {/* Image Column */}
           <div className="lg:col-span-5 order-2 lg:order-1 relative">
@@ -58,8 +65,7 @@ export const AboutView: React.FC = () => {
           {/* Content Column */}
           <div className="lg:col-span-7 order-1 lg:order-2">
             <ScrollReveal delay={0.2}>
-              <GlassBadge icon="history_edu" colorClass="text-jaci-purple">Nuestra Historia</GlassBadge>
-              <h1 className={DESIGN_SYSTEM.typography.h1 + " mt-8 mb-8"}>
+              <h1 className={DESIGN_SYSTEM.typography.h1 + " mb-8"}>
                 La <span className="text-transparent bg-clip-text bg-gradient-to-r from-jaci-purple to-primary">mente</span> detrás.
               </h1>
               
@@ -72,21 +78,21 @@ export const AboutView: React.FC = () => {
                 </p>
               </div>
 
-              {/* Stats Grid - ORDEN REESTABLECIDO: Xalapa en la última tarjeta */}
+              {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-12">
                 <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-jaci-green/20 transition-all duration-500 group/stat flex flex-col min-w-0 overflow-hidden">
                   <span className="material-symbols-outlined text-4xl text-jaci-green mb-6 filled group-hover/stat:scale-110 transition-transform">trending_up</span>
-                  <h4 className="font-black font-display text-slate-900 text-[clamp(1.1rem,2.5vw,1.5rem)] mb-4 leading-tight tracking-tight break-words hyphens-auto">Resultados Reales</h4>
+                  <h4 className="font-black font-display text-slate-900 text-[clamp(1.1rem,2.5vw,1.5rem)] mb-4 leading-tight tracking-tight break-words hyphens-auto text-balance">Resultados Reales</h4>
                   <p className="text-sm text-slate-600 font-medium font-body leading-relaxed">Más de 2,000 niños han desbloqueado su máximo potencial con nosotros.</p>
                 </div>
                 <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-jaci-purple/20 transition-all duration-500 group/stat flex flex-col min-w-0 overflow-hidden">
                   <span className="material-symbols-outlined text-4xl text-jaci-purple mb-6 filled group-hover/stat:scale-110 transition-transform">psychology_alt</span>
-                  <h4 className="font-black font-display text-slate-900 text-[clamp(1.1rem,2.5vw,1.5rem)] mb-4 leading-tight tracking-tight break-words hyphens-auto">Experta en Neurodesarrollo</h4>
+                  <h4 className="font-black font-display text-slate-900 text-[clamp(1.1rem,2.5vw,1.5rem)] mb-4 leading-tight tracking-tight break-words hyphens-auto text-balance">Experta en Neurodesarrollo</h4>
                   <p className="text-sm text-slate-600 font-medium font-body leading-relaxed">Mi enfoque mezcla la activación neuronal con el corazón, creando una generación de niños felices y capaces.</p>
                 </div>
                 <div className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-500 group/stat flex flex-col min-w-0 overflow-hidden">
                   <span className="material-symbols-outlined text-4xl text-primary mb-6 filled group-hover/stat:scale-110 transition-transform">emoji_events</span>
-                  <h4 className="font-black font-display text-slate-900 text-[clamp(1.1rem,2.5vw,1.5rem)] mb-4 leading-tight tracking-tight break-words hyphens-auto">Pioneros en Xalapa</h4>
+                  <h4 className="font-black font-display text-slate-900 text-[clamp(1.1rem,2.5vw,1.5rem)] mb-4 leading-tight tracking-tight break-words hyphens-auto text-balance">Pioneros en Xalapa</h4>
                   <p className="text-sm text-slate-600 font-medium font-body leading-relaxed">Creadores de un método divertido y funcional para enseñar a leer.</p>
                 </div>
               </div>

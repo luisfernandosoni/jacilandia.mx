@@ -39,41 +39,36 @@ interface LocationConfig {
 const LOCATIONS: LocationConfig[] = [
   {
     id: 'centro',
-    name: 'Ávila Camacho',
-    label: 'Sucursal Centro',
+    name: 'Sucursal Centro',
+    label: 'Ávila Camacho',
     color: DESIGN_SYSTEM.colors.primary,
     softColor: 'bg-primary-soft',
     address: 'Av. Manuel Ávila Camacho 33',
     subtext: 'Zona Centro, 91000 Xalapa-Enríquez, Ver.',
     masterUrl: 'https://maps.app.goo.gl/xUHCvBgKd2Rddjun9',
     embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3761.343513689239!2d-96.927163023955!3d19.526844941320496!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85db321946399c0d%3A0xb306129188e99e43!2sAv.%20Manuel%20%C3%81vila%20Camacho%2033%2C%20Zona%20Centro%2C%20Centro%2C%2091000%20Xalapa-Enr%C3%ADquez%2C%20Ver.!5e0!3m2!1sen!2smx!4v1710000000000!5m2!1sen!2smx',
-    // Coordenadas exactas extraídas del link: @19.5277903,-96.9263094
     coordinates: { lat: 19.5277903, lng: -96.9263094 },
-    // Heading 207.86h según URL
     pov: { heading: 207.86, pitch: 0 },
     panoId: 'eyodG-vx09zeo-Gz8qQARQ',
     fallbackImage: 'https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=eyodG-vx09zeo-Gz8qQARQ&cb_client=search.gws-prod.gps&w=1200&h=800&yaw=207.86&pitch=0&thumbfov=90'
   },
   {
     id: 'americas',
-    name: 'Av. Américas',
-    label: 'Sucursal Américas',
+    name: 'Sucursal Américas',
+    label: 'Dos de Abril',
     color: DESIGN_SYSTEM.colors.yellow,
     softColor: 'bg-jaci-yellow-soft',
     address: 'Av. Américas 313',
     subtext: 'Dos de Abril, 91030 Xalapa-Enríquez, Ver.',
     masterUrl: 'https://maps.app.goo.gl/9qz1tSqh8Eyec5eD9',
     embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3761.161476579973!2d-96.92383852395484!3d19.53488874112276!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85db321045996023%3A0xc343453303c7336e!2sAv.%20Am%C3%A9ricas%20313%2C%20Dos%20de%20Abril%2C%2091030%20Xalapa-Enr%C3%ADquez%2C%20Ver.!5e0!3m2!1sen!2smx!4v1710000000000!5m2!1sen!2smx',
-    // Coordenadas exactas extraídas del link: @19.5361253,-96.9127322
     coordinates: { lat: 19.5361253, lng: -96.9127322 },
-    // Heading 43.44h según URL
     pov: { heading: 43.44, pitch: 0 },
     panoId: '8xATB9rNU3yfDiqaNr4NoQ',
     fallbackImage: 'https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=8xATB9rNU3yfDiqaNr4NoQ&cb_client=search.gws-prod.gps&w=1200&h=800&yaw=43.44&pitch=0&thumbfov=90'
   }
 ];
 
-// Componente individual de StreetView con manejo de estado robusto
 const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hasError, setHasError] = useState(false);
@@ -86,7 +81,7 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
       const panorama = new window.google.maps.StreetViewPanorama(containerRef.current, {
         position: location.coordinates,
         pov: location.pov,
-        pano: location.panoId, // Usamos el ID específico si existe
+        pano: location.panoId,
         zoom: 0,
         disableDefaultUI: true,
         addressControl: false,
@@ -101,38 +96,28 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
         clickToGo: true,
       });
 
-      // Verificamos si realmente cargó datos del panorama
       panorama.addListener('status_changed', () => {
         const status = panorama.getStatus();
         if (status === 'OK') {
           setIsLoading(false);
         } else {
-          console.warn(`Street View data not found for ${location.id}: ${status}`);
           setHasError(true);
         }
       });
     } catch (error) {
-      console.error("Error initializing panorama:", error);
       setHasError(true);
     }
   }, [location]);
 
   useEffect(() => {
-    // 1. Verificar API Key
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
-      console.warn("⚠️ VITE_GOOGLE_MAPS_API_KEY no encontrada. Usando modo fallback.");
       setHasError(true);
       return;
     }
 
-    // 2. Manejador global de error de autenticación (definido por Google)
-    window.gm_authFailure = () => {
-      console.error("Google Maps Auth Failure detected.");
-      setHasError(true);
-    };
+    window.gm_authFailure = () => setHasError(true);
 
-    // 3. Cargar Script si no existe
     if (window.google && window.google.maps) {
       initPanorama();
     } else {
@@ -140,16 +125,10 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
       if (!document.getElementById(scriptId)) {
         const script = document.createElement('script');
         script.id = scriptId;
-        // CRITICAL UPDATE: Añadido `&loading=async` para eliminar el warning de consola y mejorar performance
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapJaci&loading=async`;
         script.async = true;
         script.defer = true;
-        
-        // Callback global
-        window.initMapJaci = () => {
-          window.dispatchEvent(new Event('google-maps-ready'));
-        };
-        
+        window.initMapJaci = () => window.dispatchEvent(new Event('google-maps-ready'));
         script.onerror = () => setHasError(true);
         document.head.appendChild(script);
       }
@@ -182,7 +161,6 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
           <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-500 rounded-full animate-spin" />
         </div>
       )}
-      {/* Overlay para mejorar legibilidad de textos sobre el mapa */}
       <div className="absolute inset-0 pointer-events-none z-20 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
     </div>
   );
@@ -195,13 +173,13 @@ export const LocationsView: React.FC = () => {
         {/* Header Section */}
         <div className="text-center max-w-3xl mx-auto mb-24 flex flex-col items-center">
           <ScrollReveal>
-            <GlassBadge icon="distance">Campus Xalapa</GlassBadge>
+            <GlassBadge icon="child_care" colorClass="text-primary">Nuestras Sedes</GlassBadge>
             <h1 className={DESIGN_SYSTEM.typography.h1 + " mt-6"}>
-              Nuestras sedes en <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-jaci-purple">JACI</span>
+              Dónde sucede la <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-jaci-purple">magia</span>
             </h1>
             <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
-              Ubicaciones estratégicas diseñadas bajo la neuroarquitectura para potenciar el aprendizaje y la seguridad de tus hijos.
+              Espacios pensados para que tus hijos exploren con total libertad y seguridad en el corazón de Xalapa.
             </p>
           </ScrollReveal>
         </div>
@@ -224,14 +202,6 @@ export const LocationsView: React.FC = () => {
                         <span className={DESIGN_SYSTEM.typography.label + " !text-slate-800"}>{loc.label}</span>
                       </div>
                     </div>
-
-                    {/* Indicador de Interactividad */}
-                    <div className="absolute bottom-4 right-4 z-30 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="bg-black/50 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[10px]">360</span>
-                        Explorar
-                      </div>
-                    </div>
                   </div>
                   
                   <div className="p-8 md:p-10 flex flex-col flex-1 gap-10">
@@ -241,14 +211,14 @@ export const LocationsView: React.FC = () => {
                         <div className={`size-10 rounded-xl ${loc.softColor} flex items-center justify-center shrink-0`}>
                           <span className="material-symbols-outlined filled" style={{ color: loc.color }}>location_on</span>
                         </div>
-                        <p className="text-slate-600 font-body text-base leading-relaxed">
-                          <span className="font-bold text-slate-900 block text-lg mb-1">{loc.address}</span>
-                          {loc.subtext}
-                        </p>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-900 text-lg mb-1 leading-tight">{loc.address}</span>
+                          <span className="text-slate-500 font-body text-sm leading-relaxed">{loc.subtext}</span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Static Map Container (Fallback/Contexto) */}
+                    {/* Static Map Container */}
                     <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border-4 border-white shadow-sm group/map">
                       {/* Master Link Overlay */}
                       <a 
