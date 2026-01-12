@@ -63,11 +63,9 @@ const LOCATIONS: LocationConfig[] = [
 
 const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isApiLoaded, setIsApiLoaded] = useState(false);
   const [isLive, setIsLive] = useState(false);
   const [hasError, setHasError] = useState(false);
   
-  // Usamos useInView para detectar cuándo el usuario se acerca a la card
   const isInView = useInView(containerRef, { margin: "200px 0px", once: true });
 
   const initPanorama = useCallback(() => {
@@ -94,72 +92,68 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
 
       panorama.addListener('status_changed', () => {
         if (panorama.getStatus() === 'OK') {
-          // Pequeño delay adicional para asegurar que el canvas se pintó
-          setTimeout(() => setIsLive(true), 150);
+          // Fade-in controlado tras renderizado exitoso
+          setTimeout(() => setIsLive(true), 200);
         } else {
           setHasError(true);
         }
       });
     } catch (error) {
+      console.error("StreetView Init Error:", error);
       setHasError(true);
     }
   }, [location]);
 
   useEffect(() => {
-    // Solo disparamos la carga si el componente está en el viewport
-    // y después de un delay que permita que las animaciones de entrada terminen (stutter prevention)
-    if (!isInView || isApiLoaded) return;
+    if (!isInView) return;
 
     const timer = setTimeout(() => {
-      // Fix: TypeScript error 'Property env does not exist on type ImportMeta'.
-      // Vite handles import.meta.env at build-time. We suppress this check to allow compilation.
-      // @ts-ignore
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      if (!apiKey) {
-        setHasError(true);
+      // 1. Verificar si ya existe el objeto maps
+      if (window.google?.maps) {
+        initPanorama();
         return;
       }
 
-      window.gm_authFailure = () => setHasError(true);
+      // 2. Definir la función de retorno global antes de cargar el script
+      window.initMapJaci = () => {
+        window.dispatchEvent(new Event('google-maps-ready'));
+      };
 
-      const loadScript = () => {
-        if (window.google?.maps) {
-          setIsApiLoaded(true);
-          initPanorama();
+      // 3. Suscribirse al evento de "Listo"
+      window.addEventListener('google-maps-ready', () => {
+        initPanorama();
+      }, { once: true });
+
+      // 4. Inyectar script si no existe
+      const scriptId = 'google-maps-loader';
+      if (!document.getElementById(scriptId)) {
+        // Obtenemos API Key (Soporte para múltiples fuentes de env)
+        // @ts-ignore
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || process.env.API_KEY;
+        
+        if (!apiKey) {
+          console.error("Google Maps API Key missing");
+          setHasError(true);
           return;
         }
 
-        const scriptId = 'google-maps-loader';
-        if (!document.getElementById(scriptId)) {
-          const script = document.createElement('script');
-          script.id = scriptId;
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async`;
-          script.async = true;
-          script.defer = true;
-          window.initMapJaci = () => {
-            window.dispatchEvent(new Event('google-maps-ready'));
-          };
-          script.onerror = () => setHasError(true);
-          document.head.appendChild(script);
-        }
-        
-        const handleReady = () => {
-          setIsApiLoaded(true);
-          initPanorama();
-        };
-
-        window.addEventListener('google-maps-ready', handleReady, { once: true });
-      };
-
-      loadScript();
-    }, 800); // 800ms de buffer para dejar que Framer Motion respire
+        const script = document.createElement('script');
+        script.id = scriptId;
+        // CRÍTICO: Se añade &callback=initMapJaci para que Google llame a nuestra función
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapJaci&loading=async`;
+        script.async = true;
+        script.defer = true;
+        script.onerror = () => setHasError(true);
+        document.head.appendChild(script);
+      }
+    }, 800); // Buffer para animaciones
 
     return () => clearTimeout(timer);
-  }, [isInView, isApiLoaded, initPanorama]);
+  }, [isInView, initPanorama]);
 
   return (
     <div className="w-full h-full relative bg-slate-100 overflow-hidden">
-      {/* CAPA 1: Fallback Estático (Siempre presente como base para evitar saltos) */}
+      {/* CAPA 1: Fallback Estático */}
       <div className="absolute inset-0 z-0">
         <OptimizedImage 
           src={location.fallbackImage} 
@@ -171,19 +165,25 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
       </div>
 
-      {/* CAPA 2: Street View Interactivo (Fade-in cuando está listo) */}
+      {/* CAPA 2: Street View Interactivo */}
       <div 
         ref={containerRef} 
-        className={`w-full h-full absolute inset-0 z-10 transition-opacity duration-700 ease-in-out ${isLive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+        className={`w-full h-full absolute inset-0 z-10 transition-opacity duration-1000 ease-in-out ${isLive ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
       />
 
-      {/* Loader sutil solo si estamos intentando cargar */}
-      {isInView && !isLive && !hasError && (
-        <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-          <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          <span className="text-[8px] font-black uppercase tracking-widest text-white/60">Activando Vista...</span>
-        </div>
-      )}
+      {/* Loader o Error State */}
+      <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2">
+        {hasError ? (
+          <div className="bg-red-500/90 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+             <span className="text-[8px] font-black uppercase tracking-widest text-white">Error de Carga</span>
+          </div>
+        ) : isInView && !isLive && (
+          <div className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+            <div className="w-2 h-2 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span className="text-[8px] font-black uppercase tracking-widest text-white/60">Activando...</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -240,7 +240,7 @@ export const LocationsView: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Static Map Container - Cargado solo en interacción */}
+                    {/* Static Map Container */}
                     <div className="relative w-full aspect-[21/9] rounded-[2rem] overflow-hidden border-4 border-white shadow-soft group/map">
                       <a 
                         href={loc.masterUrl}
