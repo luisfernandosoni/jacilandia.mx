@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 // Fix: Removed ParallaxSection import as it is not exported from MotionPrimitives
-import { ScrollReveal, InteractionCard, ViewContainer, GlassBadge, Magnetic, FloatingMonster } from '../components/MotionPrimitives';
+import { ScrollReveal, InteractionCard, ViewContainer, GlassBadge, Magnetic, FloatingMonster, OptimizedImage } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
 
 export const MethodologyView: React.FC = () => {
@@ -26,7 +26,7 @@ export const MethodologyView: React.FC = () => {
               </h1>
               <p className={DESIGN_SYSTEM.typography.body}>
                 En JACI, no solo enseñamos materias; cultivamos la <span className="text-slate-900 font-bold underline decoration-jaci-yellow decoration-4 underline-offset-4">curiosidad infinita</span>. 
-                Transformamos cada aula en un ecosistema de descubrimiento a través de nuestro Método Cromático.
+                Transformamos cada aula en un ecosistema de descubrimiento a través de nuestro Método JACI.
               </p>
             </ScrollReveal>
           </motion.div>
@@ -59,69 +59,101 @@ export const MethodologyView: React.FC = () => {
           </div>
         </div>
 
-        {/* SECTION 2: DNA VALUES (From AboutView) */}
+        {/* SECTION 2: DNA VALUES (Updated with specific images and logical descriptions) */}
         <div className="mb-48">
           <div className="text-center mb-20 flex flex-col items-center">
             <ScrollReveal>
               <h2 className={DESIGN_SYSTEM.typography.h2}>Nuestro <span className="text-jaci-purple">ADN</span></h2>
               <p className={DESIGN_SYSTEM.typography.body + " mt-6 max-w-2xl mx-auto"}>
-                Cuatro pilares que sostienen nuestro compromiso con el futuro de tus hijos.
+                Cuatro pilares fundamentales que integran ciencia, emoción y conocimiento para potenciar el genio de tus hijos.
               </p>
             </ScrollReveal>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             <ScrollReveal delay={0.1}>
-              <InteractionCard borderColor={DESIGN_SYSTEM.colors.primary} className="h-full">
+              <InteractionCard borderColor={DESIGN_SYSTEM.colors.primary} className="h-full group">
                 <div className="flex flex-col gap-6 h-full">
-                  <div className="w-14 h-14 rounded-2xl bg-primary-soft text-primary flex items-center justify-center border border-primary/20">
-                    <span className="material-symbols-outlined text-2xl filled">psychology</span>
+                  <div className="relative h-40 w-full mb-2 overflow-hidden rounded-2xl bg-primary/5 p-4 flex items-center justify-center">
+                    <OptimizedImage 
+                      src="https://assets.jacilandia.mx/JACI_Activación Neuronal.png" 
+                      alt="Activación Neuronal"
+                      className="w-full h-full group-hover:scale-110 transition-transform duration-700"
+                      aspectRatio="aspect-square"
+                      objectFit="contain"
+                    />
                   </div>
                   <div>
-                    <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Mente Ágil</h4>
-                    <p className="text-slate-500 text-sm leading-relaxed font-body">Estimulamos el pensamiento crítico y la curiosidad innata desde los 3 años.</p>
+                    <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Activación Neuronal</h4>
+                    <p className="text-slate-500 text-sm leading-relaxed font-body">
+                      Estimulamos las conexiones cerebrales a través del movimiento y retos cognitivos diseñados para despertar la agilidad mental desde etapas tempranas.
+                    </p>
                   </div>
                 </div>
               </InteractionCard>
             </ScrollReveal>
 
             <ScrollReveal delay={0.2}>
-              <InteractionCard borderColor={DESIGN_SYSTEM.colors.pink} className="h-full">
+              <InteractionCard borderColor={DESIGN_SYSTEM.colors.pink} className="h-full group">
                 <div className="flex flex-col gap-6 h-full">
-                  <div className="w-14 h-14 rounded-2xl bg-jaci-pink-soft text-jaci-pink flex items-center justify-center border border-jaci-pink/20">
-                    <span className="material-symbols-outlined text-2xl filled">favorite</span>
+                  <div className="relative h-40 w-full mb-2 overflow-hidden rounded-2xl bg-jaci-pink/5 p-4 flex items-center justify-center">
+                    <OptimizedImage 
+                      src="https://assets.jacilandia.mx/JACI_Desarrollo Emocional.png" 
+                      alt="Desarrollo Emocional"
+                      className="w-full h-full group-hover:scale-110 transition-transform duration-700"
+                      aspectRatio="aspect-square"
+                      objectFit="contain"
+                    />
                   </div>
                   <div>
-                    <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Corazón Empático</h4>
-                    <p className="text-slate-500 text-sm leading-relaxed font-body">La inteligencia emocional y la gestión de sentimientos es nuestra prioridad #1.</p>
+                    <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Desarrollo Emocional</h4>
+                    <p className="text-slate-500 text-sm leading-relaxed font-body">
+                      Un entorno seguro donde aprenden a identificar y gestionar sus sentimientos, construyendo una inteligencia emocional sólida y una autoestima blindada.
+                    </p>
                   </div>
                 </div>
               </InteractionCard>
             </ScrollReveal>
 
             <ScrollReveal delay={0.3}>
-              <InteractionCard borderColor={DESIGN_SYSTEM.colors.yellow} className="h-full">
+              <InteractionCard borderColor={DESIGN_SYSTEM.colors.yellow} className="h-full group">
                 <div className="flex flex-col gap-6 h-full">
-                  <div className="w-14 h-14 rounded-2xl bg-jaci-yellow-soft text-jaci-yellow flex items-center justify-center border border-jaci-yellow/20">
-                    <span className="material-symbols-outlined text-2xl filled">rocket_launch</span>
+                  <div className="relative h-40 w-full mb-2 overflow-hidden rounded-2xl bg-jaci-yellow/5 p-4 flex items-center justify-center">
+                    <OptimizedImage 
+                      src="https://assets.jacilandia.mx/JACI_Español.png" 
+                      alt="Español"
+                      className="w-full h-full group-hover:scale-110 transition-transform duration-700"
+                      aspectRatio="aspect-square"
+                      objectFit="contain"
+                    />
                   </div>
                   <div>
-                    <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Impulso Creativo</h4>
-                    <p className="text-slate-500 text-sm leading-relaxed font-body">Sin miedo al error; premiamos la experimentación y la resolución lúdica.</p>
+                    <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Habilidades de Lenguaje</h4>
+                    <p className="text-slate-500 text-sm leading-relaxed font-body">
+                      Dominio del español y lectura acelerada. Transformamos las letras en herramientas de comunicación poderosa y puertas abiertas a mundos infinitos.
+                    </p>
                   </div>
                 </div>
               </InteractionCard>
             </ScrollReveal>
 
             <ScrollReveal delay={0.4}>
-              <InteractionCard borderColor={DESIGN_SYSTEM.colors.purple} className="h-full">
+              <InteractionCard borderColor={DESIGN_SYSTEM.colors.purple} className="h-full group">
                 <div className="flex flex-col gap-6 h-full">
-                  <div className="w-14 h-14 rounded-2xl bg-jaci-purple-soft text-jaci-purple flex items-center justify-center border border-jaci-purple/20">
-                    <span className="material-symbols-outlined text-2xl filled">groups</span>
+                  <div className="relative h-40 w-full mb-2 overflow-hidden rounded-2xl bg-jaci-purple/5 p-4 flex items-center justify-center">
+                    <OptimizedImage 
+                      src="https://assets.jacilandia.mx/JACI_Matématicas.png" 
+                      alt="Matemáticas"
+                      className="w-full h-full group-hover:scale-110 transition-transform duration-700"
+                      aspectRatio="aspect-square"
+                      objectFit="contain"
+                    />
                   </div>
                   <div>
-                    <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Comunidad Viva</h4>
-                    <p className="text-slate-500 text-sm leading-relaxed font-body">Un ecosistema de colaboración constante entre guías, padres y alumnos.</p>
+                    <h4 className="text-xl font-black font-display text-slate-900 mb-3 tracking-tight">Pensamiento Lógico</h4>
+                    <p className="text-slate-500 text-sm leading-relaxed font-body">
+                      Matemáticas divertidas y cálculo mental ágil. Resolvemos problemas reales con la seguridad de quien domina los números de forma natural y lúdica.
+                    </p>
                   </div>
                 </div>
               </InteractionCard>
@@ -135,7 +167,7 @@ export const MethodologyView: React.FC = () => {
               <div className="flex flex-col lg:flex-row items-center justify-center gap-8 md:gap-12 text-center lg:text-left">
                 <div className="flex flex-col items-center lg:items-start max-w-3xl">
                   <GlassBadge icon="palette" colorClass="text-jaci-purple">La Práctica</GlassBadge>
-                  <h2 className={DESIGN_SYSTEM.typography.h2}>El <span className="text-jaci-yellow">Método</span> Cromático</h2>
+                  <h2 className={DESIGN_SYSTEM.typography.h2}>El <span className="text-jaci-yellow">Método</span> JACI</h2>
                   <p className={DESIGN_SYSTEM.typography.body + " mt-8"}>
                       Cada área del desarrollo se nutre con experiencias vivas. No memorizamos conceptos sueltos, construimos significados reales.
                   </p>
