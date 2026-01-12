@@ -10,12 +10,12 @@ export const HomeView: React.FC = () => {
 
   return (
     <div className="relative w-full overflow-x-hidden min-h-[85vh] flex flex-col justify-center">
-      {/* Squad Guardians - Persistent positioning */}
+      {/* Squad Guardians - Persistent positioning & HIGH PRIORITY LOADING */}
       <div className="absolute top-[12%] left-2 md:left-[10%] z-0 pointer-events-none opacity-40 md:opacity-100">
-        <FloatingMonster monster="POMPIN" size="size-28 md:size-48" delay={0.5} />
+        <FloatingMonster monster="POMPIN" size="size-28 md:size-48" delay={0.5} priority={true} />
       </div>
       <div className="absolute bottom-[20%] right-2 md:right-[12%] z-0 pointer-events-none opacity-40 md:opacity-100">
-        <FloatingMonster monster="GRAPPY" size="size-36 md:size-56" delay={1} />
+        <FloatingMonster monster="GRAPPY" size="size-36 md:size-56" delay={1} priority={true} />
       </div>
 
       <ViewContainer className="flex flex-col items-center text-center relative z-10 pt-12 pb-24">
@@ -35,6 +35,8 @@ export const HomeView: React.FC = () => {
                  transition={DESIGN_SYSTEM.springs.identity}
                  src="https://assets.jacilandia.mx/JACI_Color.png" 
                  alt="JACI Icon" 
+                 // @ts-ignore
+                 fetchpriority="high"
                  className="w-full h-full object-contain relative z-10"
                  style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
                />

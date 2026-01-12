@@ -1,5 +1,5 @@
 
-import React, { useRef, memo, useCallback, useState, useMemo } from 'react';
+import React, { useRef, memo, useCallback, useState, useMemo, useEffect } from 'react';
 import { motion, HTMLMotionProps, useSpring, useScroll, useTransform, useReducedMotion, useInView, useVelocity } from 'framer-motion';
 import { DESIGN_SYSTEM, PerformanceProfile, JACI_SQUAD } from '../types';
 import { usePerformance } from '../App';
@@ -17,7 +17,7 @@ export const ViewContainer: React.FC<ViewContainerProps> = memo(({ children, cla
       hidden: { opacity: 0 },
       visible: {
         opacity: 1,
-        transition: { staggerChildren: 0.03, delayChildren: 0.01 }
+        transition: { staggerChildren: 0.05, delayChildren: 0.01 }
       }
     }}
     style={{ 
@@ -92,7 +92,7 @@ export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children,
   );
 });
 
-// --- ULTRA-FAST CLOUDFLARE IMAGES INTEGRATION ---
+// --- CLOUDFLARE EDGE TRANSFORMER ENGINE ---
 export const OptimizedImage: React.FC<{ 
   src: string; 
   alt: string; 
@@ -100,33 +100,46 @@ export const OptimizedImage: React.FC<{
   aspectRatio?: string;
   priority?: 'high' | 'low' | 'auto';
   objectFit?: 'cover' | 'contain';
-}> = memo(({ src, alt, className = "", aspectRatio = "aspect-[16/10]", priority = "auto", objectFit = 'cover' }) => {
+  sizes?: string; // Atributo manual para ayudar al navegador
+}> = memo(({ src, alt, className = "", aspectRatio = "aspect-[16/10]", priority = "auto", objectFit = 'cover', sizes }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const perf = usePerformance();
   const ref = useRef(null);
-  const isInView = useInView(ref, { margin: "25% 0px", once: true });
+  // Margin expandido al 50% para empezar a cargar antes de que el usuario llegue
+  const isInView = useInView(ref, { margin: "50% 0px", once: true }); 
 
-  // Configuración de resolución ultra-baja para el preview (LIP)
   const getTransformUrl = useCallback((width: number, blur: number = 0) => {
-    // IMPORTANTE: Para que Cloudflare cuente las transformaciones, la petición DEBE ser relativa al dominio principal.
-    // Esto hace que el Worker de Cloudflare intercepte /cdn-cgi/image/
     const baseTransform = "/cdn-cgi/image/";
-    const quality = width < 100 ? 30 : (perf === PerformanceProfile.LITE ? 60 : 85);
+    // Si la pantalla es pequeña (width < 600), forzamos calidad un poco menor para velocidad extrema
+    const quality = width < 600 ? 75 : (perf === PerformanceProfile.LITE ? 60 : 85);
     const blurParam = blur > 0 ? `,blur=${blur}` : '';
     const options = `width=${width},quality=${quality},format=auto,fit=${objectFit}${blurParam}`;
     
-    // Extraemos solo el path para evitar DNS lookup adicional si es nuestro dominio de assets
     const cleanPath = src.replace('https://assets.jacilandia.mx', '');
     const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
-    
-    // Si la URL es de assets.jacilandia.mx, la servimos a través del proxy del dominio actual
     const sourceImage = src.includes('jacilandia.mx') ? `https://assets.jacilandia.mx${finalPath}` : src;
     
     return `${baseTransform}${options}/${sourceImage}`;
   }, [src, perf, objectFit]);
 
-  // Micro-previo para carga instantánea
-  const placeholderUrl = useMemo(() => getTransformUrl(50, 15), [getTransformUrl]);
+  // LIP (Low Intensity Preview): Imagen de 30px, Blur de 20px. Pesa ~400 bytes.
+  const placeholderUrl = useMemo(() => getTransformUrl(30, 20), [getTransformUrl]);
+  
+  // SrcSet Generado Inteligentemente
+  // El navegador usa esto para elegir QUÉ descargar basándose en el ancho de SU ventana y la densidad de píxeles (DPR).
+  const srcSet = useMemo(() => {
+    return `
+      ${getTransformUrl(400)} 400w,
+      ${getTransformUrl(640)} 640w,
+      ${getTransformUrl(960)} 960w,
+      ${getTransformUrl(1280)} 1280w,
+      ${getTransformUrl(1920)} 1920w
+    `;
+  }, [getTransformUrl]);
+
+  // Sizes por defecto si no se proveen. 
+  // "Si la pantalla es menor a 768px, la imagen ocupa el 100% del ancho. Si es mayor, ocupa el 50% (diseño a 2 columnas típico)"
+  const defaultSizes = sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw";
 
   return (
     <div 
@@ -134,40 +147,38 @@ export const OptimizedImage: React.FC<{
       className={`relative overflow-hidden ${aspectRatio} bg-slate-100 ${className}`} 
       style={{ 
         contain: 'paint',
+        // Evita Layout Shift reservando el espacio exacto
         aspectRatio: aspectRatio.includes('[') ? aspectRatio.split('-')[1].replace('[','').replace(']','') : 'auto'
       }}
     >
-      {/* 1. Micro-preview Layer (Carga en <100ms) */}
+      {/* 1. Instant Blur Layer (Base64 placeholder o tiny fetch) */}
       <div 
-        className="absolute inset-0 z-0 transition-opacity duration-1000"
+        className="absolute inset-0 z-0 transition-opacity duration-700 ease-out"
         style={{ 
           backgroundImage: `url('${placeholderUrl}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'scale(1.1)', // Evita bordes blancos en el blur
+          filter: 'scale(1.1)', // Esconde bordes del blur
           opacity: isLoaded ? 0 : 1
         }}
+        aria-hidden="true"
       />
 
-      {/* 2. Shimmer Overlay (Opcional para High Perf) */}
-      {!isLoaded && perf === PerformanceProfile.HIGH && (
-        <div className="absolute inset-0 z-1 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-      )}
-
-      {/* 3. Main Image Layer */}
-      {isInView && (
+      {/* 2. Main Image Layer */}
+      {/* Solo renderizamos el tag <img> si está cerca del viewport (Lazy) O si es prioridad alta (Eager) */}
+      {(isInView || priority === 'high') && (
         <motion.img
-          src={getTransformUrl(1200)}
-          srcSet={`${getTransformUrl(400)} 400w, ${getTransformUrl(800)} 800w, ${getTransformUrl(1200)} 1200w, ${getTransformUrl(1600)} 1600w`}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          src={getTransformUrl(1280)} // Fallback para navegadores viejos
+          srcSet={srcSet}
+          sizes={defaultSizes}
           alt={alt}
           onLoad={() => setIsLoaded(true)}
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoaded ? 1 : 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.4, ease: "easeOut" }} // Transición rápida
           className={`relative z-10 w-full h-full object-${objectFit} transform-gpu`}
           loading={priority === 'high' ? 'eager' : 'lazy'}
-          decoding="async"
+          decoding="async" // Permite al navegador decodificar la imagen en otro hilo sin bloquear el scroll
           // @ts-ignore
           fetchpriority={priority}
           style={{ 
@@ -185,7 +196,8 @@ export const FloatingMonster: React.FC<{
   className?: string;
   delay?: number;
   size?: string;
-}> = memo(({ monster, className = "", delay = 0, size = "size-32" }) => {
+  priority?: boolean; // Nuevo prop para forzar carga inmediata en Home
+}> = memo(({ monster, className = "", delay = 0, size = "size-32", priority = false }) => {
   const prefersReducedMotion = useReducedMotion();
   const perf = usePerformance();
   const { scrollY } = useScroll();
@@ -201,6 +213,7 @@ export const FloatingMonster: React.FC<{
         src={JACI_SQUAD[monster]} 
         alt="" 
         className={`${size} object-contain ${className} drop-shadow-md`} 
+        loading={priority ? "eager" : "lazy"}
       />
     );
   }
@@ -220,7 +233,8 @@ export const FloatingMonster: React.FC<{
          className="w-full h-full !bg-transparent"
          aspectRatio="aspect-square"
          objectFit="contain"
-         priority={delay === 0 ? 'high' : 'auto'}
+         priority={priority ? 'high' : 'auto'}
+         sizes={`(max-width: 768px) 150px, 300px`} // Tamaños muy específicos para monstruos
        />
     </motion.div>
   );

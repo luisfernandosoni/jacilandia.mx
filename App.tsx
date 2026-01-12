@@ -1,7 +1,7 @@
 
 import React, { useState, useTransition, Suspense, useCallback, memo, lazy, createContext, useContext, useDeferredValue, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ViewState, DESIGN_SYSTEM, PerformanceProfile, VIEW_THEMES } from './types';
+import { ViewState, DESIGN_SYSTEM, PerformanceProfile, VIEW_THEMES, JACI_SQUAD } from './types';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 
@@ -59,6 +59,52 @@ export const applyAtmosphere = (view: ViewState) => {
   root.style.setProperty('--theme-accent', theme.accent);
 };
 
+// --- PREDICTIVE ASSET WARMER ---
+// Esta utilidad "golpea" las URLs de Cloudflare en segundo plano.
+// No descarga la imagen completa para no gastar datos, solo fuerza a Cloudflare a generar la transformación.
+const warmUpAssets = (perf: PerformanceProfile) => {
+  if (typeof window === 'undefined') return;
+
+  // Lista de Assets Críticos de otras vistas que queremos pre-calentar
+  const CRITICAL_ASSETS = [
+    JACI_SQUAD.GULY, // Metodología
+    JACI_SQUAD.LY,   // Metodología
+    JACI_SQUAD.POMPIN, // About / Levels
+    JACI_SQUAD.PEPE, // Levels
+    "https://assets.jacilandia.mx/JessydeJACI.jpg" // About
+  ];
+
+  // Helper para generar URL de Cloudflare
+  const getUrl = (src: string, width: number) => {
+    const cleanPath = src.replace('https://assets.jacilandia.mx', '');
+    const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+    const sourceImage = src.includes('jacilandia.mx') ? `https://assets.jacilandia.mx${finalPath}` : src;
+    const quality = perf === PerformanceProfile.LITE ? 60 : 75; // Calidad media para el warm-up
+    return `/cdn-cgi/image/width=${width},quality=${quality},format=auto/${sourceImage}`;
+  };
+
+  const task = () => {
+    CRITICAL_ASSETS.forEach(src => {
+      // Pre-calentamos tamaños comunes: Móvil (400) y Desktop (1280)
+      // Usamos fetch con priority: 'low' para no bloquear la red principal
+      [400, 1280].forEach(width => {
+        const url = getUrl(src, width);
+        // fetch(url, { priority: 'low', mode: 'no-cors' }).catch(() => {});
+        // Nota: new Image() es más compatible para cache warming que fetch en algunos navegadores
+        const img = new Image();
+        img.src = url; 
+        // No necesitamos adjuntarla al DOM, solo pedirla.
+      });
+    });
+  };
+
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(task, { timeout: 5000 });
+  } else {
+    setTimeout(task, 3000);
+  }
+};
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
   const [isPending, startTransition] = useTransition();
@@ -67,7 +113,6 @@ const App: React.FC = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Initial atmosphere
     applyAtmosphere(currentView);
     
     const detectPerformance = () => {
@@ -79,6 +124,9 @@ const App: React.FC = () => {
       if (memory < 4 || cores < 4 || isWeak) {
         setPerfProfile(PerformanceProfile.LITE);
         document.getElementById('mesh-bg')?.style.setProperty('display', 'none');
+      } else {
+        // Solo lanzamos el warm-up en dispositivos decentes
+        warmUpAssets(PerformanceProfile.HIGH);
       }
     };
     detectPerformance();
@@ -95,10 +143,7 @@ const App: React.FC = () => {
 
   const handleViewChange = useCallback((view: ViewState) => {
     if (currentView === view) return;
-    
-    // Smooth transition of atmosphere BEFORE the react transition for perceived speed
     applyAtmosphere(view);
-    
     startTransition(() => {
       setCurrentView(view);
     });
