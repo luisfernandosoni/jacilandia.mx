@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { ViewContainer, InteractionCard, GlassBadge, ScrollReveal, Magnetic, OptimizedImage } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
@@ -31,6 +32,7 @@ interface LocationConfig {
   embedUrl: string;
   coordinates: { lat: number; lng: number };
   pov: { heading: number; pitch: number };
+  panoId?: string; // ID específico del panorama para precisión exacta
   fallbackImage: string;
 }
 
@@ -45,9 +47,12 @@ const LOCATIONS: LocationConfig[] = [
     subtext: 'Zona Centro, 91000 Xalapa-Enríquez, Ver.',
     masterUrl: 'https://maps.app.goo.gl/xUHCvBgKd2Rddjun9',
     embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3761.343513689239!2d-96.927163023955!3d19.526844941320496!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85db321946399c0d%3A0xb306129188e99e43!2sAv.%20Manuel%20%C3%81vila%20Camacho%2033%2C%20Zona%20Centro%2C%20Centro%2C%2091000%20Xalapa-Enr%C3%ADquez%2C%20Ver.!5e0!3m2!1sen!2smx!4v1710000000000!5m2!1sen!2smx',
-    coordinates: { lat: 19.526845, lng: -96.927163 },
-    pov: { heading: 235, pitch: 5 },
-    fallbackImage: 'https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=Yj4X_pU6z_fG0oD9T-Q1g&cb_client=search.gws-prod.gps&w=1200&h=800&yaw=245&pitch=0&thumbfov=90'
+    // Coordenadas exactas extraídas del link: @19.5277903,-96.9263094
+    coordinates: { lat: 19.5277903, lng: -96.9263094 },
+    // Heading 207.86h según URL
+    pov: { heading: 207.86, pitch: 0 },
+    panoId: 'eyodG-vx09zeo-Gz8qQARQ',
+    fallbackImage: 'https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=eyodG-vx09zeo-Gz8qQARQ&cb_client=search.gws-prod.gps&w=1200&h=800&yaw=207.86&pitch=0&thumbfov=90'
   },
   {
     id: 'americas',
@@ -59,9 +64,12 @@ const LOCATIONS: LocationConfig[] = [
     subtext: 'Dos de Abril, 91030 Xalapa-Enríquez, Ver.',
     masterUrl: 'https://maps.app.goo.gl/9qz1tSqh8Eyec5eD9',
     embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3761.161476579973!2d-96.92383852395484!3d19.53488874112276!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85db321045996023%3A0xc343453303c7336e!2sAv.%20Am%C3%A9ricas%20313%2C%20Dos%20de%20Abril%2C%2091030%20Xalapa-Enr%C3%ADquez%2C%20Ver.!5e0!3m2!1sen!2smx!4v1710000000000!5m2!1sen!2smx',
-    coordinates: { lat: 19.534889, lng: -96.923839 },
-    pov: { heading: 110, pitch: 0 },
-    fallbackImage: 'https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=U4vO0u_5v_z_p_p_p_p_p&cb_client=search.gws-prod.gps&w=1200&h=800&yaw=110&pitch=0&thumbfov=90'
+    // Coordenadas exactas extraídas del link: @19.5361253,-96.9127322
+    coordinates: { lat: 19.5361253, lng: -96.9127322 },
+    // Heading 43.44h según URL
+    pov: { heading: 43.44, pitch: 0 },
+    panoId: '8xATB9rNU3yfDiqaNr4NoQ',
+    fallbackImage: 'https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=8xATB9rNU3yfDiqaNr4NoQ&cb_client=search.gws-prod.gps&w=1200&h=800&yaw=43.44&pitch=0&thumbfov=90'
   }
 ];
 
@@ -78,6 +86,7 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
       const panorama = new window.google.maps.StreetViewPanorama(containerRef.current, {
         position: location.coordinates,
         pov: location.pov,
+        pano: location.panoId, // Usamos el ID específico si existe
         zoom: 0,
         disableDefaultUI: true,
         addressControl: false,
