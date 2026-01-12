@@ -92,7 +92,7 @@ export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children,
   );
 });
 
-// --- CLOUDFLARE IMAGES INTEGRATION ENGINE ---
+// --- ULTRA-FAST CLOUDFLARE IMAGES INTEGRATION ---
 export const OptimizedImage: React.FC<{ 
   src: string; 
   alt: string; 
@@ -106,64 +106,72 @@ export const OptimizedImage: React.FC<{
   const ref = useRef(null);
   const isInView = useInView(ref, { margin: "25% 0px", once: true });
 
-  const getCloudflareUrl = useCallback((width: number) => {
-    // Si la imagen ya viene de nuestro dominio de assets, aplicamos el pipeline de redimensionamiento de Cloudflare
-    // El formato esperado para Cloudflare Images (Free/Transform) es:
-    // /cdn-cgi/image/width=X,quality=Y,format=auto,fit=Z/FULL_PATH_TO_IMAGE
-    
-    // Asumimos que assets.jacilandia.mx es el dominio configurado en Cloudflare con R2
+  // Configuración de resolución ultra-baja para el preview (LIP)
+  const getTransformUrl = useCallback((width: number, blur: number = 0) => {
+    // IMPORTANTE: Para que Cloudflare cuente las transformaciones, la petición DEBE ser relativa al dominio principal.
+    // Esto hace que el Worker de Cloudflare intercepte /cdn-cgi/image/
     const baseTransform = "/cdn-cgi/image/";
-    const quality = perf === PerformanceProfile.LITE ? 60 : 85;
-    const options = `width=${width},quality=${quality},format=auto,fit=${objectFit}`;
+    const quality = width < 100 ? 30 : (perf === PerformanceProfile.LITE ? 60 : 85);
+    const blurParam = blur > 0 ? `,blur=${blur}` : '';
+    const options = `width=${width},quality=${quality},format=auto,fit=${objectFit}${blurParam}`;
     
-    // Si la URL es externa, Cloudflare necesita la URL completa
-    // Si es interna, solo la ruta. Aquí lo manejamos de forma resiliente.
-    const cleanSrc = src.replace('https://assets.jacilandia.mx/', '');
-    const absolutePath = src.startsWith('http') ? src : `https://assets.jacilandia.mx/${cleanSrc}`;
+    // Extraemos solo el path para evitar DNS lookup adicional si es nuestro dominio de assets
+    const cleanPath = src.replace('https://assets.jacilandia.mx', '');
+    const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
     
-    return `${baseTransform}${options}/${absolutePath}`;
+    // Si la URL es de assets.jacilandia.mx, la servimos a través del proxy del dominio actual
+    const sourceImage = src.includes('jacilandia.mx') ? `https://assets.jacilandia.mx${finalPath}` : src;
+    
+    return `${baseTransform}${options}/${sourceImage}`;
   }, [src, perf, objectFit]);
 
-  const srcSet = useMemo(() => {
-    const widths = [400, 800, 1200, 1600];
-    return widths.map(w => `${getCloudflareUrl(w)} ${w}w`).join(', ');
-  }, [getCloudflareUrl]);
+  // Micro-previo para carga instantánea
+  const placeholderUrl = useMemo(() => getTransformUrl(50, 15), [getTransformUrl]);
 
   return (
     <div 
       ref={ref}
-      className={`relative overflow-hidden ${aspectRatio} bg-slate-100/50 ${className}`} 
+      className={`relative overflow-hidden ${aspectRatio} bg-slate-100 ${className}`} 
       style={{ 
         contain: 'paint',
         aspectRatio: aspectRatio.includes('[') ? aspectRatio.split('-')[1].replace('[','').replace(']','') : 'auto'
       }}
     >
-      {/* Skeleton / Placeholder de baja resolución */}
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-slate-200/50">
-          {perf === PerformanceProfile.HIGH && (
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-          )}
-        </div>
+      {/* 1. Micro-preview Layer (Carga en <100ms) */}
+      <div 
+        className="absolute inset-0 z-0 transition-opacity duration-1000"
+        style={{ 
+          backgroundImage: `url('${placeholderUrl}')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'scale(1.1)', // Evita bordes blancos en el blur
+          opacity: isLoaded ? 0 : 1
+        }}
+      />
+
+      {/* 2. Shimmer Overlay (Opcional para High Perf) */}
+      {!isLoaded && perf === PerformanceProfile.HIGH && (
+        <div className="absolute inset-0 z-1 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
       )}
 
+      {/* 3. Main Image Layer */}
       {isInView && (
         <motion.img
-          src={getCloudflareUrl(1200)}
-          srcSet={srcSet}
+          src={getTransformUrl(1200)}
+          srcSet={`${getTransformUrl(400)} 400w, ${getTransformUrl(800)} 800w, ${getTransformUrl(1200)} 1200w, ${getTransformUrl(1600)} 1600w`}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           alt={alt}
           onLoad={() => setIsLoaded(true)}
-          initial={perf === PerformanceProfile.HIGH ? { opacity: 0, scale: 1.05, filter: 'blur(10px)' } : { opacity: 0 }}
-          animate={isLoaded ? { opacity: 1, scale: 1, filter: 'blur(0px)' } : { opacity: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className={`w-full h-full object-${objectFit} transform-gpu`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isLoaded ? 1 : 0 }}
+          transition={{ duration: 0.6 }}
+          className={`relative z-10 w-full h-full object-${objectFit} transform-gpu`}
           loading={priority === 'high' ? 'eager' : 'lazy'}
           decoding="async"
-          // @ts-ignore - Atributo experimental soportado por browsers modernos
+          // @ts-ignore
           fetchpriority={priority}
           style={{ 
-            willChange: 'transform, opacity',
+            willChange: 'opacity',
             backfaceVisibility: 'hidden'
           }}
         />
@@ -187,7 +195,6 @@ export const FloatingMonster: React.FC<{
   const velocityY = useTransform(smoothVelocity, [-3000, 3000], [40, -40]);
   const velocityRotate = useTransform(smoothVelocity, [-3000, 3000], [-15, 15]);
 
-  // Usamos OptimizedImage internamente para los monstruos con fit contain
   if (perf === PerformanceProfile.LITE) {
     return (
       <img 
