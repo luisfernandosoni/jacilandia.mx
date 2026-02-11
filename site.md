@@ -6,21 +6,23 @@
 
 ## Screen Inventory
 
-| Intent            | Route                | Key Components                        |
-| :---------------- | :------------------- | :------------------------------------ |
-| Landing / Hero    | `/`                  | `HomeView`, `AtmosphereOverlay`       |
-| About Us          | `?view=ABOUT`        | `AboutView`, `TeamGrid`               |
-| Methodology       | `?view=METHODOLOGY`  | `MethodologyView`, `InteractiveSteps` |
-| Levels / Classes  | `?view=LEVELS`       | `LevelsView`, `CurriculumCards`       |
-| Pricing / Plans   | `?view=PRICING`      | `PricingView`, `ComparisonTable`      |
-| Testimonials      | `?view=TESTIMONIALS` | `TestimonialsView`, `MasonryWall`     |
-| Locations         | `?view=LOCATIONS`    | `LocationsView`, `MapDisplay`         |
-| Registration      | `?view=REGISTER`     | `RegisterView`, `MultiStepForm`       |
-| Student Dashboard | `?view=DASHBOARD`    | `DashboardView`, `ProgressTracker`    |
-| Privacy Policy    | `?view=PRIVACY`      | `PrivacyView`                         |
+| Intent            | State / Route  | Key Components                | Backend Integration          |
+| :---------------- | :------------- | :---------------------------- | :--------------------------- |
+| Landing / Hero    | `HOME`         | `HomeView`, `FloatingMonster` | -                            |
+| About Us          | `ABOUT`        | `AboutView`, `TeamGrid`       | -                            |
+| Methodology       | `METHODOLOGY`  | `MethodologyView`             | -                            |
+| Levels / Classes  | `LEVELS`       | `LevelsView`                  | -                            |
+| Pricing / Plans   | `PRICING`      | `PricingView`                 | `/api/checkout/subscription` |
+| Testimonials      | `TESTIMONIALS` | `TestimonialsView`            | -                            |
+| Locations         | `LOCATIONS`    | `LocationsView`               | -                            |
+| Registration      | `REGISTER`     | `RegisterView`, `LuciaForm`   | `/api/auth/login-dev`        |
+| Student Dashboard | `DASHBOARD`    | `DashboardView`               | `/api/drops`, `/api/user`    |
+| Downloads         | -              | `DownloadButton`              | `/api/download/:dropId`      |
+| Privacy Policy    | `PRIVACY`      | `PrivacyView`                 | -                            |
 
 ## User Flows
 
 1. **Discovery**: Home -> Levels -> Pricing -> Register.
-2. **Support**: Home -> Locations -> About.
-3. **Engagement**: Home -> Testimonials -> Methodology.
+2. **Subscription**: Pricing -> MercadoPago Checkout -> Dashboard.
+3. **Consumption**: Dashboard -> Drop Selection -> R2 Asset Download.
+4. **Authentication**: Login -> Lucia Session -> Protected Routes.

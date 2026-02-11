@@ -25,6 +25,20 @@
 - **Snappy**: `stiffness: 450, damping: 32` (UI elements, buttons).
 - **Gentle**: `stiffness: 150, damping: 25` (Background shifts).
 - **Bouncy**: `stiffness: 500, damping: 20` (Character movements/Jaci Squad).
+- **Magnetic**: `stiffness: 200, damping: 15` (Cursor attraction).
+
+## Interaction Physics
+
+- **Magnetic Pull**: `0.32` strength for premium cursor-following elements.
+- **Scroll Momentum**: Skew and scale transforms applied to text and images based on scroll velocity (via `useVelocity` and `useTransform`).
+- **Atmospheric Blending**: 1.2s cubic-bezier transition for radial gradients in the fixed mesh background.
+
+## Image Optimization (Cloudflare Images)
+
+- **LQIP (Low Quality Image Placeholder)**: 32px blurred webp versions loaded instantly as backdrops.
+- **Adaptive SrcSet**: Dynamic width and quality parameters injected via `/cdn-cgi/image/` (implemented in `OptimizedImage`).
+- **Eager Loading**: Critical hero assets warmed up during idle callbacks (`warmUpAssets`).
+- **Metadata Stripping**: `metadata=none` requested via Cloudflare for bandwidth optimization.
 
 ## Design Tokens
 
