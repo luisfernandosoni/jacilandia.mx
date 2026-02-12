@@ -167,6 +167,13 @@ const SubscriptionSchema = z.object({
   planId: z.string().optional(),
 });
 
+// --- AUTH UTILS (@auth-implementation-patterns) ---
+const getBaseUrl = (c: any) => {
+  // Use config URL or fall back to request origin for local dev/preview
+  let url = c.env.APP_URL || new URL(c.req.url).origin;
+  return url.replace(/\/$/, ""); // Normalize: remove trailing slash
+};
+
 // --- RUTAS DE AUTENTICACIÓN ---
 
 // 1. Google OAuth (Arctic)
@@ -174,7 +181,7 @@ app.get('/auth/login/google', rateLimiter(10), async (c) => {
   const google = new Google(
     c.env.GOOGLE_CLIENT_ID,
     c.env.GOOGLE_CLIENT_SECRET,
-    `${c.env.APP_URL}/api/auth/callback/google`
+    `${getBaseUrl(c)}/api/auth/callback/google`
   );
   
   const state = generateState();
@@ -214,7 +221,7 @@ app.get('/auth/callback/google', async (c) => {
   const google = new Google(
     c.env.GOOGLE_CLIENT_ID,
     c.env.GOOGLE_CLIENT_SECRET,
-    `${c.env.APP_URL}/api/auth/callback/google`
+    `${getBaseUrl(c)}/api/auth/callback/google`
   );
 
   try {

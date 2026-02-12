@@ -12,3 +12,6 @@ database_id = "f5dc1c56-f335-4803-becf-136384382cef"
 [[r2_buckets]]
 binding = "R2"
 bucket_name = "jaci-assets"
+
+[vars]
+APP_URL = "https://jacilandia.mx"
