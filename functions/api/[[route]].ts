@@ -241,7 +241,7 @@ app.get('/auth/callback/google', async (c) => {
     try {
       console.log(`[AUTH STEP] Validating auth code...`);
       tokens = await google.validateAuthorizationCode(code, codeVerifier);
-      console.log(`[AUTH STEP] Tokens received. Access Token Len: ${tokens.accessToken.length}`);
+      console.log(`[AUTH STEP] Tokens received. Access Token Len: ${tokens.accessToken().length}`);
     } catch (e: any) {
       console.error(`[AUTH ERROR] validateAuthorizationCode failed:`, e);
       throw new Error(`Token Exchange Failed: ${e.message}`);
@@ -256,11 +256,11 @@ app.get('/auth/callback/google', async (c) => {
     const sanitizeToken = (token: string) => token.replace(/[^\x20-\x7E]/g, "").trim();
     
     // Log before sanitization
-    const rawToken = tokens.accessToken;
-    console.log(`[AUTH DEBUG] Raw Token Len: ${rawToken.length}, First 5 codes: ${rawToken.split('').slice(0,5).map(c => c.charCodeAt(0))}, Last 5 codes: ${rawToken.split('').slice(-5).map(c => c.charCodeAt(0))}`);
+    const rawToken = tokens.accessToken();
+    console.log(`[AUTH DEBUG] Raw Token Len: ${rawToken.length}, First 5 codes: ${rawToken.split('').slice(0,5).map((c: string) => c.charCodeAt(0))}, Last 5 codes: ${rawToken.split('').slice(-5).map((c: string) => c.charCodeAt(0))}`);
 
     const cleanToken = sanitizeToken(rawToken);
-    console.log(`[AUTH DEBUG] Clean Token Len: ${cleanToken.length}, First 5 codes: ${cleanToken.split('').slice(0,5).map(c => c.charCodeAt(0))}, Last 5 codes: ${cleanToken.split('').slice(-5).map(c => c.charCodeAt(0))}`);
+    console.log(`[AUTH DEBUG] Clean Token Len: ${cleanToken.length}, First 5 codes: ${cleanToken.split('').slice(0,5).map((c: string) => c.charCodeAt(0))}, Last 5 codes: ${cleanToken.split('').slice(-5).map((c: string) => c.charCodeAt(0))}`);
 
     if (cleanToken.length === 0) {
        throw new Error("Access Token became empty after sanitization!");
@@ -418,7 +418,7 @@ app.post('/checkout/subscription', rateLimiter(10), async (c) => {
   const user = c.get('user');
   if (!user) return c.json({ error: "Unauthorized" }, 401);
 
-  const mp = new MP_Service(c.env.MP_ACCESS_TOKEN, c.env.MP_WEBHOOK_SECRET);
+  const mp = new MP_Service(c.env.MP_ACCESS_TOKEN.trim(), c.env.MP_WEBHOOK_SECRET.trim());
   const data = await mp.createSubscription(user.id, (user as any).email, c.env.APP_URL);
   
   if (data.init_point) {
@@ -437,7 +437,7 @@ app.post('/checkout/buy/:dropId', rateLimiter(10), async (c) => {
   const drop: any = await db.prepare("SELECT title FROM drops WHERE id = ?").bind(dropId).first();
   if (!drop) return c.json({ error: "Drop not found" }, 404);
 
-  const mp = new MP_Service(c.env.MP_ACCESS_TOKEN, c.env.MP_WEBHOOK_SECRET);
+  const mp = new MP_Service(c.env.MP_ACCESS_TOKEN.trim(), c.env.MP_WEBHOOK_SECRET.trim());
   const data = await mp.createOneOffPreference(user.id, dropId, drop.title, c.env.APP_URL);
 
   if (data.init_point) {
@@ -570,7 +570,7 @@ app.post('/webhooks/mercadopago', async (c) => {
   const dataId = body.data?.id;
   if (!dataId) return c.json({ error: "Invalid payload" }, 400);
 
-  const mp = new MP_Service(c.env.MP_ACCESS_TOKEN, c.env.MP_WEBHOOK_SECRET);
+  const mp = new MP_Service(c.env.MP_ACCESS_TOKEN.trim(), c.env.MP_WEBHOOK_SECRET.trim());
   const isValid = await mp.verifySignature(xSignature, xRequestId, dataId);
 
   if (!isValid) {
