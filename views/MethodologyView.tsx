@@ -220,8 +220,6 @@ export const MethodologyView: React.FC = () => {
                 <InteractionCard 
                   borderColor={prog.color} 
                   className="h-full group !pb-10"
-                  animate={i === 0 || i === 2 ? { scale: [1, 1.01, 1] } : {}}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <div className="flex justify-between items-start mb-6">
                     <div className="size-14 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-900 border border-slate-100">

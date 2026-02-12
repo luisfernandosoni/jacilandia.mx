@@ -31,3 +31,8 @@
 - [x] Infrastructure Verification
   - [x] Test `pages:dev` with Wrangler (Stable on port 8788)
   - [x] Verify D1 database connectivity (Bindings confirmed)
+- [x] Motion Refinement
+  - [x] Analyze "snap up" behavior in Methodology cards
+  - [x] Implement reduced range of motion in `MotionPrimitives.tsx`
+  - [x] Clean up conflicting animations in `MethodologyView.tsx`
+  - [x] Verify fluid transitions

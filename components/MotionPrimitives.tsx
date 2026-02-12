@@ -90,7 +90,7 @@ export const InteractionCard: React.FC<InteractionCardProps> = memo(({ children,
         }
       }}
       whileHover={prefersReducedMotion || !isInView || perf === PerformanceProfile.LITE ? {} : { 
-        y: -10, 
+        y: -8, 
         scale: 1.01,
         transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } 
       }}
@@ -230,7 +230,7 @@ export const FloatingMonster: React.FC<{
     >
       <motion.div
         animate={prefersReducedMotion ? {} : {
-          y: [0, -25, 0],
+          y: [0, -15, 0],
           rotate: [0, 4, -4, 0]
         }}
         transition={prefersReducedMotion ? {} : {
@@ -329,8 +329,8 @@ export const ScrollReveal: React.FC<{ children: React.ReactNode; delay?: number;
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 30 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       style={isText && perf === PerformanceProfile.HIGH && !prefersReducedMotion ? { skewY: skew, scaleY: scale } : {}}
       transition={{ ...DESIGN_SYSTEM.springs.gentle, delay, duration: 0.6 }}
       className={className}

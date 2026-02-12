@@ -7,6 +7,7 @@
 - **Cloudflare CDN Integration**: All assets should be proxied through `/cdn-cgi/image/` with quality/width parameters to ensure performance across devices.
 - **Atmospheric Transitions**: State-based transitions combined with `AnimatePresence` provide a seamless SPA feel without complex routing overhead.
 
-### Design Lessons
+### Animation & UX
 
-- **Dynamic Theming**: Modifying CSS variables on the root element (`--theme-primary`, etc.) is an efficient way to sync multiple components to a shared atmospheric state.
+- **Reveal vs Pulse**: Avoid combining continuous pulse animations with initial entrance reveals on the same element; the superposition of vectors can cause visual 'snapping' on high-refresh-rate displays.
+- **Subtle Amplitudes**: In premium interfaces, less is more. Reducing `y` offsets from 30px to 20px and floating amplitudes from 25px to 15px creates a more controlled and professional feel.
