@@ -175,12 +175,22 @@ const App: React.FC = () => {
             <AnimatePresence>
               {successMessage && (
                 <motion.div 
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 bg-slate-900 text-white rounded-full text-[0.6rem] font-black uppercase tracking-widest shadow-2xl flex items-center gap-3 border border-white/10"
+                  initial={{ opacity: 0, y: -40, scale: 0.9, filter: 'blur(20px)' }}
+                  animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, scale: 0.95, filter: 'blur(20px)', transition: { duration: 0.2 } }}
+                  transition={DESIGN_SYSTEM.springs.snappy}
+                  className="fixed top-28 left-1/2 -translate-x-1/2 z-[200] px-8 py-4 bg-white/80 backdrop-blur-2xl text-slate-900 rounded-[2rem] text-[0.7rem] font-black uppercase tracking-[0.2em] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] flex items-center gap-4 border border-white"
                 >
-                  <span className="material-symbols-outlined text-primary text-sm">stars</span>
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                    <motion.span 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: 'spring' }}
+                      className="material-symbols-outlined text-sm"
+                    >
+                      check_circle
+                    </motion.span>
+                  </div>
                   {successMessage}
                 </motion.div>
               )}

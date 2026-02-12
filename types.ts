@@ -125,3 +125,13 @@ export const DESIGN_SYSTEM = {
     magneticPull: 0.32,
   }
 } as const;
+
+export interface DatabaseUser {
+  id: string;
+  email: string;
+  google_id?: string;
+  name?: string;
+  picture?: string;
+  role?: 'admin' | 'user';
+  created_at?: number;
+}

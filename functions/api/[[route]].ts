@@ -179,7 +179,7 @@ app.get('/auth/callback/google', async (c) => {
     const lucia = c.get('lucia');
 
     // Pattern: Account Linking
-    let user = await db.prepare("SELECT * FROM users WHERE google_id = ? OR email = ?")
+    let user: any = await db.prepare("SELECT * FROM users WHERE google_id = ? OR email = ?")
       .bind(googleUser.sub, googleUser.email)
       .first();
 
@@ -196,7 +196,7 @@ app.get('/auth/callback/google', async (c) => {
         .run();
     }
 
-    const session = await lucia.createSession((user as any).id, {});
+    const session = await lucia.createSession(user.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
     c.header("Set-Cookie", sessionCookie.serialize(), { append: true });
 
