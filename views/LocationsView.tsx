@@ -127,7 +127,7 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
       // 4. Inyectar script si no existe
       const scriptId = 'google-maps-loader';
       if (!document.getElementById(scriptId)) {
-        // Obtenemos API Key (Soporte para múltiples fuentes de env)
+        // Obtenemos API Key
         // @ts-ignore
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || process.env.API_KEY;
         
@@ -137,14 +137,22 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
           return;
         }
 
-        const script = document.createElement('script');
-        script.id = scriptId;
-        // CRÍTICO: Se añade &callback=initMapJaci para que Google llame a nuestra función
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapJaci&loading=async`;
-        script.async = true;
-        script.defer = true;
-        script.onerror = () => setHasError(true);
-        document.head.appendChild(script);
+        const injectScript = () => {
+          const script = document.createElement('script');
+          script.id = scriptId;
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapJaci&loading=async`;
+          script.async = true;
+          script.defer = true;
+          script.onerror = () => setHasError(true);
+          document.head.appendChild(script);
+        };
+
+        // Optimización: Usar requestIdleCallback para no bloquear el hilo principal durante el scroll
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(injectScript, { timeout: 2000 });
+        } else {
+          setTimeout(injectScript, 500);
+        }
       }
     }, 800); // Buffer para animaciones
 
