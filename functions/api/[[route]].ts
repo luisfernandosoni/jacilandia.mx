@@ -245,14 +245,34 @@ app.get('/auth/callback/google', async (c) => {
 
     if (!user) {
       const userId = crypto.randomUUID();
-      await db.prepare("INSERT INTO users (id, email, google_id, name, picture, created_at) VALUES (?, ?, ?, ?, ?, ?)")
-        .bind(userId, googleUser.email, googleUser.sub, googleUser.name, googleUser.picture, Date.now())
+      await db.prepare("INSERT INTO users (id, email, google_id, name, given_name, family_name, picture, locale, email_verified, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(
+          userId, 
+          googleUser.email, 
+          googleUser.sub, 
+          googleUser.name, 
+          googleUser.given_name, 
+          googleUser.family_name, 
+          googleUser.picture, 
+          googleUser.locale, 
+          googleUser.email_verified ? 1 : 0,
+          Math.floor(Date.now() / 1000) // standard unix timestamp
+        )
         .run();
       user = { id: userId, email: googleUser.email };
     } else if (!user.google_id) {
-      // Link existing email account to Google ID
-      await db.prepare("UPDATE users SET google_id = ?, picture = ?, name = ? WHERE id = ?")
-        .bind(googleUser.sub, googleUser.picture, googleUser.name, user.id)
+      // Link existing email account to Google ID & enrich profile
+      await db.prepare("UPDATE users SET google_id = ?, picture = ?, name = ?, given_name = ?, family_name = ?, locale = ?, email_verified = ? WHERE id = ?")
+        .bind(
+          googleUser.sub, 
+          googleUser.picture, 
+          googleUser.name, 
+          googleUser.given_name, 
+          googleUser.family_name, 
+          googleUser.locale, 
+          googleUser.email_verified ? 1 : 0, 
+          user.id
+        )
         .run();
     }
 
@@ -261,9 +281,14 @@ app.get('/auth/callback/google', async (c) => {
     c.header("Set-Cookie", sessionCookie.serialize(), { append: true });
 
     return c.redirect("/");
-  } catch (e) {
-    console.error(e);
-    return c.json({ error: "Authentication failed" }, 500);
+  } catch (e: any) {
+    console.error("[OAuth Error] Callback failed:", e);
+    // 🧪 observability: return specific error for remote debugging
+    return c.json({ 
+      error: "Authentication failed", 
+      details: e.message || "Unknown error",
+      stack: e.stack?.split("\n").slice(0, 2) // helpful for debugging, harmless in test phase
+    }, 500);
   }
 });
 
