@@ -252,7 +252,21 @@ app.get('/auth/callback/google', async (c) => {
     console.log(`[AUTH AUDIT] Secret Len: ${secret.length}, First: ${secret.charCodeAt(0)}, Last: ${secret.charCodeAt(secret.length - 1)}`);
     
     // 🔍 STEP 2: User Info
-    const authHeader = `Bearer ${tokens.accessToken}`;
+    // SANITIZATION: Remove any non-printable characters from the access token
+    const sanitizeToken = (token: string) => token.replace(/[^\x20-\x7E]/g, "").trim();
+    
+    // Log before sanitization
+    const rawToken = tokens.accessToken;
+    console.log(`[AUTH DEBUG] Raw Token Len: ${rawToken.length}, First 5 codes: ${rawToken.split('').slice(0,5).map(c => c.charCodeAt(0))}, Last 5 codes: ${rawToken.split('').slice(-5).map(c => c.charCodeAt(0))}`);
+
+    const cleanToken = sanitizeToken(rawToken);
+    console.log(`[AUTH DEBUG] Clean Token Len: ${cleanToken.length}, First 5 codes: ${cleanToken.split('').slice(0,5).map(c => c.charCodeAt(0))}, Last 5 codes: ${cleanToken.split('').slice(-5).map(c => c.charCodeAt(0))}`);
+
+    if (cleanToken.length === 0) {
+       throw new Error("Access Token became empty after sanitization!");
+    }
+
+    const authHeader = `Bearer ${cleanToken}`;
     console.log(`[AUTH DEBUG] Auth Header: ${JSON.stringify(authHeader)}`);
     
     let googleUser: any;
