@@ -61,6 +61,9 @@
   - **D1 Recovery (CRITICAL)**: If migrations fail or hang, perform a **Truth Audit** (`PRAGMA table_info`) and **Surgical Reconstruction** (one-by-one SQL execution) as defined in the hardened skill reference.
   - **Edge Processing**: Guard for **128MB** memory limit. Prefer streaming via `response.body`.
   - **Guardrail**: ALWAYS use `--remote` for wrangler operations to verify the "Truth on the Edge".
+  - **Anti-Hallucination**: NEVER assume resource names (DB, Buckets, Secrets). You MUST verify via `wrangler.toml` or `wrangler [service] list` before setiap action.
+  - **Anti-Deletion**: `delete` commands are strictly forbidden unless explicitly requested. If requested, audit with `list` first to confirm the exact ID/name to the user.
+  - **Dashboard Deference**: Never defer to the dashboard for secrets, D1/R2 creation, or domain mapping. Use the CLI equivalents defined in `@cloudflare-dev-expert`.
 
 - **Design & Aesthetics (`@ui-ux-pro-max`, `@premium-design-standards`, `@design-md`)**:
   - **Standard**: "Silicon Valley" Tier (Apple/Stripe quality). No basic UI.
