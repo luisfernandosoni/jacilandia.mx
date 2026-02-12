@@ -84,7 +84,11 @@ const app = new Hono<{ Bindings: Bindings; Variables: Variables }>().basePath('/
 // --- MIDDLEWARE DE SEGURIDAD (DEVSECOPS SPRINT 1 & 3) ---
 app.use('*', secureHeaders()); 
 app.use('*', cors({
-  origin: (origin) => origin.endsWith('.pages.dev') || origin.includes('localhost') ? origin : null,
+  origin: (origin) => {
+    if (!origin) return null;
+    const allowedSubdomains = ['.pages.dev', 'jacilandia.mx', 'localhost'];
+    return allowedSubdomains.some(domain => origin.endsWith(domain) || origin.includes(domain)) ? origin : null;
+  },
   credentials: true,
 }));
 
