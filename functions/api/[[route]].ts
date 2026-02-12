@@ -294,24 +294,41 @@ app.get('/auth/callback/google', async (c) => {
     let user: any;
     try {
       const db = c.env.DB;
+      
+      // Sanitization for D1: Coalesce undefined to null (D1 strict typing)
+      const g_sub = googleUser.sub;
+      const g_email = googleUser.email;
+      const g_name = googleUser.name ?? null;
+      const g_given_name = googleUser.given_name ?? null; // Causa probable de error
+      const g_family_name = googleUser.family_name ?? null;
+      const g_picture = googleUser.picture ?? null;
+      const g_locale = googleUser.locale ?? null;
+      const g_verified = googleUser.email_verified ? 1 : 0;
+      
+      console.log(`[AUTH DEBUG] DB Bind Params: sub=${g_sub}, email=${g_email}, name=${g_name}, given=${g_given_name}, family=${g_family_name}`);
+
       user = await db.prepare("SELECT * FROM users WHERE google_id = ? OR email = ?")
-        .bind(googleUser.sub, googleUser.email)
+        .bind(g_sub, g_email)
         .first();
 
       if (!user) {
         const userId = crypto.randomUUID();
         await db.prepare("INSERT INTO users (id, email, google_id, name, given_name, family_name, picture, locale, email_verified, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-          .bind(userId, googleUser.email, googleUser.sub, googleUser.name, googleUser.given_name, googleUser.family_name, googleUser.picture, googleUser.locale, googleUser.email_verified ? 1 : 0, Math.floor(Date.now() / 1000))
+          .bind(userId, g_email, g_sub, g_name, g_given_name, g_family_name, g_picture, g_locale, g_verified, Math.floor(Date.now() / 1000))
           .run();
-        user = { id: userId, email: googleUser.email };
+        user = { id: userId, email: g_email };
       } else if (!user.google_id) {
         await db.prepare("UPDATE users SET google_id = ?, picture = ?, name = ?, given_name = ?, family_name = ?, locale = ?, email_verified = ? WHERE id = ?")
-          .bind(googleUser.sub, googleUser.picture, googleUser.name, googleUser.given_name, googleUser.family_name, googleUser.locale, googleUser.email_verified ? 1 : 0, user.id)
+          .bind(g_sub, g_picture, g_name, g_given_name, g_family_name, g_locale, g_verified, user.id)
           .run();
       }
       console.log(`[AUTH STEP] User DB sync complete: ${user.id}`);
     } catch (e: any) {
       console.error(`[AUTH ERROR] DB Sync failed:`, e);
+      // Detailed error logging for D1
+      if (e.message.includes("D1_TYPE_ERROR")) {
+         console.error(`[AUTH DIAGNOSTIC] Check for undefined values in bind params.`);
+      }
       throw new Error(`DB Sync Failed: ${e.message}`);
     }
 
