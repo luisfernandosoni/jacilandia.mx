@@ -236,62 +236,75 @@ app.get('/auth/callback/google', async (c) => {
   console.log(`[AUTH DEBUG] Code matches: ${!!code}, Verifier matches: ${!!codeVerifier}`);
 
   try {
-    const tokens = await google.validateAuthorizationCode(code, codeVerifier);
+    // 🔍 STEP 1: Exchange Code
+    let tokens;
+    try {
+      console.log(`[AUTH STEP] Validating auth code...`);
+      tokens = await google.validateAuthorizationCode(code, codeVerifier);
+      console.log(`[AUTH STEP] Tokens received. Access Token Len: ${tokens.accessToken.length}`);
+    } catch (e: any) {
+      console.error(`[AUTH ERROR] validateAuthorizationCode failed:`, e);
+      throw new Error(`Token Exchange Failed: ${e.message}`);
+    }
     
     // 🧪 Truth Audit: Verify if secrets or tokens are malformed (@cloudflare-dev-expert)
     const secret = c.env.GOOGLE_CLIENT_SECRET;
     console.log(`[AUTH AUDIT] Secret Len: ${secret.length}, First: ${secret.charCodeAt(0)}, Last: ${secret.charCodeAt(secret.length - 1)}`);
     
+    // 🔍 STEP 2: User Info
     const authHeader = `Bearer ${tokens.accessToken}`;
-    const googleResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-      headers: { Authorization: authHeader }
-    });
-    const googleUser: any = await googleResponse.json();
-
-    const db = c.env.DB;
-    const lucia = c.get('lucia');
-
-    // Pattern: Account Linking
-    let user: any = await db.prepare("SELECT * FROM users WHERE google_id = ? OR email = ?")
-      .bind(googleUser.sub, googleUser.email)
-      .first();
-
-    if (!user) {
-      const userId = crypto.randomUUID();
-      await db.prepare("INSERT INTO users (id, email, google_id, name, given_name, family_name, picture, locale, email_verified, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-        .bind(
-          userId, 
-          googleUser.email, 
-          googleUser.sub, 
-          googleUser.name, 
-          googleUser.given_name, 
-          googleUser.family_name, 
-          googleUser.picture, 
-          googleUser.locale, 
-          googleUser.email_verified ? 1 : 0,
-          Math.floor(Date.now() / 1000) // standard unix timestamp
-        )
-        .run();
-      user = { id: userId, email: googleUser.email };
-    } else if (!user.google_id) {
-      // Link existing email account to Google ID & enrich profile
-      await db.prepare("UPDATE users SET google_id = ?, picture = ?, name = ?, given_name = ?, family_name = ?, locale = ?, email_verified = ? WHERE id = ?")
-        .bind(
-          googleUser.sub, 
-          googleUser.picture, 
-          googleUser.name, 
-          googleUser.given_name, 
-          googleUser.family_name, 
-          googleUser.locale, 
-          googleUser.email_verified ? 1 : 0, 
-          user.id
-        )
-        .run();
+    console.log(`[AUTH DEBUG] Auth Header: ${JSON.stringify(authHeader)}`);
+    
+    let googleUser: any;
+    try {
+      const googleResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+        headers: { Authorization: authHeader }
+      });
+      googleUser = await googleResponse.json();
+      console.log(`[AUTH STEP] User info received: ${googleUser.email}`);
+    } catch (e: any) {
+       console.error(`[AUTH ERROR] UserInfo fetch failed:`, e);
+       throw new Error(`UserInfo Fetch Failed: ${e.message}`);
     }
 
-    const session = await lucia.createSession(user.id, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    c.header("Set-Cookie", sessionCookie.serialize(), { append: true });
+    // 🔍 STEP 3: DB Operations
+    let user: any;
+    try {
+      const db = c.env.DB;
+      user = await db.prepare("SELECT * FROM users WHERE google_id = ? OR email = ?")
+        .bind(googleUser.sub, googleUser.email)
+        .first();
+
+      if (!user) {
+        const userId = crypto.randomUUID();
+        await db.prepare("INSERT INTO users (id, email, google_id, name, given_name, family_name, picture, locale, email_verified, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+          .bind(userId, googleUser.email, googleUser.sub, googleUser.name, googleUser.given_name, googleUser.family_name, googleUser.picture, googleUser.locale, googleUser.email_verified ? 1 : 0, Math.floor(Date.now() / 1000))
+          .run();
+        user = { id: userId, email: googleUser.email };
+      } else if (!user.google_id) {
+        await db.prepare("UPDATE users SET google_id = ?, picture = ?, name = ?, given_name = ?, family_name = ?, locale = ?, email_verified = ? WHERE id = ?")
+          .bind(googleUser.sub, googleUser.picture, googleUser.name, googleUser.given_name, googleUser.family_name, googleUser.locale, googleUser.email_verified ? 1 : 0, user.id)
+          .run();
+      }
+      console.log(`[AUTH STEP] User DB sync complete: ${user.id}`);
+    } catch (e: any) {
+      console.error(`[AUTH ERROR] DB Sync failed:`, e);
+      throw new Error(`DB Sync Failed: ${e.message}`);
+    }
+
+    // 🔍 STEP 4: Session & Cookie
+    try {
+      const lucia = c.get('lucia');
+      const session = await lucia.createSession(user.id, {});
+      const sessionCookie = lucia.createSessionCookie(session.id);
+      console.log(`[AUTH DEBUG] Session Cookie: ${JSON.stringify(sessionCookie.serialize())}`);
+      c.header("Set-Cookie", sessionCookie.serialize(), { append: true });
+    } catch (e: any) {
+      console.error(`[AUTH ERROR] Session/Cookie failed:`, e);
+      throw new Error(`Session Cookie Failed: ${e.message}`);
+    }
+
+    return c.redirect("/");
 
     return c.redirect("/");
   } catch (e: any) {
@@ -299,8 +312,9 @@ app.get('/auth/callback/google', async (c) => {
     // 🧪 observability: return specific error for remote debugging
     return c.json({ 
       error: "Authentication failed", 
+      step: e.message, // Expose step context
       details: e.message || "Unknown error",
-      stack: e.stack?.split("\n").slice(0, 2) // helpful for debugging, harmless in test phase
+      stack: e.stack?.split("\n").slice(0, 4) 
     }, 500);
   }
 });
