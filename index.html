@@ -6,6 +6,11 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://assets.jacilandia.mx https://placehold.co; connect-src 'self' https://esm.sh;"
+    />
     <meta
       http-equiv="Accept-CH"
       content="Sec-CH-Prefers-Reduced-Motion, Device-Memory, Downlink, Viewport-Width"

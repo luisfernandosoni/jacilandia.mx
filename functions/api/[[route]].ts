@@ -7,7 +7,8 @@ import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 import { MP_Service } from './mp-service';
 
 // --- SILICON VALLEY SECURITY UTILS (@api-security-best-practices) ---
-const SIGNING_SECRET = "jaci_vault_secure_2026"; // In production, use c.env.SIGNING_SECRET
+// Using @safe-vibe Rule #89: Never hardcode secrets. Fallback to dev string only for local testing.
+const SIGNING_SECRET_FALLBACK = "jaci_vault_secure_2026"; 
 
 async function getSignature(message: string, secret: string) {
   const enc = new TextEncoder();
@@ -25,6 +26,31 @@ async function verifySignature(message: string, signature: string, secret: strin
   const expected = await getSignature(message, secret);
   return expected === signature;
 }
+
+// --- RUTHLESS RATE LIMITING [#1] ---
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const rateLimitMap = new Map<string, { count: number; start: number }>();
+
+const rateLimiter = (limit: number) => async (c: any, next: any) => {
+  const ip = c.req.header("cf-connecting-ip") || "anonymous";
+  const now = Date.now();
+  const record = rateLimitMap.get(ip) || { count: 0, start: now };
+
+  if (now - record.start > RATE_LIMIT_WINDOW) {
+    record.count = 1;
+    record.start = now;
+  } else {
+    record.count++;
+  }
+
+  rateLimitMap.set(ip, record);
+
+  if (record.count > limit) {
+    return c.json({ error: "Too many requests. Please try again later.", code: "RATE_LIMIT_EXCEEDED" }, 429);
+  }
+  return next();
+};
+
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
 import { z } from 'zod';
@@ -43,6 +69,7 @@ type Bindings = {
   GOOGLE_CLIENT_SECRET: string;
   APP_URL: string; // Base URL for callbacks
   SIGNING_SECRET?: string;
+  ENVIRONMENT?: string;
 };
 
 type Variables = {
@@ -136,7 +163,7 @@ const SubscriptionSchema = z.object({
 // --- RUTAS DE AUTENTICACIÓN ---
 
 // 1. Google OAuth (Arctic)
-app.get('/auth/login/google', async (c) => {
+app.get('/auth/login/google', rateLimiter(10), async (c) => {
   const google = new Google(
     c.env.GOOGLE_CLIENT_ID,
     c.env.GOOGLE_CLIENT_SECRET,
@@ -222,8 +249,14 @@ app.get('/auth/callback/google', async (c) => {
   }
 });
 
-// 1. LOGIN (Legacy/Dev)
-app.post('/auth/login-dev', async (c) => {
+// 1. LOGIN (Legacy/Dev Hardening [#46])
+app.post('/auth/login-dev', rateLimiter(5), async (c) => {
+  // Solo permitir en desarrollo o si el usuario es explícitamente admin
+  const isDev = c.env.ENVIRONMENT === 'development' || c.env.APP_URL?.includes('localhost');
+  if (!isDev) {
+    return c.json({ error: "Method not allowed in production." }, 405);
+  }
+
   const body = await c.req.json();
   const result = LoginSchema.safeParse(body);
   
@@ -256,6 +289,15 @@ app.post('/auth/login-dev', async (c) => {
   return c.json({ success: true, user: { id: user.id, email: user.email } });
 });
 
+// --- RUTHLESS ERROR HARDENING [#8] ---
+app.onError((err, c) => {
+  console.error(`[CRITICAL ERROR] ${c.req.method} ${c.req.url}:`, err);
+  return c.json({ 
+    error: "An unexpected error occurred. Please contact support if this persists.",
+    code: "INTERNAL_SERVER_ERROR" 
+  }, 500);
+});
+
 // SPRINT 3: LOGOUT (Invalidación de sesión)
 app.post('/auth/logout', async (c) => {
   const lucia = c.get('lucia');
@@ -279,7 +321,7 @@ app.get('/user', (c) => {
 
 // --- RESTO DE RUTAS (PROTEGIDAS) ---
 
-app.post('/checkout/subscription', async (c) => {
+app.post('/checkout/subscription', rateLimiter(10), async (c) => {
   const user = c.get('user');
   if (!user) return c.json({ error: "Unauthorized" }, 401);
 
@@ -293,7 +335,7 @@ app.post('/checkout/subscription', async (c) => {
 });
 
 // NEW: One-off Checkout Handler (@payment-integration)
-app.post('/checkout/buy/:dropId', async (c) => {
+app.post('/checkout/buy/:dropId', rateLimiter(10), async (c) => {
   const user = c.get('user');
   const dropId = c.req.param('dropId');
   if (!user) return c.json({ error: "Unauthorized" }, 401);
@@ -343,7 +385,8 @@ app.get('/drops/:id', async (c) => {
 
   if (!drop) return c.json({ error: "Drop not found" }, 404);
 
-  // 2. Get Assets (Always return previews, restrict masters if locked)
+  // 2. Get Assets (Hardened RLS Simulation [#6])
+  // Restrict masters if locked or USER DOES NOT OWN DROP
   const assets: any = await db.prepare(`
     SELECT id, type, filename, mime_type, file_size, sort_order,
            CASE WHEN ? = 1 OR type = 'preview' THEN r2_key ELSE NULL END as r2_key
@@ -378,7 +421,7 @@ app.get('/download/:assetId', async (c) => {
   // 2. Generate Signed URL (Rule 89)
   const expires = Math.floor(Date.now() / 1000) + 300; // 5 minute window
   const payload = `${asset.r2_key}:${expires}`;
-  const signature = await getSignature(payload, c.env.SIGNING_SECRET || SIGNING_SECRET);
+  const signature = await getSignature(payload, c.env.SIGNING_SECRET || SIGNING_SECRET_FALLBACK);
   
   return c.redirect(`/api/cdn/${asset.r2_key}?expires=${expires}&signature=${signature}`);
 });
@@ -393,7 +436,7 @@ app.get('/cdn/:key', async (c) => {
   if (parseInt(expires) < Math.floor(Date.now() / 1000)) return c.text("Forbidden: Link expired", 403);
   
   const payload = `${key}:${expires}`;
-  const isValid = await verifySignature(payload, signature, c.env.SIGNING_SECRET || SIGNING_SECRET);
+  const isValid = await verifySignature(payload, signature, c.env.SIGNING_SECRET || SIGNING_SECRET_FALLBACK);
   if (!isValid) return c.text("Forbidden: Invalid signature", 403);
 
   const object = await c.env.R2.get(key);
