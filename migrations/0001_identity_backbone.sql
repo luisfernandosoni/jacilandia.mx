@@ -1,15 +1,11 @@
 -- Identity & Content Backbone Migration
 
--- 1. Users (Sync with current foundation)
-CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY,
-  email TEXT UNIQUE,
-  google_id TEXT,
-  picture TEXT,
-  name TEXT,
-  role TEXT DEFAULT 'user',
-  created_at INTEGER DEFAULT (unixepoch())
-);
+-- 1. Users (OAuth Enhancements)
+-- These columns are missing from the current remote D1 schema.
+-- Note: created_at already exists from 0000_core_auth.sql, so we exclude it here.
+ALTER TABLE users ADD COLUMN google_id TEXT;
+ALTER TABLE users ADD COLUMN picture TEXT;
+ALTER TABLE users ADD COLUMN name TEXT;
 CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
 
 -- 2. Drops (The Container)
@@ -20,10 +16,6 @@ CREATE TABLE IF NOT EXISTS drops (
 );
 
 -- Reconciling partial state for drops
--- These will fail gracefully in fresh installs where they are already in CREATE TABLE, 
--- but are needed for the user's current remote DB state.
--- Note: SQLite does not support IF NOT EXISTS on ALTER, so we use plain ALTER.
--- If these fail because they exist, it means the recovery is already complete.
 ALTER TABLE drops ADD COLUMN month INTEGER NOT NULL DEFAULT 1;
 ALTER TABLE drops ADD COLUMN year INTEGER NOT NULL DEFAULT 2026;
 ALTER TABLE drops ADD COLUMN thumbnail_url TEXT;
