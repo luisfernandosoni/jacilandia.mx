@@ -20,6 +20,9 @@
 - [x] UI Polish: Audit and fix Navigation centering & swap items
 - [x] Debug: Resolved `App.tsx` regression causing build failure (referenced `deferredView` out of scope)
 - [x] Optimization: Ubicaciones "Idle-Warmup" & API Cost Audit
+- [x] Global Performance Audit (LCP, CLS, Predictive Prefetching)
+- [x] Chrome DevTools Baseline Evaluation (Core Web Vitals)
+- [x] Implement Performance Optimizations (Font Preload, Tailwind CSS Hardening)
 - [ ] Environment Setup
   - [ ] `npm install` and dependency audit
   - [ ] Set up `.env.local` with Gemini API key

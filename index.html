@@ -1,123 +1,162 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta http-equiv="Accept-CH" content="Sec-CH-Prefers-Reduced-Motion, Device-Memory, Downlink, Viewport-Width">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      http-equiv="Accept-CH"
+      content="Sec-CH-Prefers-Reduced-Motion, Device-Memory, Downlink, Viewport-Width"
+    />
     <title>JACI | Monstruomentes Brillantes</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://assets.jacilandia.mx" crossorigin>
-    
-    <link rel="preload" href="https://assets.jacilandia.mx/JACI_Color.png" as="image" fetchpriority="high">
-    
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://assets.jacilandia.mx" crossorigin />
+
+    <!-- FONT PRELOADING: Pre-fetching the actual woff2 binaries to cut FOUT/CLS at 0ms -->
+    <link
+      rel="preload"
+      href="https://fonts.gstatic.com/s/notosans/v42/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5a7duw.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <link
+      rel="preload"
+      href="https://assets.jacilandia.mx/JACI_Color.png"
+      as="image"
+      fetchpriority="high"
+    />
+
     <!-- TAILWIND NATIVO: Vinculación prioritaria para el Preload Scanner -->
-    <link rel="stylesheet" href="/index.css">
-    
+    <link rel="stylesheet" href="/index.css" />
+
     <!-- CARGA ASÍNCRONA DE FUENTES -->
-    <link 
-      rel="preload" 
-      as="style" 
+    <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
-    >
-    <link 
-      rel="stylesheet" 
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" 
-      media="print" 
-      onload="this.media='all'"
-    >
-    
-    <link 
-      rel="preload" 
-      as="style" 
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      media="print"
+      onload="this.media = 'all'"
+    />
+
+    <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
-    >
-    <link 
-      rel="stylesheet" 
-      href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" 
-      media="print" 
-      onload="this.media='all'"
-    >
-    
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
+      media="print"
+      onload="this.media = 'all'"
+    />
+
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-      <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+      <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link
+        href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
+        rel="stylesheet"
+      />
     </noscript>
 
     <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "framer-motion": "https://esm.sh/framer-motion@^12.24.0",
-    "vite": "https://esm.sh/vite@^7.3.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "hono/": "https://esm.sh/hono@^4.11.3/",
-    "hono": "https://esm.sh/hono@^4.11.3",
-    "@lucia-auth/adapter-sqlite": "https://esm.sh/@lucia-auth/adapter-sqlite@^3.0.2",
-    "lucia": "https://esm.sh/lucia@^3.2.2",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
-  }
-}
-</script>
-</head>
+      {
+        "imports": {
+          "react": "https://esm.sh/react@^19.2.3",
+          "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+          "react/": "https://esm.sh/react@^19.2.3/",
+          "framer-motion": "https://esm.sh/framer-motion@^12.24.0",
+          "vite": "https://esm.sh/vite@^7.3.0",
+          "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+          "hono/": "https://esm.sh/hono@^4.11.3/",
+          "hono": "https://esm.sh/hono@^4.11.3",
+          "@lucia-auth/adapter-sqlite": "https://esm.sh/@lucia-auth/adapter-sqlite@^3.0.2",
+          "lucia": "https://esm.sh/lucia@^3.2.2",
+          "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+        }
+      }
+    </script>
+  </head>
   <body class="noise-grain">
     <div class="mesh-bg" id="mesh-bg"></div>
     <div id="root"></div>
-    
+
     <!-- TAILWIND SMART GUARD (Detección por Computación de Estilos con Grace Period) -->
     <script>
-      (function() {
+      (function () {
         const checkTailwind = () => {
-          const canary = document.createElement('div');
-          canary.className = 'w-[0.123px]';
-          canary.style.position = 'absolute';
-          canary.style.visibility = 'hidden';
+          const canary = document.createElement("div");
+          canary.className = "w-[0.123px]";
+          canary.style.position = "absolute";
+          canary.style.visibility = "hidden";
           document.body.appendChild(canary);
-          
-          const isWorking = window.getComputedStyle(canary).width === '0.123px';
+
+          const isWorking = window.getComputedStyle(canary).width === "0.123px";
           canary.remove();
 
           if (!isWorking) {
-            console.warn('%cJACI Performance Guard: Native Tailwind not detected after 500ms. Loading CDN fallback...', 'color: #f472b6; font-weight: bold;');
-            const script = document.createElement('script');
+            console.warn(
+              "%cJACI Performance Guard: Native Tailwind not detected after 800ms. Loading CDN fallback...",
+              "color: #f472b6; font-weight: bold;",
+            );
+            const script = document.createElement("script");
             script.src = "https://cdn.tailwindcss.com";
             script.onload = () => {
               tailwind.config = {
                 theme: {
                   extend: {
                     colors: {
-                      "primary": "#25c0f4",
+                      primary: "#25c0f4",
                       "jaci-pink": "#f472b6",
                       "jaci-yellow": "#fbbf24",
                       "jaci-purple": "#a78bfa",
                       "jaci-green": "#22c55e",
                     },
                     fontFamily: {
-                      "display": ["Space Grotesk", "sans-serif"],
-                      "body": ["Noto Sans", "sans-serif"],
-                    }
-                  }
-                }
+                      display: ["Space Grotesk", "sans-serif"],
+                      body: ["Noto Sans", "sans-serif"],
+                    },
+                  },
+                },
               };
             };
             document.head.appendChild(script);
           } else {
-            console.log('%cJACI Performance Guard: Native Tailwind Active ✅', 'color: #22c55e; font-weight: bold;');
+            console.log(
+              "%cJACI Performance Guard: Native Tailwind Active ✅",
+              "color: #22c55e; font-weight: bold;",
+            );
           }
         };
 
         // Delay crítico para permitir que Vite/App inyecten los estilos nativos
-        if (document.readyState === 'complete') {
-          setTimeout(checkTailwind, 500);
+        if (document.readyState === "complete") {
+          setTimeout(checkTailwind, 800);
         } else {
-          window.addEventListener('load', () => setTimeout(checkTailwind, 500));
+          window.addEventListener("load", () => setTimeout(checkTailwind, 800));
         }
       })();
     </script>
-    
+
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
