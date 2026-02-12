@@ -104,60 +104,49 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
     }
   }, [location]);
 
-  useEffect(() => {
-    if (!isInView) return;
-
-    const timer = setTimeout(() => {
-      // 1. Verificar si ya existe el objeto maps
+  // Cargador de script robusto (Singleton)
+  const loadScript = useCallback((apiKey: string) => {
+    return new Promise<void>((resolve, reject) => {
+      const scriptId = 'google-maps-loader';
       if (window.google?.maps) {
-        initPanorama();
+        resolve();
         return;
       }
 
-      // 2. Definir la función de retorno global antes de cargar el script
-      window.initMapJaci = () => {
-        window.dispatchEvent(new Event('google-maps-ready'));
-      };
-
-      // 3. Suscribirse al evento de "Listo"
-      window.addEventListener('google-maps-ready', () => {
-        initPanorama();
-      }, { once: true });
-
-      // 4. Inyectar script si no existe
-      const scriptId = 'google-maps-loader';
       if (!document.getElementById(scriptId)) {
-        // Obtenemos API Key
-        // @ts-ignore
-        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || process.env.API_KEY;
-        
-        if (!apiKey) {
-          console.error("Google Maps API Key missing");
-          setHasError(true);
-          return;
-        }
-
-        const injectScript = () => {
-          const script = document.createElement('script');
-          script.id = scriptId;
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapJaci&loading=async`;
-          script.async = true;
-          script.defer = true;
-          script.onerror = () => setHasError(true);
-          document.head.appendChild(script);
+        window.initMapJaci = () => {
+          window.dispatchEvent(new Event('google-maps-ready'));
         };
 
-        // Optimización: Usar requestIdleCallback para no bloquear el hilo principal durante el scroll
-        if ('requestIdleCallback' in window) {
-          (window as any).requestIdleCallback(injectScript, { timeout: 2000 });
-        } else {
-          setTimeout(injectScript, 500);
-        }
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMapJaci&loading=async`;
+        script.async = true;
+        script.defer = true;
+        script.onerror = () => reject(new Error("Failed to load Maps script"));
+        document.head.appendChild(script);
       }
-    }, 800); // Buffer para animaciones
 
-    return () => clearTimeout(timer);
-  }, [isInView, initPanorama]);
+      window.addEventListener('google-maps-ready', () => resolve(), { once: true });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isInView || isLive || hasError) return;
+
+    const apiKey = (import.meta as any).env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      setHasError(true);
+      return;
+    }
+
+    loadScript(apiKey)
+      .then(() => initPanorama())
+      .catch((err) => {
+        console.error(err);
+        setHasError(true);
+      });
+  }, [isInView, isLive, hasError, loadScript, initPanorama]);
 
   return (
     <div className="w-full h-full relative bg-slate-200 overflow-hidden">
