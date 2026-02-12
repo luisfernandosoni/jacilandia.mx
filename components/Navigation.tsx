@@ -12,8 +12,8 @@ interface NavigationProps {
 
 const navItems: NavItem[] = [
   { label: 'Inicio', view: ViewState.HOME },
-  { label: 'Nosotros', view: ViewState.ABOUT },
   { label: 'El Método', view: ViewState.METHODOLOGY },
+  { label: 'Nosotros', view: ViewState.ABOUT },
   { label: 'Niveles', view: ViewState.LEVELS },
   { label: 'Testimonios', view: ViewState.TESTIMONIALS },
   { label: 'Ubicaciones', view: ViewState.LOCATIONS },
@@ -53,7 +53,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
 
   return (
     <header className="sticky top-0 z-[100] w-full bg-white/95 backdrop-blur-xl border-b border-white/40 shadow-sm min-h-[5rem]">
-      <div className="max-w-[1600px] mx-auto px-4 md:px-12 py-2 md:py-0 flex flex-wrap items-center justify-between min-h-[5rem]">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-12 py-2 md:py-0 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] min-h-[5rem]">
         
         <div className="flex items-center shrink-0 py-2">
           <Magnetic pullStrength={0.05}>
@@ -84,7 +84,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
           </Magnetic>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-1 p-1 bg-slate-900/5 rounded-full border border-slate-900/5 my-2">
+        <nav className="hidden lg:flex items-center justify-center gap-1 p-1 bg-slate-900/5 rounded-full border border-slate-900/5 my-2">
           {navItems.map((item) => {
             const isActive = currentView === item.view;
             return (
@@ -104,7 +104,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
           })}
         </nav>
 
-        <div className="flex items-center gap-3 xs:gap-4 md:gap-6 py-2">
+        <div className="flex items-center justify-end gap-3 xs:gap-4 md:gap-6 py-2">
           <button 
             onClick={() => navigate(ViewState.DASHBOARD)}
             onPointerEnter={() => handleIntentStart(ViewState.DASHBOARD)}

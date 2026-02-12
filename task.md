@@ -17,6 +17,7 @@
   - [x] A11y Audit: Add `aria-label` and `role` to interactive elements
   - [x] Error Resilience: Improve frontend `catch` blocks and data revalidation
   - [x] Backend: Integrate `Zod` validation and standardized error responses
+- [x] UI Polish: Audit and fix Navigation centering & swap items
 - [ ] Environment Setup
   - [ ] `npm install` and dependency audit
   - [ ] Set up `.env.local` with Gemini API key
