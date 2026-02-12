@@ -9,6 +9,7 @@ export enum ViewState {
   LEVELS = 'LEVELS',
   REGISTER = 'REGISTER',
   DASHBOARD = 'DASHBOARD',
+  ADMIN = 'ADMIN',
   PRIVACY = 'PRIVACY'
 }
 
@@ -46,6 +47,7 @@ export const VIEW_THEMES: Record<ViewState, ThemeColors> = {
   [ViewState.PRICING]: { primary: 'rgba(244, 114, 182, 0.18)', secondary: 'rgba(167, 139, 250, 0.15)', accent: 'rgba(37, 192, 244, 0.1)' },
   [ViewState.REGISTER]: { primary: 'rgba(34, 197, 94, 0.12)', secondary: 'rgba(37, 192, 244, 0.1)', accent: 'rgba(244, 114, 182, 0.08)' },
   [ViewState.DASHBOARD]: { primary: 'rgba(15, 23, 42, 0.05)', secondary: 'rgba(37, 192, 244, 0.08)', accent: 'rgba(255, 255, 255, 0)' },
+  [ViewState.ADMIN]: { primary: 'rgba(30, 41, 59, 0.15)', secondary: 'rgba(15, 23, 42, 0.1)', accent: 'rgba(37, 192, 244, 0.1)' },
   [ViewState.PRIVACY]: { primary: 'rgba(15, 23, 42, 0.08)', secondary: 'rgba(37, 192, 244, 0.05)', accent: 'rgba(148, 163, 184, 0.05)' }
 };
 

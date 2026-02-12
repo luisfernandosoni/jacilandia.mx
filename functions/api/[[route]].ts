@@ -109,6 +109,20 @@ app.use('*', async (c, next) => {
   return next();
 });
 
+// --- ADMIN SECURITY MIDDLEWARE (@api-security-best-practices) ---
+const adminMiddleware = async (c: any, next: any) => {
+  const user = c.get('user');
+  if (!user) return c.json({ error: "Unauthorized" }, 401);
+  
+  const db = c.env.DB;
+  const dbUser: any = await db.prepare("SELECT role FROM users WHERE id = ?").bind(user.id).first();
+  
+  if (!dbUser || dbUser.role !== 'admin') {
+    return c.json({ error: "Forbidden: Admin access required" }, 403);
+  }
+  return next();
+};
+
 // --- SCHEMAS ---
 const LoginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -461,6 +475,62 @@ app.post('/webhooks/mercadopago', async (c) => {
   }
 
   return c.json({ status: "ok" });
+});
+
+// --- INTELLIGENCE COCKPIT ENGINE (@kpi-dashboard-design & @startup-metrics-framework) ---
+app.get('/admin/stats', adminMiddleware, async (c) => {
+  const db = c.env.DB;
+
+  // 1. Revenue & MRR
+  const revenueStats: any = await db.prepare(`
+    SELECT 
+      SUM(CASE WHEN unlocked_at >= ? THEN amount ELSE 0 END) as revenue_24h,
+      SUM(CASE WHEN unlocked_at >= ? THEN amount ELSE 0 END) as revenue_7d,
+      SUM(amount) as revenue_total
+    FROM ledger
+  `).bind(
+    Date.now() - 24 * 60 * 60 * 1000,
+    Date.now() - 7 * 24 * 60 * 60 * 1000
+  ).first();
+
+  const mrr: any = await db.prepare(`
+    SELECT COUNT(*) * 29 as value
+    FROM subscriptions WHERE status = 'authorized'
+  `).first();
+
+  // 2. User & Subscription Growth
+  const userStats: any = await db.prepare(`
+    SELECT 
+      (SELECT COUNT(*) FROM users) as total_users,
+      (SELECT COUNT(*) FROM subscriptions WHERE status = 'authorized') as active_subs,
+      (SELECT COUNT(*) FROM subscriptions WHERE status = 'cancelled') as churned_subs
+  `).first();
+
+  // 3. Drop Performance (Engagement Level)
+  const { results: topDrops } = await db.prepare(`
+    SELECT 
+      d.title, 
+      COUNT(l.id) as unlocks
+    FROM drops d
+    LEFT JOIN ledger l ON d.id = l.drop_id
+    GROUP BY d.id
+    ORDER BY unlocks DESC
+    LIMIT 5
+  `).all();
+
+  return c.json({
+    kpis: {
+      mrr: mrr.value || 0,
+      revenue_24h: revenueStats.revenue_24h || 0,
+      revenue_7d: revenueStats.revenue_7d || 0,
+      revenue_total: revenueStats.revenue_total || 0,
+      total_users: userStats.total_users,
+      active_subs: userStats.active_subs,
+      churn_rate: userStats.total_users > 0 ? (userStats.churned_subs / userStats.total_users * 100).toFixed(1) + "%" : "0%"
+    },
+    topDrops,
+    total_users_base: userStats.total_users
+  });
 });
 
 export const onRequest = handle(app);

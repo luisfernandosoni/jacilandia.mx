@@ -39,6 +39,7 @@ const VIEW_LOADERS: Record<ViewState, () => Promise<any>> = {
   [ViewState.PRICING]: () => import('./views/PricingView'),
   [ViewState.REGISTER]: () => import('./views/RegisterView'),
   [ViewState.DASHBOARD]: () => import('./views/DashboardView'),
+  [ViewState.ADMIN]: () => import('./views/AdminView'),
   [ViewState.PRIVACY]: () => import('./views/PrivacyView'),
 };
 
@@ -51,6 +52,7 @@ const PricingView = lazy(() => VIEW_LOADERS[ViewState.PRICING]().then(m => ({ de
 const LevelsView = lazy(() => VIEW_LOADERS[ViewState.LEVELS]().then(m => ({ default: m.LevelsView })));
 const RegisterView = lazy(() => VIEW_LOADERS[ViewState.REGISTER]().then(m => ({ default: m.RegisterView })));
 const DashboardView = lazy(() => VIEW_LOADERS[ViewState.DASHBOARD]().then(m => ({ default: m.DashboardView })));
+const AdminView = lazy(() => VIEW_LOADERS[ViewState.ADMIN]());
 const PrivacyView = lazy(() => VIEW_LOADERS[ViewState.PRIVACY]().then(m => ({ default: m.PrivacyView })));
 
 // --- ATMOSPHERIC UTILS ---
@@ -225,6 +227,7 @@ const App: React.FC = () => {
                           case ViewState.PRICING: return <PricingView />;
                           case ViewState.REGISTER: return <RegisterView />;
                           case ViewState.DASHBOARD: return <DashboardView />;
+                          case ViewState.ADMIN: return <AdminView />;
                           case ViewState.PRIVACY: return <PrivacyView />;
                           default: return <HomeView />;
                         }
