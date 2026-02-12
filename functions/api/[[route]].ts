@@ -253,11 +253,16 @@ app.get('/auth/callback/google', async (c) => {
     
     // 🔍 STEP 2: User Info
     // SANITIZATION: Remove any non-printable characters from the access token
-    const sanitizeToken = (token: string) => token.replace(/[^\x20-\x7E]/g, "").trim();
+    const sanitizeToken = (token: any) => {
+      if (typeof token !== 'string') {
+        throw new Error(`Invalid token type: ${typeof token}`);
+      }
+      return token.replace(/[^\x20-\x7E]/g, "").trim();
+    };
     
     // Log before sanitization
     const rawToken = tokens.accessToken();
-    console.log(`[AUTH DEBUG] Raw Token Len: ${rawToken.length}, First 5 codes: ${rawToken.split('').slice(0,5).map((c: string) => c.charCodeAt(0))}, Last 5 codes: ${rawToken.split('').slice(-5).map((c: string) => c.charCodeAt(0))}`);
+    console.log(`[AUTH DEBUG] Raw Token Len: ${rawToken.length}, First 5 codes: ${String(rawToken).split('').slice(0,5).map((c: string) => c.charCodeAt(0))}, Last 5 codes: ${String(rawToken).split('').slice(-5).map((c: string) => c.charCodeAt(0))}`);
 
     const cleanToken = sanitizeToken(rawToken);
     console.log(`[AUTH DEBUG] Clean Token Len: ${cleanToken.length}, First 5 codes: ${cleanToken.split('').slice(0,5).map((c: string) => c.charCodeAt(0))}, Last 5 codes: ${cleanToken.split('').slice(-5).map((c: string) => c.charCodeAt(0))}`);
@@ -266,13 +271,17 @@ app.get('/auth/callback/google', async (c) => {
        throw new Error("Access Token became empty after sanitization!");
     }
 
-    const authHeader = `Bearer ${cleanToken}`;
-    console.log(`[AUTH DEBUG] Auth Header: ${JSON.stringify(authHeader)}`);
+    // Use Headers API for stricter validation and safer handling
+    const userHeaders = new Headers();
+    userHeaders.set("Authorization", `Bearer ${cleanToken}`);
+    
+    // Log header value for final verification
+    console.log(`[AUTH DEBUG] Auth Header: ${JSON.stringify(userHeaders.get("Authorization"))}`);
     
     let googleUser: any;
     try {
       const googleResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-        headers: { Authorization: authHeader }
+        headers: userHeaders
       });
       googleUser = await googleResponse.json();
       console.log(`[AUTH STEP] User info received: ${googleUser.email}`);
