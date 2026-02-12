@@ -141,7 +141,17 @@ const App: React.FC = () => {
     if (viewParam && Object.values(ViewState).includes(viewParam)) {
       handleViewChange(viewParam);
     }
+
+    if (params.get('payment') === 'success') {
+      setSuccessMessage("¡Pago completado con éxito! Bienvenido a la bóveda.");
+      // Atmosphere shift to primary (success color)
+      applyAtmosphere(currentView);
+      window.history.replaceState({}, '', window.location.pathname);
+      setTimeout(() => setSuccessMessage(null), 5000);
+    }
   }, []);
+
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const setCacheValue = useCallback((key: string, data: any) => {
     setDataCache(prev => ({ ...prev, [key]: data }));
@@ -162,6 +172,19 @@ const App: React.FC = () => {
       <PerformanceContext.Provider value={perfProfile}>
         <NavigationContext.Provider value={{ currentView, navigateTo: handleViewChange }}>
           <div className={`min-h-screen flex flex-col font-body selection:bg-primary/20 transition-colors duration-700 ${isPending ? 'bg-slate-50' : 'bg-surface'}`}>
+            <AnimatePresence>
+              {successMessage && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 bg-slate-900 text-white rounded-full text-[0.6rem] font-black uppercase tracking-widest shadow-2xl flex items-center gap-3 border border-white/10"
+                >
+                  <span className="material-symbols-outlined text-primary text-sm">stars</span>
+                  {successMessage}
+                </motion.div>
+              )}
+            </AnimatePresence>
             <Navigation currentView={currentView} onChangeView={handleViewChange} />
             
             <main 

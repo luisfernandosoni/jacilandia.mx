@@ -196,7 +196,7 @@ app.get('/auth/callback/google', async (c) => {
         .run();
     }
 
-    const session = await lucia.createSession(user.id, {});
+    const session = await lucia.createSession((user as any).id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
     c.header("Set-Cookie", sessionCookie.serialize(), { append: true });
 
