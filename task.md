@@ -41,3 +41,15 @@
   - [x] Fix `isLive` status listener and script race condition
   - [x] Verify Street View initialization
   - [x] Test layout stability
+- [ ] Membership & Commerce System (Using @payment-integration & @auth-implementation-patterns)
+  - [ ] **Phase 1: Database & Auth (Analytics-First)**
+    - [ ] Update D1 Schema (Users + `ledger` "Golden Table" for unified access/revenue)
+    - [ ] Implement Google OAuth 2.0 using `arctic` (Account Linking)
+  - [ ] **Phase 2: Payment Engine (MercadoPago)**
+    - [ ] Encapsulate `MP_Service` logic
+    - [ ] Implement Subscription/One-off Webhooks with Idempotency
+    - [ ] Sync successful payments to `ledger` (Unlock + Revenue Log)
+  - [ ] **Phase 3: Dashboard & Intelligence**
+    - [ ] Build `DashboardView` with ownership checks
+    - [ ] Implement "Instant Analytics" endpoints (MRR, LTV, Top Drops)
+    - [ ] Connect R2 Secure Downloads

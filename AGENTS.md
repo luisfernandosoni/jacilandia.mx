@@ -40,6 +40,9 @@
 
 ## 5. Baseline Documentation
 
+- **Skill Transparency**:
+  - `implementation_plan.md` MUST list "Active Skills" in the header.
+  - `walkthrough.md` MUST list "Skills Used" in the summary.
 - [task.md](file:///e:/Antigravity/jacilandia.mx/task.md)
 - [site.md](file:///e:/Antigravity/jacilandia.mx/site.md)
 - [design.md](file:///e:/Antigravity/jacilandia.mx/design.md)
