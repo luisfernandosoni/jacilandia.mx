@@ -1,33 +1,17 @@
-# task.md - Project Roadmap
+# Task: Update cloudflare-dev-expert skill with D1 data
 
-- [x] Initial Repository Cloning
-- [x] Git Configuration & Security (`.agent` to `.gitignore`)
-- [x] Baseline Documentation Scaffolding
-- [x] Deep Site Audit & Architectural Mapping
-- [x] Advanced Optimizations & Refinements
-- [x] UI Polish: Audit and fix Navigation centering & swap items
-- [x] Global Performance Audit
-- [x] Chrome DevTools Baseline Evaluation
-- [x] Implement Performance Optimizations
-- [x] UX & UI Audit
-- [x] Implement UI/UX Refinements
-- [x] Environment Setup
-- [x] Infrastructure Verification
-- [x] Motion Refinement
-- [x] Street View Regression Debug
-- [x] **Phase 1-3: Identity, Vault & Cashflow (Hardened)**
-  - [x] Lucia Auth + Google OAuth (Arctic)
-  - [x] Drop Explorer with /cdn-cgi/image/
-  - [x] MercadoPago Singleton with Signature Verification
-- [x] **Phase 4: The Cockpit (Intelligence Dashboard)**
-  - [x] AdminView with Glassmorphic KPIs
-  - [x] Real-time stats (MRR, Revenue, Churn)
-  - [x] AdminMiddleware RBAC
-- [/] **Phase 5: Ruthless Audit (In Progress)**
-  - [ ] Data Integrity: Stress test ledger table under high-concurrency mocks
-  - [ ] Asset Personalization: Implementing "User-Exclusive" watermarking on PNG downloads
-  - [ ] Success UI: Polishing the "Post-Purchase" experience to be a "Wow" moment
-- [ ] **Future Phases**
-  - [ ] Asset Multi-Select: ZIP-on-the-fly generation
-  - [ ] Community Layer: Gated commenting system
-  - [ ] AI Tagger: Automated R2 tagging via workers-ai
+- [/] Initialize documentation and planning <!-- id: 0 -->
+  - [x] Read GEMINI.md and AGENTS.md <!-- id: 1 -->
+  - [/] Create `task.md` <!-- id: 2 -->
+  - [ ] Create `implementation_plan.md` <!-- id: 3 -->
+- [ ] Research D1 Documentation <!-- id: 4 -->
+  - [ ] Read `https://developers.cloudflare.com/d1/` and subpages <!-- id: 5 -->
+  - [ ] Identify granular details (limits, configuration, SQL features, API usage) <!-- id: 6 -->
+- [ ] Research Related Skills <!-- id: 7 -->
+  - [ ] Search System Skill Library for complementary skills <!-- id: 8 -->
+- [ ] Update cloudflare-dev-expert Skill <!-- id: 9 -->
+  - [ ] Draft granular additions for SKILL.md <!-- id: 10 -->
+  - [ ] Update SKILL.md in `c:\Users\sonig\.gemini\skills\cloudflare-dev-expert` <!-- id: 11 -->
+- [ ] Verification <!-- id: 12 -->
+  - [ ] Review updated skill against documentation accuracy <!-- id: 13 -->
+  - [ ] Create `walkthrough.md` <!-- id: 14 -->
