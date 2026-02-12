@@ -15,3 +15,4 @@ bucket_name = "jaci-assets"
 
 [vars]
 APP_URL = "https://jacilandia.mx"
+GOOGLE_CLIENT_ID = "174406118242-vern534bf8oj4iibmk5fhhne7khigd9q.apps.googleusercontent.com"
