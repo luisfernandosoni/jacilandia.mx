@@ -3,7 +3,12 @@
 
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
-    email TEXT UNIQUE
+    email TEXT UNIQUE,
+    google_id TEXT,
+    picture TEXT,
+    name TEXT,
+    role TEXT DEFAULT 'user',
+    created_at INTEGER DEFAULT (unixepoch())
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
