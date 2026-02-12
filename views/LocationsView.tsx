@@ -24,15 +24,21 @@ interface LocationConfig {
   embedUrl: string;
   coordinates: { lat: number; lng: number };
   pov: { heading: number; pitch: number };
+  zoom?: number;
   panoId?: string;
   fallbackImage: string;
 }
 
 // Helper to generate official Street View Static API URL
-const getStreetViewStaticUrl = (panoId: string, pov: { heading: number; pitch: number }) => {
+const getStreetViewStaticUrl = (panoId: string, pov: { heading: number; pitch: number }, zoom: number = 0) => {
   const apiKey = (import.meta as any).env.VITE_GOOGLE_MAPS_API_KEY;
   if (!apiKey) return 'https://placehold.co/640x360?text=JACI+Location'; // Fallback handle gracefully
-  return `https://maps.googleapis.com/maps/api/streetview?size=640x360&pano=${panoId}&heading=${pov.heading}&pitch=${pov.pitch}&fov=90&key=${apiKey}`;
+  
+  // Calculate FOV based on zoom level. Base FOV 90 corresponds approximately to zoom 0-1 depending on context,
+  // but for static API, 90 is default. We'll use 90 / 2^zoom logic for consistency.
+  const fov = 90 / Math.pow(2, zoom);
+  
+  return `https://maps.googleapis.com/maps/api/streetview?size=640x360&pano=${panoId}&heading=${pov.heading}&pitch=${pov.pitch}&fov=${fov}&key=${apiKey}`;
 };
 
 const LOCATIONS: LocationConfig[] = [
@@ -48,6 +54,7 @@ const LOCATIONS: LocationConfig[] = [
     embedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3761.343513689239!2d-96.927163023955!3d19.526844941320496!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85db321946399c0d%3A0xb306129188e99e43!2sAv.%20Manuel%20%C3%81vila%20Camacho%2033%2C%20Zona%20Centro%2C%20Centro%2C%2091000%20Xalapa-Enr%C3%ADquez%2C%20Ver.!5e0!3m2!1sen!2smx!4v1710000000000!5m2!1sen!2smx',
     coordinates: { lat: 19.5277903, lng: -96.9263094 },
     pov: { heading: 207.86, pitch: 0 },
+    zoom: 1,
     panoId: 'eyodG-vx09zeo-Gz8qQARQ',
     fallbackImage: '' // Populated dynamically
   },
@@ -68,7 +75,7 @@ const LOCATIONS: LocationConfig[] = [
   }
 ].map(loc => ({
   ...loc,
-  fallbackImage: loc.panoId ? getStreetViewStaticUrl(loc.panoId, loc.pov) : loc.fallbackImage
+  fallbackImage: loc.panoId ? getStreetViewStaticUrl(loc.panoId, loc.pov, loc.zoom) : loc.fallbackImage
 }));
 
 const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
@@ -84,9 +91,12 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
     try {
       const panorama = new window.google.maps.StreetViewPanorama(containerRef.current, {
         position: location.coordinates,
-        pov: location.pov,
+        pov: { 
+          ...location.pov, 
+          zoom: location.zoom || 0 // Deprecated in pov, but sometimes needed or used in view options directly
+        },
+        zoom: location.zoom || 0, // Top level zoom property
         pano: location.panoId,
-        zoom: 0,
         disableDefaultUI: true,
         addressControl: false,
         fullscreenControl: false,
