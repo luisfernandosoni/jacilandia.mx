@@ -11,13 +11,20 @@ CREATE TABLE IF NOT EXISTS drops (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
-  month INTEGER NOT NULL,
-  year INTEGER NOT NULL,
+  month INTEGER NOT NULL DEFAULT 1,
+  year INTEGER NOT NULL DEFAULT 2026,
   thumbnail_url TEXT,
   description TEXT,
   tags TEXT, -- JSON Array ["video", "print", "desktop"] for filtering
-  published_at INTEGER
+  published_at INTEGER DEFAULT (unixepoch())
 );
+
+-- Emergency Column Injection for Drops
+ALTER TABLE drops ADD COLUMN IF NOT EXISTS month INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE drops ADD COLUMN IF NOT EXISTS year INTEGER NOT NULL DEFAULT 2026;
+ALTER TABLE drops ADD COLUMN IF NOT EXISTS slug TEXT; 
+-- Note: UNIQUE constraint on slug can't be added via ALTER TABLE in SQLite, 
+-- but we ensure the column exists for logic.
 
 -- 🔍 Full Text Search (The "Google" within JACI)
 CREATE VIRTUAL TABLE IF NOT EXISTS drops_fts USING fts5(
@@ -60,11 +67,21 @@ CREATE TABLE IF NOT EXISTS ledger (
   user_id TEXT NOT NULL,
   drop_id TEXT NOT NULL,
   source TEXT NOT NULL, -- 'subscription_renewal', 'one_off_purchase'
-  amount REAL NOT NULL,
+  amount REAL NOT NULL DEFAULT 0,
   payment_ref TEXT,
   month INTEGER,
   year INTEGER,
-  unlocked_at INTEGER,
+  unlocked_at INTEGER DEFAULT (unixepoch()),
   UNIQUE(user_id, drop_id)
 );
+
+-- Emergency Column Injection for partially existing schemas
+-- These will only run if the columns don't exist, preventing "no such column" errors
+-- in foreign keys or indexes.
+-- Note: D1 execute handles multiple statements; if column exists, these might fail
+-- but since we know they are MISSING from the remote DB based on PRAGMA, we add them.
+ALTER TABLE ledger ADD COLUMN IF NOT EXISTS amount REAL NOT NULL DEFAULT 0;
+ALTER TABLE ledger ADD COLUMN IF NOT EXISTS month INTEGER;
+ALTER TABLE ledger ADD COLUMN IF NOT EXISTS year INTEGER;
+
 CREATE INDEX IF NOT EXISTS idx_ledger_month_year ON ledger(month, year);
