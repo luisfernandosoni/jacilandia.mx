@@ -53,6 +53,7 @@ const rateLimiter = (limit: number) => async (c: any, next: any) => {
 
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
+import { bodyLimit } from 'hono/body-limit';
 import { z } from 'zod';
 import { Lucia, Session, User } from "lucia";
 import { D1Adapter } from "@lucia-auth/adapter-sqlite";
@@ -89,6 +90,12 @@ app.use('*', cors({
 
 // SPRINT 3: CSRF Protection (Solo permite peticiones del mismo origen)
 app.use('*', csrf());
+
+// 🧪 SECURITY 360: Body Limit for DoS Protection (@api-fuzzing-bug-bounty)
+app.use('*', bodyLimit({
+  maxSize: 64 * 1024, // 64KB limit for all payloads
+  onError: (c) => c.json({ error: "Payload too large", code: "PAYLOAD_TOO_LARGE" }, 413)
+}));
 
 // --- FACTORY DE LUCIA AUTH ---
 const getLucia = (db: any) => {
@@ -292,6 +299,15 @@ app.post('/auth/login-dev', rateLimiter(5), async (c) => {
 // --- RUTHLESS ERROR HARDENING [#8] ---
 app.onError((err, c) => {
   console.error(`[CRITICAL ERROR] ${c.req.method} ${c.req.url}:`, err);
+  
+  // 🧪 SECURITY 360: Production Secret Guard (@production-code-audit)
+  if (!c.env.SIGNING_SECRET && c.env.ENVIRONMENT === 'production') {
+    return c.json({ 
+      error: "Critical infrastructure failure. Please contact administrator.", 
+      code: "INTERNAL_SERVER_ERROR" 
+    }, 500);
+  }
+
   return c.json({ 
     error: "An unexpected error occurred. Please contact support if this persists.",
     code: "INTERNAL_SERVER_ERROR" 
@@ -512,8 +528,8 @@ app.post('/webhooks/mercadopago', async (c) => {
       if (drop && userId) {
         const amount = payment.transaction_amount || 0;
         await db.prepare(`
-          INSERT INTO ledger (id, user_id, drop_id, source, amount, payment_ref, month, year, unlocked_at)
-          VALUES (?, ?, ?, 'subscription', ?, ?, ?, ?, ?)
+          INSERT INTO ledger (id, user_id, drop_id, source, amount, payment_ref, month, year, unlocked_at, payment_status)
+          VALUES (?, ?, ?, 'subscription', ?, ?, ?, ?, ?, ?)
         `).bind(
           crypto.randomUUID(), 
           userId, 
@@ -522,7 +538,8 @@ app.post('/webhooks/mercadopago', async (c) => {
           dataId.toString(),
           month,
           year,
-          Date.now()
+          Date.now(),
+          payment.status // 🧪 SECURITY 360: Auditability improvement
         ).run();
       }
     }
@@ -538,55 +555,59 @@ app.post('/webhooks/mercadopago', async (c) => {
 app.get('/admin/stats', adminMiddleware, async (c) => {
   const db = c.env.DB;
 
-  // 1. Revenue & MRR
-  const revenueStats: any = await db.prepare(`
-    SELECT 
-      SUM(CASE WHEN unlocked_at >= ? THEN amount ELSE 0 END) as revenue_24h,
-      SUM(CASE WHEN unlocked_at >= ? THEN amount ELSE 0 END) as revenue_7d,
-      SUM(amount) as revenue_total
-    FROM ledger
-  `).bind(
-    Date.now() - 24 * 60 * 60 * 1000,
-    Date.now() - 7 * 24 * 60 * 60 * 1000
-  ).first();
+  // 🧪 SECURITY 360: Parallel D1 Queries (@production-code-audit)
+  const [revenueStats, mrr, userStats, { results: topDrops }] = await Promise.all([
+    // 1. Revenue
+    db.prepare(`
+      SELECT 
+        SUM(CASE WHEN unlocked_at >= ? THEN amount ELSE 0 END) as revenue_24h,
+        SUM(CASE WHEN unlocked_at >= ? THEN amount ELSE 0 END) as revenue_7d,
+        SUM(amount) as revenue_total
+      FROM ledger
+    `).bind(
+      Date.now() - 24 * 60 * 60 * 1000,
+      Date.now() - 7 * 24 * 60 * 60 * 1000
+    ).first() as Promise<any>,
 
-  const mrr: any = await db.prepare(`
-    SELECT COUNT(*) * 29 as value
-    FROM subscriptions WHERE status = 'authorized'
-  `).first();
+    // 2. MRR
+    db.prepare(`
+      SELECT COUNT(*) * 29 as value
+      FROM subscriptions WHERE status = 'authorized'
+    `).first() as Promise<any>,
 
-  // 2. User & Subscription Growth
-  const userStats: any = await db.prepare(`
-    SELECT 
-      (SELECT COUNT(*) FROM users) as total_users,
-      (SELECT COUNT(*) FROM subscriptions WHERE status = 'authorized') as active_subs,
-      (SELECT COUNT(*) FROM subscriptions WHERE status = 'cancelled') as churned_subs
-  `).first();
+    // 3. User & Subscription Growth
+    db.prepare(`
+      SELECT 
+        (SELECT COUNT(*) FROM users) as total_users,
+        (SELECT COUNT(*) FROM subscriptions WHERE status = 'authorized') as active_subs,
+        (SELECT COUNT(*) FROM subscriptions WHERE status = 'cancelled') as churned_subs
+    `).first() as Promise<any>,
 
-  // 3. Drop Performance (Engagement Level)
-  const { results: topDrops } = await db.prepare(`
-    SELECT 
-      d.title, 
-      COUNT(l.id) as unlocks
-    FROM drops d
-    LEFT JOIN ledger l ON d.id = l.drop_id
-    GROUP BY d.id
-    ORDER BY unlocks DESC
-    LIMIT 5
-  `).all();
+    // 4. Drop Performance
+    db.prepare(`
+      SELECT 
+        d.title, 
+        COUNT(l.id) as unlocks
+      FROM drops d
+      LEFT JOIN ledger l ON d.id = l.drop_id
+      GROUP BY d.id
+      ORDER BY unlocks DESC
+      LIMIT 5
+    `).all() as Promise<any>
+  ]);
 
   return c.json({
     kpis: {
-      mrr: mrr.value || 0,
-      revenue_24h: revenueStats.revenue_24h || 0,
-      revenue_7d: revenueStats.revenue_7d || 0,
-      revenue_total: revenueStats.revenue_total || 0,
-      total_users: userStats.total_users,
-      active_subs: userStats.active_subs,
-      churn_rate: userStats.total_users > 0 ? (userStats.churned_subs / userStats.total_users * 100).toFixed(1) + "%" : "0%"
+      mrr: mrr?.value || 0,
+      revenue_24h: revenueStats?.revenue_24h || 0,
+      revenue_7d: revenueStats?.revenue_7d || 0,
+      revenue_total: revenueStats?.revenue_total || 0,
+      total_users: userStats?.total_users || 0,
+      active_subs: userStats?.active_subs || 0,
+      churn_rate: (userStats?.total_users || 0) > 0 ? (userStats.churned_subs / userStats.total_users * 100).toFixed(1) + "%" : "0%"
     },
-    topDrops,
-    total_users_base: userStats.total_users
+    topDrops: topDrops || [],
+    total_users_base: userStats?.total_users || 0
   });
 });
 
