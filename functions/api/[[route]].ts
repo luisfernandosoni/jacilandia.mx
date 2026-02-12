@@ -3,6 +3,7 @@ import { handle } from 'hono/cloudflare-pages';
 import { secureHeaders } from 'hono/secure-headers';
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
+import { z } from 'zod';
 import { Lucia, generateIdFromEntropySize, Session, User } from "lucia";
 import { D1Adapter } from "@lucia-auth/adapter-sqlite";
 
@@ -78,16 +79,30 @@ app.use('*', async (c, next) => {
   return next();
 });
 
+// --- SCHEMAS ---
+const LoginSchema = z.object({
+  email: z.string().email("Email inválido"),
+});
+
+const SubscriptionSchema = z.object({
+  planId: z.string().optional(),
+});
+
 // --- RUTAS DE AUTENTICACIÓN ---
 
 // 1. LOGIN
 app.post('/auth/login-dev', async (c) => {
   const body = await c.req.json();
-  const email = body.email?.toLowerCase().trim();
+  const result = LoginSchema.safeParse(body);
   
-  if (!email || !email.includes('@')) {
-    return c.json({ error: "Email inválido o requerido" }, 400);
+  if (!result.success) {
+    return c.json({ 
+      error: "Validación fallida", 
+      details: result.error.errors.map(e => ({ path: e.path, message: e.message }))
+    }, 400);
   }
+
+  const email = result.data.email.toLowerCase().trim();
 
   const lucia = c.get('lucia');
   const db = c.env.DB;
@@ -135,6 +150,12 @@ app.get('/user', (c) => {
 app.post('/checkout/subscription', async (c) => {
   const user = c.get('user');
   if (!user) return c.json({ error: "Unauthorized" }, 401);
+
+  const body = await c.req.json().catch(() => ({}));
+  const result = SubscriptionSchema.safeParse(body);
+  if (!result.success) {
+    return c.json({ error: "Datos de suscripción inválidos" }, 400);
+  }
 
   const accessToken = c.env.MP_ACCESS_TOKEN;
   if (!accessToken) return c.json({ error: "Server config error" }, 500);

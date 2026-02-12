@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ViewState, DESIGN_SYSTEM, PerformanceProfile, VIEW_THEMES, JACI_SQUAD } from './types';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
+import { Meta } from './components/Meta';
 
 // --- GLOBAL DATA COORDINATOR ---
 const DataCacheContext = createContext<{
@@ -144,7 +145,12 @@ const App: React.FC = () => {
 
   const prefetchData = useCallback((key: string, fetcher: () => Promise<any>) => {
     if (dataCache[key]) return;
-    fetcher().then(data => setCacheValue(key, data)).catch(() => {});
+    fetcher()
+      .then(data => setCacheValue(key, data))
+      .catch(err => {
+        console.error(`[DataCache] Prefetch failed for ${key}:`, err);
+        setCacheValue(key, { error: err.message || "Failed to fetch" });
+      });
   }, [dataCache, setCacheValue]);
 
   return (
@@ -165,22 +171,27 @@ const App: React.FC = () => {
                   className="w-full will-change-[transform,opacity]"
                 >
                   <Suspense fallback={null}>
-                    {(() => {
                       const deferredView = useDeferredValue(currentView);
-                      switch (deferredView) {
-                        case ViewState.HOME: return <HomeView />;
-                        case ViewState.ABOUT: return <AboutView />;
-                        case ViewState.METHODOLOGY: return <MethodologyView />;
-                        case ViewState.LEVELS: return <LevelsView />;
-                        case ViewState.TESTIMONIALS: return <TestimonialsView />;
-                        case ViewState.LOCATIONS: return <LocationsView />;
-                        case ViewState.PRICING: return <PricingView />;
-                        case ViewState.REGISTER: return <RegisterView />;
-                        case ViewState.DASHBOARD: return <DashboardView />;
-                        case ViewState.PRIVACY: return <PrivacyView />;
-                        default: return <HomeView />;
-                      }
-                    })()}
+                      return (
+                        <>
+                          <Meta view={deferredView} />
+                          {(() => {
+                            switch (deferredView) {
+                              case ViewState.HOME: return <HomeView />;
+                              case ViewState.ABOUT: return <AboutView />;
+                              case ViewState.METHODOLOGY: return <MethodologyView />;
+                              case ViewState.LEVELS: return <LevelsView />;
+                              case ViewState.TESTIMONIALS: return <TestimonialsView />;
+                              case ViewState.LOCATIONS: return <LocationsView />;
+                              case ViewState.PRICING: return <PricingView />;
+                              case ViewState.REGISTER: return <RegisterView />;
+                              case ViewState.DASHBOARD: return <DashboardView />;
+                              case ViewState.PRIVACY: return <PrivacyView />;
+                              default: return <HomeView />;
+                            }
+                          })()}
+                        </>
+                      );
                   </Suspense>
                 </motion.div>
               </AnimatePresence>

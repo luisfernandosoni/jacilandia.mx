@@ -62,6 +62,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
               onPointerEnter={() => handleIntentStart(ViewState.HOME)}
               onPointerLeave={() => handleIntentCancel(ViewState.HOME)}
               className="flex items-center active:scale-95 transition-transform group"
+              aria-label="Ir al inicio"
             >
               <div className="relative w-9 h-9 md:w-11 md:h-11">
                 <AnimatePresence mode="wait">
@@ -93,6 +94,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
                 onPointerLeave={() => handleIntentCancel(item.view)}
                 onClick={() => navigate(item.view)}
                 className={`relative px-5 py-3 min-h-[44px] flex items-center justify-center text-[0.625rem] font-black tracking-[0.15em] uppercase transition-all duration-500 whitespace-nowrap ${isActive ? 'text-primary' : 'text-slate-500 hover:text-slate-900'}`}
+                aria-label={`Navegar a ${item.label}`}
+                aria-current={isActive ? 'page' : undefined}
               >
                 <span className="relative z-10">{item.label}</span>
                 {isActive && <motion.div layoutId={DESIGN_SYSTEM.layoutIds.NAV_PILL} transition={DESIGN_SYSTEM.springs.projection} className="absolute inset-0 bg-white rounded-full shadow-sm z-0" />}
@@ -107,6 +110,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
             onPointerEnter={() => handleIntentStart(ViewState.DASHBOARD)}
             onPointerLeave={() => handleIntentCancel(ViewState.DASHBOARD)}
             className={`text-[0.55rem] xs:text-[0.6rem] md:text-[0.625rem] font-black uppercase tracking-[0.15em] md:tracking-[0.2em] transition-colors min-h-[44px] flex items-center ${currentView === ViewState.DASHBOARD ? 'text-primary' : 'text-slate-500 hover:text-slate-900'}`}
+            aria-label="Acceder a mi panel de estudiante"
           >
             Mi Panel
           </button>
@@ -117,6 +121,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
               onPointerEnter={() => handleIntentStart(ViewState.REGISTER)}
               onPointerLeave={() => handleIntentCancel(ViewState.REGISTER)}
               className="group relative px-4 xs:px-5 md:px-7 py-2 md:py-3 overflow-hidden rounded-full transition-all active:scale-95 shadow-glow-pink/10 min-h-[44px] flex items-center"
+              aria-label="Iniciar proceso de inscripción"
             >
               <div className="absolute inset-0 bg-jaci-pink" />
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
@@ -124,7 +129,12 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
             </button>
           </Magnetic>
           
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-1.5 min-w-[44px] min-h-[44px] text-slate-600 active:scale-90 transition-transform flex items-center justify-center">
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+            className="lg:hidden p-1.5 min-w-[44px] min-h-[44px] text-slate-600 active:scale-90 transition-transform flex items-center justify-center"
+            aria-label={isMobileMenuOpen ? "Cerrar menú móvil" : "Abrir menú móvil"}
+            aria-expanded={isMobileMenuOpen}
+          >
             <motion.span animate={{ rotate: isMobileMenuOpen ? 90 : 0 }} className="material-symbols-outlined text-2xl md:text-3xl">{isMobileMenuOpen ? 'close' : 'menu'}</motion.span>
           </button>
         </div>

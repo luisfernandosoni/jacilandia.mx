@@ -32,10 +32,13 @@ export const DashboardView: React.FC = () => {
       if (user && !cache.drops) {
         try {
           const res = await fetch('/api/drops');
+          if (!res.ok) throw new Error("No se pudierón cargar los contenidos.");
           const data = await res.json() as Drop[];
           setCache('drops', data);
           setDrops(data);
-        } catch (e) {}
+        } catch (e: any) {
+          setLoginError(e.message);
+        }
       }
       setIsLoading(false);
     };
@@ -146,13 +149,22 @@ export const DashboardView: React.FC = () => {
                 <div className="flex flex-col h-full">
                   <div className="relative aspect-[16/11] overflow-hidden group/img">
                     <OptimizedImage src={drop.cover_image || `https://placehold.co/800x600/f8fafc/64748b?text=${drop.title}`} alt={drop.title} className={`w-full h-full object-cover transition-transform duration-1000 ${drop.is_unlocked ? 'group-hover/img:scale-110' : 'grayscale opacity-60'}`} />
-                    {!drop.is_unlocked && <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[4px] flex items-center justify-center"><div className="size-14 bg-white rounded-full flex items-center justify-center shadow-2xl"><span className="material-symbols-outlined text-slate-900 filled">lock</span></div></div>}
+                    {!drop.is_unlocked && (
+                      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[4px] flex items-center justify-center">
+                        <div className="size-14 bg-white rounded-full flex items-center justify-center shadow-2xl" aria-label="Contenido bloqueado">
+                          <span className="material-symbols-outlined text-slate-900 filled" aria-hidden="true">lock</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="p-8 md:p-10 flex flex-col flex-1">
                     <span className={DESIGN_SYSTEM.typography.label}>{drop.month} {drop.year}</span>
                     <h3 className="text-xl md:text-2xl font-black font-display text-slate-900 mb-4 transition-colors group-hover/card:text-primary">{drop.title}</h3>
                     <p className="text-slate-500 font-body text-sm mb-10 flex-1">{drop.is_unlocked ? "Contenido listo para descargar." : "Suscripción necesaria."}</p>
-                    <button className={`w-full py-4 rounded-full font-black text-[9px] uppercase tracking-[0.25em] transition-all flex items-center justify-center gap-2 ${drop.is_unlocked ? 'bg-slate-900 text-white hover:bg-jaci-green' : 'border-2 border-slate-100 text-slate-400'}`}>
+                    <button 
+                      className={`w-full py-4 rounded-full font-black text-[9px] uppercase tracking-[0.25em] transition-all flex items-center justify-center gap-2 ${drop.is_unlocked ? 'bg-slate-900 text-white hover:bg-jaci-green' : 'border-2 border-slate-100 text-slate-400'}`}
+                      aria-label={drop.is_unlocked ? `Descargar ${drop.title}` : `Suscribirse para desbloquear ${drop.title}`}
+                    >
                       <span className="material-symbols-outlined text-lg">{drop.is_unlocked ? 'cloud_download' : 'star'}</span>
                       {drop.is_unlocked ? 'Descargar' : 'Suscribirme'}
                     </button>
