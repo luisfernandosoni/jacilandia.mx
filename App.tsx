@@ -102,6 +102,7 @@ const App: React.FC = () => {
   const [perfProfile, setPerfProfile] = useState<PerformanceProfile>(PerformanceProfile.HIGH);
   const [dataCache, setDataCache] = useState<Record<string, any>>({});
   const mainContentRef = useRef<HTMLDivElement>(null);
+  const deferredView = useDeferredValue(currentView);
 
   const handleViewChange = useCallback((view: ViewState) => {
     if (currentView === view) return;
@@ -171,27 +172,24 @@ const App: React.FC = () => {
                   className="w-full will-change-[transform,opacity]"
                 >
                   <Suspense fallback={null}>
-                      const deferredView = useDeferredValue(currentView);
-                      return (
-                        <>
-                          <Meta view={deferredView} />
-                          {(() => {
-                            switch (deferredView) {
-                              case ViewState.HOME: return <HomeView />;
-                              case ViewState.ABOUT: return <AboutView />;
-                              case ViewState.METHODOLOGY: return <MethodologyView />;
-                              case ViewState.LEVELS: return <LevelsView />;
-                              case ViewState.TESTIMONIALS: return <TestimonialsView />;
-                              case ViewState.LOCATIONS: return <LocationsView />;
-                              case ViewState.PRICING: return <PricingView />;
-                              case ViewState.REGISTER: return <RegisterView />;
-                              case ViewState.DASHBOARD: return <DashboardView />;
-                              case ViewState.PRIVACY: return <PrivacyView />;
-                              default: return <HomeView />;
-                            }
-                          })()}
-                        </>
-                      );
+                    <>
+                      <Meta view={deferredView} />
+                      {(() => {
+                        switch (deferredView) {
+                          case ViewState.HOME: return <HomeView />;
+                          case ViewState.ABOUT: return <AboutView />;
+                          case ViewState.METHODOLOGY: return <MethodologyView />;
+                          case ViewState.LEVELS: return <LevelsView />;
+                          case ViewState.TESTIMONIALS: return <TestimonialsView />;
+                          case ViewState.LOCATIONS: return <LocationsView />;
+                          case ViewState.PRICING: return <PricingView />;
+                          case ViewState.REGISTER: return <RegisterView />;
+                          case ViewState.DASHBOARD: return <DashboardView />;
+                          case ViewState.PRIVACY: return <PrivacyView />;
+                          default: return <HomeView />;
+                        }
+                      })()}
+                    </>
                   </Suspense>
                 </motion.div>
               </AnimatePresence>

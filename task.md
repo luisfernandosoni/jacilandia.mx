@@ -18,6 +18,7 @@
   - [x] Error Resilience: Improve frontend `catch` blocks and data revalidation
   - [x] Backend: Integrate `Zod` validation and standardized error responses
 - [x] UI Polish: Audit and fix Navigation centering & swap items
+- [x] Debug: Resolved `App.tsx` regression causing build failure (referenced `deferredView` out of scope)
 - [ ] Environment Setup
   - [ ] `npm install` and dependency audit
   - [ ] Set up `.env.local` with Gemini API key
