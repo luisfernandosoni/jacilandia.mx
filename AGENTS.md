@@ -21,9 +21,24 @@
 - **Theming:** Use `applyAtmosphere` for view-specific color shifts.
 - **Assets:** Use the `/cdn-cgi/image/` prefix for all external assets to leverage Cloudflare's image optimization as implemented in `warmUpAssets`.
 - **Git:** NEVER upload the `.agent` folder or any `.md` file. They are ignored in `.gitignore`.
-- **Skill Transparency:** Always explicitly mention which skill is being applied for any given task (e.g., "Using @ui-ux-pro-max").
+- **Skill Transparency**: Always explicitly mention which skill is being applied for any given task (e.g., "Using @ui-ux-pro-max").
 
-## 4. Baseline Documentation
+## 4. Agent Evolution & Skill Manual
+
+### Self-Growth Protocol
+
+- **Continuous Learning**: After every major task or audit, identify new skills used or lessons learned and document them here.
+- **Constitutional Updates**: If a new best practice is established (e.g., "Atmospheric Prestige" patterns), promote it to the Mandatory Rules.
+
+### Active Skill Manual
+
+- **@ui-ux-pro-max**: Advanced visual hierarchy, grid systems, and elite aesthetics audit.
+- **@premium-design-standards**: Benchmarking against high-end Silicon Valley web interfaces.
+- **@web-performance-optimization**: LCP/CLS engineering, resource preloading, and bundle hardening.
+- **@performance-profiling**: Trace analysis and bottleneck identification.
+- **@motion-engine-v12**: Advanced spring physics and layout animations with Framer Motion.
+
+## 5. Baseline Documentation
 
 - [task.md](file:///e:/Antigravity/jacilandia.mx/task.md)
 - [site.md](file:///e:/Antigravity/jacilandia.mx/site.md)

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { ViewContainer, InteractionCard, GlassBadge, ScrollReveal, Magnetic, OptimizedImage } from '../components/MotionPrimitives';
 import { DESIGN_SYSTEM } from '../types';
-import { useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 
 // Extendemos el objeto window para TypeScript
 declare global {
@@ -160,18 +160,34 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
   }, [isInView, initPanorama]);
 
   return (
-    <div className="w-full h-full relative bg-slate-100 overflow-hidden">
-      {/* CAPA 1: Fallback Estático */}
+    <div className="w-full h-full relative bg-slate-200 overflow-hidden">
+      {/* CAPA 1: Fallback Estático con Blur Inicial */}
       <div className="absolute inset-0 z-0">
         <OptimizedImage 
           src={location.fallbackImage} 
           alt={location.name} 
-          className="w-full h-full object-cover grayscale-[15%]" 
+          className="w-full h-full object-cover grayscale-[15%] group-hover:scale-105 transition-transform duration-1000" 
           aspectRatio="aspect-video"
           priority="high"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none" />
       </div>
+
+      {/* CAPA INTERACTIVA: Indicador de que es 360° */}
+      {!isLive && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+          <motion.div 
+            animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="flex flex-col items-center gap-2"
+          >
+            <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white">
+              <span className="material-symbols-outlined text-3xl">360</span>
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white drop-shadow-md">Vista 360°</span>
+          </motion.div>
+        </div>
+      )}
 
       {/* CAPA 2: Street View Interactivo */}
       <div 
@@ -180,7 +196,7 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
       />
 
       {/* Loader o Error State */}
-      <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2">
+      <div className="absolute bottom-6 right-6 z-30 flex items-center gap-2">
         {hasError ? (
           <div className="bg-red-500/90 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
              <span className="text-[8px] font-black uppercase tracking-widest text-white">Error de Carga</span>
@@ -188,7 +204,7 @@ const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
         ) : isInView && !isLive && (
           <div className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
             <div className="w-2 h-2 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span className="text-[8px] font-black uppercase tracking-widest text-white/60">Activando...</span>
+            <span className="text-[8px] font-black uppercase tracking-widest text-white/60">Sincronizando...</span>
           </div>
         )}
       </div>

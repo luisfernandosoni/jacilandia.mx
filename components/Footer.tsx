@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Magnetic, getCloudflareImageUrl } from './MotionPrimitives';
 import { useNavigation } from '../App';
 import { ViewState } from '../types';
@@ -64,8 +65,11 @@ const SOCIAL_LINKS = [
 
 const NAV_LINKS = [
   { label: 'Inicio', view: ViewState.HOME },
-  { label: 'Aviso de Privacidad', view: ViewState.PRIVACY },
-  { label: 'Inscripciones Xalapa', view: ViewState.REGISTER },
+  { label: 'El Método', view: ViewState.METHODOLOGY },
+  { label: 'Nosotros', view: ViewState.ABOUT },
+  { label: 'Ubicaciones', view: ViewState.LOCATIONS },
+  { label: 'Privacidad', view: ViewState.PRIVACY },
+  { label: 'Inscripciones', view: ViewState.REGISTER },
 ];
 
 export const Footer: React.FC = () => {
@@ -88,7 +92,7 @@ export const Footer: React.FC = () => {
               <img 
                 src={optimizedLogoUrl} 
                 alt="JACI Xalapa" 
-                className="h-20 w-auto object-contain transition-all duration-500 group-hover:scale-105"
+                className="h-16 w-auto object-contain transition-all duration-500 group-hover:scale-105"
               />
             </div>
             <p className="text-gray-400 text-[10px] font-body mt-2 tracking-tight text-center md:text-left leading-relaxed">
@@ -103,7 +107,7 @@ export const Footer: React.FC = () => {
               <button 
                 key={link.label}
                 onClick={() => navigateTo(link.view)}
-                className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-primary transition-all duration-300 relative group cursor-pointer"
+                className="text-[10px] font-black tracking-[0.1em] text-slate-500 hover:text-primary transition-all duration-300 relative group cursor-pointer"
               >
                 {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-primary transition-all duration-300 group-hover:w-full" />
@@ -115,15 +119,33 @@ export const Footer: React.FC = () => {
           <div className="flex gap-5">
             {SOCIAL_LINKS.map((social) => (
               <Magnetic key={social.name} pullStrength={0.2}>
-                <a 
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${social.name} JACI Xalapa`}
-                  className={`group w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-400 transition-all duration-500 border border-transparent hover:border-white/10 ${social.hoverClass}`}
+                <motion.div 
+                  className="relative group/social"
+                  whileHover="hover"
                 >
-                  {social.icon}
-                </a>
+                  <a 
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${social.name} JACI Xalapa`}
+                    className={`group w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-400 transition-all duration-500 border border-transparent hover:border-white/10 ${social.hoverClass}`}
+                  >
+                    {social.icon}
+                  </a>
+                  
+                  {/* Tooltip Premium */}
+                  <motion.div 
+                    variants={{
+                      initial: { opacity: 0, y: 10, scale: 0.8 },
+                      hover: { opacity: 1, y: -45, scale: 1 }
+                    }}
+                    initial="initial"
+                    className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-50 px-3 py-1 bg-slate-900 text-white text-[8px] font-black tracking-[0.2em] rounded-lg shadow-xl"
+                  >
+                    {social.name}
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45" />
+                  </motion.div>
+                </motion.div>
               </Magnetic>
             ))}
           </div>
