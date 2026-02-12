@@ -81,6 +81,21 @@ type Variables = {
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>().basePath('/api');
 
+// --- ENVIRONMENT SANITIZATION (@api-security-best-practices) ---
+// Defensive posture: Ensure secrets and config have no accidental whitespace or newlines
+// which commonly trigger "TypeError: Invalid header value" in Cloudflare Workers.
+app.use('*', async (c, next) => {
+  if (c.env) {
+    for (const key in c.env) {
+      const val = (c.env as any)[key];
+      if (typeof val === 'string') {
+        (c.env as any)[key] = val.trim();
+      }
+    }
+  }
+  await next();
+});
+
 // --- MIDDLEWARE DE SEGURIDAD (DEVSECOPS SPRINT 1 & 3) ---
 app.use('*', secureHeaders()); 
 app.use('*', cors({
