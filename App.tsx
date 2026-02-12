@@ -161,7 +161,11 @@ const App: React.FC = () => {
           <div className={`min-h-screen flex flex-col font-body selection:bg-primary/20 transition-colors duration-700 ${isPending ? 'bg-slate-50' : 'bg-surface'}`}>
             <Navigation currentView={currentView} onChangeView={handleViewChange} />
             
-            <main id="main-content" ref={mainContentRef} className="flex-grow relative overflow-x-clip outline-none">
+            <main 
+              id="main-content" 
+              ref={mainContentRef} 
+              className={`flex-grow relative overflow-x-clip outline-none transition-[min-height] duration-500 ease-in-out ${perfProfile === PerformanceProfile.HIGH ? 'min-h-[85vh]' : 'min-h-[70vh]'}`}
+            >
               <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo(0, 0)}>
                 <motion.div
                   key={currentView}
@@ -171,7 +175,7 @@ const App: React.FC = () => {
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
                   className="w-full will-change-[transform,opacity]"
                 >
-                  <Suspense fallback={null}>
+                  <Suspense fallback={<div className="w-full h-[60vh] flex items-center justify-center" aria-hidden="true" />}>
                     <>
                       <Meta view={deferredView} />
                       {(() => {

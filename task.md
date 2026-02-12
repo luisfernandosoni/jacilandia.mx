@@ -35,4 +35,9 @@
   - [x] Analyze "snap up" behavior in Methodology cards
   - [x] Implement reduced range of motion in `MotionPrimitives.tsx`
   - [x] Clean up conflicting animations in `MethodologyView.tsx`
-  - [x] Verify fluid transitions
+  - [ ] Verify fluid transitions
+- [x] Layout & Transition Stabilization
+  - [x] Analyze layout collapse during lazy loading
+  - [x] Implement `min-h` stabilization in `App.tsx`
+  - [x] Update `Suspense` fallback for smooth handoff
+  - [x] Verify zero-snap navigation on fresh load
