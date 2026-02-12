@@ -1,5 +1,5 @@
 #:schema https://raw.githubusercontent.com/cloudflare/wrangler2/main/packages/wrangler/config-schema.json
-name = "jacilandia-mx"
+name = "jacilandia"
 pages_build_output_dir = "dist"
 compatibility_date = "2025-02-01"
 compatibility_flags = [ "nodejs_compat" ]
