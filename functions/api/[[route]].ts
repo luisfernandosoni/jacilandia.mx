@@ -3,7 +3,7 @@ import { handle } from 'hono/cloudflare-pages';
 import { secureHeaders } from 'hono/secure-headers';
 // @ts-ignore
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
-import { Image } from 'imagescript';
+
 import { MP_Service } from './mp-service';
 
 // --- SILICON VALLEY SECURITY UTILS (@api-security-best-practices) ---
@@ -376,12 +376,11 @@ app.get('/download/:assetId', async (c) => {
   if (!asset) return c.json({ error: "No tienes acceso a este contenido o el asset no existe." }, 403);
 
   // 2. Generate Signed URL (Rule 89)
-  const watermark = (user as any).email || "JACIUSER";
   const expires = Math.floor(Date.now() / 1000) + 300; // 5 minute window
-  const payload = `${asset.r2_key}:${expires}:${watermark}`;
+  const payload = `${asset.r2_key}:${expires}`;
   const signature = await getSignature(payload, c.env.SIGNING_SECRET || SIGNING_SECRET);
   
-  return c.redirect(`/api/cdn/${asset.r2_key}?expires=${expires}&signature=${signature}&wm=${encodeURIComponent(watermark)}`);
+  return c.redirect(`/api/cdn/${asset.r2_key}?expires=${expires}&signature=${signature}`);
 });
 
 // NEW: Internal Secure CDN Proxy (Rule 67 & 89 compliance)
@@ -389,12 +388,11 @@ app.get('/cdn/:key', async (c) => {
   const key = c.req.param('key');
   const expires = c.req.query('expires');
   const signature = c.req.query('signature');
-  const watermark = c.req.query('wm');
 
   if (!expires || !signature) return c.text("Forbidden: Missing credentials", 403);
   if (parseInt(expires) < Math.floor(Date.now() / 1000)) return c.text("Forbidden: Link expired", 403);
   
-  const payload = watermark ? `${key}:${expires}:${watermark}` : `${key}:${expires}`;
+  const payload = `${key}:${expires}`;
   const isValid = await verifySignature(payload, signature, c.env.SIGNING_SECRET || SIGNING_SECRET);
   if (!isValid) return c.text("Forbidden: Invalid signature", 403);
 
@@ -406,33 +404,7 @@ app.get('/cdn/:key', async (c) => {
   headers.set('etag', object.httpEtag);
   headers.set('Cache-Control', 'public, max-age=31536000'); 
 
-  // Silicon Valley Tier: Asset Personalization (Rule 90)
-  if (key.toLowerCase().endsWith('.png') && watermark) {
-    try {
-      const arrayBuffer = await object.arrayBuffer();
-      const image = await Image.decode(new Uint8Array(arrayBuffer));
-      
-      // Draw a subtle "Identity Bar" at the bottom (30% opacity)
-      // This ensures the asset is traceable to the user
-      // [Advanced implementation would use renderText here]
-      
-      const width = image.width;
-      const height = image.height;
-      const barHeight = Math.floor(height * 0.05); // 5% of height
-      
-      // Create a semi-transparent identity overlay
-      const overlay = new Image(width, barHeight);
-      overlay.fill(0x00000044); // Slate with 30% alpha
-      
-      image.composite(overlay, 0, height - barHeight);
-      
-      const output = await image.encode();
-      headers.set('Content-Length', output.length.toString());
-      return new Response(output as BodyInit, { headers });
-    } catch (e) {
-      console.error("[Watermark] Error processing image:", e);
-    }
-  }
+
   
   return new Response(object.body as any, { headers: headers as any });
 });

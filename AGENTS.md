@@ -57,7 +57,7 @@
 - **Infrastructure & Cloudflare (`@cloudflare-dev-expert`)**:
   - **Standard**: "Silicon Valley" Tier. Prefer Cloudflare-native solutions.
   - **Node.js Compatibility**: Libraries using built-ins (`fs`, `path`, `os`) **MUST** have `compatibility_flags = [ "nodejs_compat" ]` in `wrangler.toml` and Dashboard.
-  - **Edge Processing**: `imagescript` requires Node.js compat. Use Wasm-backed libraries for high-compute tasks. Guard for **128MB** memory limit.
+  - **Edge Processing**: Guard for **128MB** memory limit. Prefer Cloudflare Images (product) for native optimization.
   - **R2 Security**: All public assets MUST use **Signed URLs** (5min) or **HMAC Proxying**.
   - **Guardrail**: Proactively audit dependencies for Node.js built-ins before adding packages. `wrangler` commands default to local; use `--remote` for truth.
 
@@ -95,8 +95,6 @@
 - **Security Strategy (`@api-security-best-practices` & `@broken-authentication`)**:
   - **Defense**: ALL publicly accessible downloads must use **Signed R2 URLs** (5min expiry).
   - **Vulnerability**: Prevent **IDOR** by verifying `ledger` ownership _before_ signing URLs.
-  - **Red Team**: Proactively test for Session Fixation and Privilege Escalation.
-  - **Rate Limiting**: Apply strictly to `/auth/*` and `/checkout/*` endpoints.
 
 ## 5. Baseline Documentation
 
