@@ -6,7 +6,7 @@ compatibility_date = "2024-02-08"
 [[d1_databases]]
 binding = "DB"
 database_name = "jaci-db"
-database_id = "jaci-db" # Local emulator name
+database_id = "67ad713e-1d5e-42a9-8918-9e77b689c0c3"
 
 [[r2_buckets]]
 binding = "R2"
