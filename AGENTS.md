@@ -54,6 +54,13 @@
 
 > **System Note:** These rules are loaded _passively_ to reduce retrieval latency.
 
+- **Infrastructure & Cloudflare (`@cloudflare-dev-expert`)**:
+  - **Standard**: "Silicon Valley" Tier. Prefer Cloudflare-native solutions.
+  - **Node.js Compatibility**: Libraries using built-ins (`fs`, `path`, `os`) **MUST** have `compatibility_flags = [ "nodejs_compat" ]` in `wrangler.toml` and Dashboard.
+  - **Edge Processing**: `imagescript` requires Node.js compat. Use Wasm-backed libraries for high-compute tasks. Guard for **128MB** memory limit.
+  - **R2 Security**: All public assets MUST use **Signed URLs** (5min) or **HMAC Proxying**.
+  - **Guardrail**: Proactively audit dependencies for Node.js built-ins before adding packages. `wrangler` commands default to local; use `--remote` for truth.
+
 - **Design & Aesthetics (`@ui-ux-pro-max`, `@premium-design-standards`, `@design-md`)**:
   - **Standard**: "Silicon Valley" Tier (Apple/Stripe quality). No basic UI.
   - **System**: Must use `DESIGN_SYSTEM` in `types.ts`.
@@ -80,7 +87,6 @@
   - **Engine**: **Cloudflare D1** (SQLite).
   - **Schema**: _Analytics-First_. The `ledger` table is the Single Source of Truth for both Access and Revenue.
   - **Search**: Use **FTS5** virtual tables for `drops` search; do not use `LIKE %...%`.
-
 - **Analytics (`@analytics-tracking` & `@startup-metrics-framework`)**:
   - **Metrics**: Track **MRR**, **LTV**, and **Churn Rate** (>5% alert).
   - **Definition**: A "User" is only tracked after `subscription_started`.
