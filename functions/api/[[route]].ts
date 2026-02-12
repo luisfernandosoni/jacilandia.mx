@@ -229,7 +229,7 @@ app.post('/auth/login-dev', async (c) => {
   if (!result.success) {
     return c.json({ 
       error: "Validación fallida", 
-      details: result.error.errors.map(e => ({ path: e.path, message: e.message }))
+      details: result.error.issues.map((e: z.ZodIssue) => ({ path: e.path, message: e.message }))
     }, 400);
   }
 
