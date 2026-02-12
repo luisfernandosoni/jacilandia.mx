@@ -2,6 +2,7 @@
 name = "jacilandia-mx"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-02-08"
+compatibility_flags = [ "nodejs_compat" ]
 
 [[d1_databases]]
 binding = "DB"
