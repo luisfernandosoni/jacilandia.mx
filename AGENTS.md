@@ -54,12 +54,12 @@
 
 > **System Note:** These rules are loaded _passively_ to reduce retrieval latency.
 
-- **Infrastructure & Cloudflare (`@cloudflare-dev-expert`)**:
+- **Infrastructure & Cloudflare (@cloudflare-dev-expert)**:
   - **Standard**: "Silicon Valley" Tier. Prefer Cloudflare-native solutions.
-  - **Node.js Compatibility**: Libraries using built-ins (`fs`, `path`, `os`) **MUST** have `compatibility_flags = [ "nodejs_compat" ]` in `wrangler.toml` and Dashboard.
-  - **Edge Processing**: Guard for **128MB** memory limit. Prefer Cloudflare Images (product) for native optimization.
-  - **R2 Security**: All public assets MUST use **Signed URLs** (5min) or **HMAC Proxying**.
-  - **Guardrail**: Proactively audit dependencies for Node.js built-ins before adding packages. `wrangler` commands default to local; use `--remote` for truth.
+  - **Node.js**: Requires `compatibility_flags = [ "nodejs_compat" ]` and `compatibility_date = "2025-02-01"` in `wrangler.toml` for modern ESM modules.
+  - **D1 Recovery (CRITICAL)**: If migrations fail or hang, perform a **Truth Audit** (`PRAGMA table_info`) and **Surgical Reconstruction** (one-by-one SQL execution) as defined in the hardened skill reference.
+  - **Edge Processing**: Guard for **128MB** memory limit. Prefer streaming via `response.body`.
+  - **Guardrail**: ALWAYS use `--remote` for wrangler operations to verify the "Truth on the Edge".
 
 - **Design & Aesthetics (`@ui-ux-pro-max`, `@premium-design-standards`, `@design-md`)**:
   - **Standard**: "Silicon Valley" Tier (Apple/Stripe quality). No basic UI.
