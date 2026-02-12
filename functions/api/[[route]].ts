@@ -175,8 +175,11 @@ const SubscriptionSchema = z.object({
 const getBaseUrl = (c: any) => {
   // Use config URL or fall back to request origin for local dev/preview
   // 🧪 SECURITY 360: Robust trimming for c.env immutability (@cloudflare-dev-expert)
-  let url = (c.env.APP_URL || new URL(c.req.url).origin).trim();
-  return url.replace(/\/$/, ""); // Normalize: remove trailing slash
+  const rawUrl = c.env.APP_URL || new URL(c.req.url).origin;
+  const url = rawUrl.trim();
+  const finalUrl = url.replace(/\/$/, ""); 
+  console.log(`[AUTH DEBUG] getBaseUrl: raw='${rawUrl}', processed='${finalUrl}'`);
+  return finalUrl;
 };
 
 // --- RUTAS DE AUTENTICACIÓN ---
@@ -188,6 +191,7 @@ app.get('/auth/login/google', rateLimiter(10), async (c) => {
     c.env.GOOGLE_CLIENT_SECRET.trim(),
     `${getBaseUrl(c)}/api/auth/callback/google`
   );
+  console.log(`[AUTH DEBUG] Login Redirect URI: ${getBaseUrl(c)}/api/auth/callback/google`);
   
   const state = generateState();
   const codeVerifier = generateCodeVerifier();
@@ -228,6 +232,8 @@ app.get('/auth/callback/google', async (c) => {
     c.env.GOOGLE_CLIENT_SECRET.trim(),
     `${getBaseUrl(c)}/api/auth/callback/google`
   );
+  console.log(`[AUTH DEBUG] Callback Redirect URI: ${getBaseUrl(c)}/api/auth/callback/google`);
+  console.log(`[AUTH DEBUG] Code matches: ${!!code}, Verifier matches: ${!!codeVerifier}`);
 
   try {
     const tokens = await google.validateAuthorizationCode(code, codeVerifier);
