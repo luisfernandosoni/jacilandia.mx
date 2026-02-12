@@ -77,9 +77,7 @@ CREATE TABLE IF NOT EXISTS ledger (
 
 -- Reconciling drift for ledger
 ALTER TABLE ledger ADD COLUMN amount REAL NOT NULL DEFAULT 0;
-ALTER TABLE ledger ADD COLUMN payment_ref TEXT;
 ALTER TABLE ledger ADD COLUMN month INTEGER;
 ALTER TABLE ledger ADD COLUMN year INTEGER;
-ALTER TABLE ledger ADD COLUMN unlocked_at INTEGER DEFAULT (unixepoch());
 
 CREATE INDEX IF NOT EXISTS idx_ledger_month_year ON ledger(month, year);
