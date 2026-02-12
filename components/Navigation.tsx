@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ViewState, NavItem, DESIGN_SYSTEM } from '../types';
 import { Magnetic, getCloudflareImageUrl } from './MotionPrimitives';
+import { UserAvatar } from './UserAvatar';
 import { prewarmView, useDataCache, applyAtmosphere } from '../App';
 
 interface NavigationProps {
@@ -118,7 +119,10 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
                     onClick={() => navigate(ViewState.DASHBOARD)}
                     className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20 hover:border-primary transition-colors active:scale-95"
                   >
-                    <img src={user.picture || `https://ui-avatars.com/api/?name=${user.email}&background=random`} alt="Usuario" className="w-full h-full object-cover" />
+                    <UserAvatar 
+                      src={user.picture} 
+                      name={user.name || user.email || "?"} 
+                    />
                   </button>
                 </div>
               );
