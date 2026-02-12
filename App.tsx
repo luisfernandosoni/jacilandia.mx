@@ -176,25 +176,43 @@ const App: React.FC = () => {
           <div className={`min-h-screen flex flex-col font-body selection:bg-primary/20 transition-colors duration-700 ${isPending ? 'bg-slate-50' : 'bg-surface'}`}>
             <AnimatePresence>
               {successMessage && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -40, scale: 0.9, filter: 'blur(20px)' }}
-                  animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, scale: 0.95, filter: 'blur(20px)', transition: { duration: 0.2 } }}
-                  transition={DESIGN_SYSTEM.springs.snappy}
-                  className="fixed top-28 left-1/2 -translate-x-1/2 z-[200] px-8 py-4 bg-white/80 backdrop-blur-2xl text-slate-900 rounded-[2rem] text-[0.7rem] font-black uppercase tracking-[0.2em] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] flex items-center gap-4 border border-white"
-                >
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                    <motion.span 
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.2, type: 'spring' }}
-                      className="material-symbols-outlined text-sm"
-                    >
-                      check_circle
-                    </motion.span>
-                  </div>
-                  {successMessage}
-                </motion.div>
+                <>
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[190] bg-primary/5 backdrop-blur-md pointer-events-none"
+                  />
+                  <motion.div 
+                    initial={{ opacity: 0, y: -60, scale: 0.8, filter: 'blur(20px)' }}
+                    animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                    exit={{ opacity: 0, scale: 0.9, filter: 'blur(20px)', transition: { duration: 0.3 } }}
+                    transition={DESIGN_SYSTEM.springs.snappy}
+                    className="fixed top-32 left-1/2 -translate-x-1/2 z-[200] pr-10 pl-6 py-5 bg-white/70 backdrop-blur-3xl text-slate-900 rounded-[3rem] text-[0.75rem] font-black uppercase tracking-[0.25em] shadow-[0_40px_80px_-20px_rgba(37,192,244,0.3)] flex items-center gap-6 border border-white/40 group"
+                  >
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white shadow-[0_0_20px_rgba(37,192,244,0.5)]">
+                        <motion.span 
+                          initial={{ scale: 0, rotate: -45 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{ delay: 0.2, type: 'spring', stiffness: 300 }}
+                          className="material-symbols-outlined text-xl filled"
+                        >
+                          auto_awesome
+                        </motion.span>
+                      </div>
+                      <motion.div 
+                        animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="absolute inset-0 bg-primary rounded-full blur-lg -z-10"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-primary text-[0.6rem] mb-1">Success Unlocked</span>
+                      {successMessage}
+                    </div>
+                  </motion.div>
+                </>
               )}
             </AnimatePresence>
             <Navigation currentView={currentView} onChangeView={handleViewChange} />

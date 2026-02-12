@@ -3,53 +3,31 @@
 - [x] Initial Repository Cloning
 - [x] Git Configuration & Security (`.agent` to `.gitignore`)
 - [x] Baseline Documentation Scaffolding
-  - [x] `AGENTS.md`
-  - [x] `site.md`
-  - [x] `design.md`
-  - [x] `lessons.md`
-  - [x] `changelog.md`
 - [x] Deep Site Audit & Architectural Mapping
-  - [x] Audit frontend interaction system (Magnetic/Velocity)
-  - [x] Map backend route integration (Lucia/MercadoPago)
-  - [x] Document Cloudflare Image Optimization (LQIP)
 - [x] Advanced Optimizations & Refinements
-  - [x] Implement `Meta.tsx` for dynamic SEO/OG tags
-  - [x] A11y Audit: Add `aria-label` and `role` to interactive elements
-  - [x] Error Resilience: Improve frontend `catch` blocks and data revalidation
-  - [x] Backend: Integrate `Zod` validation and standardized error responses
 - [x] UI Polish: Audit and fix Navigation centering & swap items
-- [x] Debug: Resolved `App.tsx` regression causing build failure (referenced `deferredView` out of scope)
-- [x] Optimization: Ubicaciones "Idle-Warmup" & API Cost Audit
-- [x] Global Performance Audit (LCP, CLS, Predictive Prefetching)
-- [x] Chrome DevTools Baseline Evaluation (Core Web Vitals)
-- [x] Implement Performance Optimizations (Font Preload, Tailwind CSS Hardening)
-- [x] UX & UI Audit (Aesthetics, Fluidity, Design Consistency)
-- [x] Implement UI/UX Refinements (Animation, Placeholder LQIP, Tooltips)
+- [x] Global Performance Audit
+- [x] Chrome DevTools Baseline Evaluation
+- [x] Implement Performance Optimizations
+- [x] UX & UI Audit
+- [x] Implement UI/UX Refinements
 - [x] Environment Setup
-  - [x] `npm install` and dependency audit
-  - [x] Set up `.env.local` (Verified Google Maps API bindings)
 - [x] Infrastructure Verification
-  - [x] Test `pages:dev` with Wrangler (Stable on port 8788)
-  - [x] Verify D1 database connectivity (Bindings confirmed)
 - [x] Motion Refinement
-  - [x] Analyze "snap up" behavior in Methodology cards
-  - [x] Implement reduced range of motion in `MotionPrimitives.tsx`
-  - [x] Clean up conflicting animations in `MethodologyView.tsx`
-  - [ ] Verify fluid transitions
-- [x] Street View Regression Debug (Using @performance-profiling & @motion-engine-v12)
-  - [x] Audit `LocationsView.tsx` logic
-  - [x] Fix `isLive` status listener and script race condition
-  - [x] Verify Street View initialization
-  - [x] Test layout stability
-- [ ] Membership & Commerce System (Using @payment-integration & @auth-implementation-patterns)
-  - [ ] **Phase 1: Database & Auth (Analytics-First)**
-    - [ ] Update D1 Schema (Users + `ledger` "Golden Table" for unified access/revenue)
-    - [ ] Implement Google OAuth 2.0 using `arctic` (Account Linking)
-  - [ ] **Phase 2: Payment Engine (MercadoPago)**
-    - [ ] Encapsulate `MP_Service` logic
-    - [ ] Implement Subscription/One-off Webhooks with Idempotency
-    - [ ] Sync successful payments to `ledger` (Unlock + Revenue Log)
-  - [ ] **Phase 3: Dashboard & Intelligence**
-    - [ ] Build `DashboardView` with ownership checks
-    - [ ] Implement "Instant Analytics" endpoints (MRR, LTV, Top Drops)
-    - [ ] Connect R2 Secure Downloads
+- [x] Street View Regression Debug
+- [x] **Phase 1-3: Identity, Vault & Cashflow (Hardened)**
+  - [x] Lucia Auth + Google OAuth (Arctic)
+  - [x] Drop Explorer with /cdn-cgi/image/
+  - [x] MercadoPago Singleton with Signature Verification
+- [x] **Phase 4: The Cockpit (Intelligence Dashboard)**
+  - [x] AdminView with Glassmorphic KPIs
+  - [x] Real-time stats (MRR, Revenue, Churn)
+  - [x] AdminMiddleware RBAC
+- [/] **Phase 5: Ruthless Audit (In Progress)**
+  - [ ] Data Integrity: Stress test ledger table under high-concurrency mocks
+  - [ ] Asset Personalization: Implementing "User-Exclusive" watermarking on PNG downloads
+  - [ ] Success UI: Polishing the "Post-Purchase" experience to be a "Wow" moment
+- [ ] **Future Phases**
+  - [ ] Asset Multi-Select: ZIP-on-the-fly generation
+  - [ ] Community Layer: Gated commenting system
+  - [ ] AI Tagger: Automated R2 tagging via workers-ai
