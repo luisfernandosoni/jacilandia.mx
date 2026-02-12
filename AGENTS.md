@@ -21,7 +21,8 @@
 - **Theming:** Use `applyAtmosphere` for view-specific color shifts.
 - **Assets:** Use the `/cdn-cgi/image/` prefix for all external assets to leverage Cloudflare's image optimization as implemented in `warmUpAssets`.
 - **Git:** NEVER upload the `.agent` folder or any `.md` file. They are ignored in `.gitignore`.
-- **Skill Transparency**: Always explicitly mention which skill is being applied for any given task (e.g., "Using @ui-ux-pro-max").
+- **Skill Transparency**: Always explicitly mention which skill is being applied for any given task (e.g., "Using @ui-ux-pro-max" or "Using @safe-vibe").
+- **Security Hardening**: You MUST run a `@safe-vibe` audit before every major feature implementation and deployment.
 - **Documentation Standard**: `implementation_plan.md` and `walkthrough.md` MUST list the skills used. ALWAYS follow the `@walkthrough-pro` (Elite Senior Staff) standard for walkthroughs.
 
 ## 4. Agent Evolution & Skill Manual
@@ -92,9 +93,11 @@
   - **Definition**: A "User" is only tracked after `subscription_started`.
   - **Privacy**: No PII in analytics logs; use `user_id`.
 
-- **Security Strategy (`@api-security-best-practices` & `@broken-authentication`)**:
+- **Security Strategy (@safe-vibe)**:
+  - **Mandate**: 62-Point Vulnerability Checklist is required for all audits.
   - **Defense**: ALL publicly accessible downloads must use **Signed R2 URLs** (5min expiry).
   - **Vulnerability**: Prevent **IDOR** by verifying `ledger` ownership _before_ signing URLs.
+  - **Hardening**: DERIVE identity server-side; NEVER trust `user_id` passed from frontend.
 
 ## 5. Baseline Documentation
 
