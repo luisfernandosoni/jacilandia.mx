@@ -81,21 +81,6 @@ type Variables = {
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>().basePath('/api');
 
-// --- ENVIRONMENT SANITIZATION (@api-security-best-practices) ---
-// Defensive posture: Ensure secrets and config have no accidental whitespace or newlines
-// which commonly trigger "TypeError: Invalid header value" in Cloudflare Workers.
-app.use('*', async (c, next) => {
-  if (c.env) {
-    for (const key in c.env) {
-      const val = (c.env as any)[key];
-      if (typeof val === 'string') {
-        (c.env as any)[key] = val.trim();
-      }
-    }
-  }
-  await next();
-});
-
 // --- MIDDLEWARE DE SEGURIDAD (DEVSECOPS SPRINT 1 & 3) ---
 app.use('*', secureHeaders()); 
 app.use('*', cors({
@@ -189,7 +174,8 @@ const SubscriptionSchema = z.object({
 // --- AUTH UTILS (@auth-implementation-patterns) ---
 const getBaseUrl = (c: any) => {
   // Use config URL or fall back to request origin for local dev/preview
-  let url = c.env.APP_URL || new URL(c.req.url).origin;
+  // 🧪 SECURITY 360: Robust trimming for c.env immutability (@cloudflare-dev-expert)
+  let url = (c.env.APP_URL || new URL(c.req.url).origin).trim();
   return url.replace(/\/$/, ""); // Normalize: remove trailing slash
 };
 
@@ -198,8 +184,8 @@ const getBaseUrl = (c: any) => {
 // 1. Google OAuth (Arctic)
 app.get('/auth/login/google', rateLimiter(10), async (c) => {
   const google = new Google(
-    c.env.GOOGLE_CLIENT_ID,
-    c.env.GOOGLE_CLIENT_SECRET,
+    c.env.GOOGLE_CLIENT_ID.trim(),
+    c.env.GOOGLE_CLIENT_SECRET.trim(),
     `${getBaseUrl(c)}/api/auth/callback/google`
   );
   
@@ -238,15 +224,21 @@ app.get('/auth/callback/google', async (c) => {
   }
 
   const google = new Google(
-    c.env.GOOGLE_CLIENT_ID,
-    c.env.GOOGLE_CLIENT_SECRET,
+    c.env.GOOGLE_CLIENT_ID.trim(),
+    c.env.GOOGLE_CLIENT_SECRET.trim(),
     `${getBaseUrl(c)}/api/auth/callback/google`
   );
 
   try {
     const tokens = await google.validateAuthorizationCode(code, codeVerifier);
+    
+    // 🧪 Truth Audit: Verify if secrets or tokens are malformed (@cloudflare-dev-expert)
+    const secret = c.env.GOOGLE_CLIENT_SECRET;
+    console.log(`[AUTH AUDIT] Secret Len: ${secret.length}, First: ${secret.charCodeAt(0)}, Last: ${secret.charCodeAt(secret.length - 1)}`);
+    
+    const authHeader = `Bearer ${tokens.accessToken}`;
     const googleResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      headers: { Authorization: authHeader }
     });
     const googleUser: any = await googleResponse.json();
 

@@ -110,9 +110,9 @@
 - **Walkthrough Pro**:
   - All walkthroughs MUST follow the `@walkthrough-pro` standard: Elite, concise, focused on ROI, and visually demonstrated with screenshots/recordings.
 - **Environment Hygiene (NEVER AGAIN #1)**:
-  - **Rule**: ALWAYS sanitize `c.env` values at the start of the request.
-  - **Why**: Cloudflare's `Headers` API throws `TypeError: Invalid header value` if secrets or URLs contain trailing newlines or spaces (common in `wrangler secrets`).
-  - **Implementation**: Global middleware: `val.trim()` for all strings in `c.env`.
+  - **Rule**: ALWAYS sanitize `c.env` values EXPLICITLY before use.
+  - **Why**: Cloudflare's `Headers` API throws `TypeError: Invalid header value` if secrets or URLs contain trailing newlines (common in `wrangler secrets`).
+  - **Critical**: `c.env` is often IMMUTABLE in production; global middleware mutation fails silently. Use `const val = c.env.VAR.trim()`.
 
 - [task.md](file:///e:/Antigravity/jacilandia.mx/task.md)
 - [site.md](file:///e:/Antigravity/jacilandia.mx/site.md)
