@@ -1,5 +1,9 @@
 # lessons.md - Knowledge Capture
 
+- **Never Again Protocol**: Turn every multi-turn bug fix or correction into a permanent rule in `AGENTS.md`.
+- **Documentation Standards**: ALWAYS list "Active Skills" in `implementation_plan.md` and "Skills Used" in `walkthrough.md`.
+- **Walkthrough Pro**: Strictly follow the `@walkthrough-pro` standard for elite, concise, ROI-focused progress reporting.
+
 ## Project Insights
 
 ### Technical Lessons

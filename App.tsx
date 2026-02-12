@@ -115,6 +115,9 @@ const App: React.FC = () => {
   useEffect(() => {
     // Initial atmosphere
     applyAtmosphere(currentView);
+
+    // Initial user fetch
+    prefetchData('user', () => fetch('/api/user').then(r => r.json()));
     
     // Performance detection
     const detectPerformance = () => {

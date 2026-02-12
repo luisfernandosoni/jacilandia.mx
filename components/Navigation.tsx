@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
 
 export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeView }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { prefetch } = useDataCache();
+  const { cache, prefetch } = useDataCache();
   const intentTimers = useRef<Record<string, number>>({});
 
   const handleIntentStart = (view: ViewState) => {
@@ -105,15 +105,42 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, onChangeVie
         </nav>
 
         <div className="flex items-center justify-end gap-3 xs:gap-4 md:gap-6 py-2">
-          <button 
-            onClick={() => navigate(ViewState.DASHBOARD)}
-            onPointerEnter={() => handleIntentStart(ViewState.DASHBOARD)}
-            onPointerLeave={() => handleIntentCancel(ViewState.DASHBOARD)}
-            className={`text-[0.55rem] xs:text-[0.6rem] md:text-[0.625rem] font-black uppercase tracking-[0.15em] md:tracking-[0.2em] transition-colors min-h-[44px] flex items-center ${currentView === ViewState.DASHBOARD ? 'text-primary' : 'text-slate-500 hover:text-slate-900'}`}
-            aria-label="Acceder a mi panel de estudiante"
-          >
-            Mi Panel
-          </button>
+          {(() => {
+            const user = cache['user']?.user;
+            if (user) {
+              return (
+                <div className="flex items-center gap-4">
+                  <div className="hidden md:flex flex-col items-end">
+                    <span className="text-[0.55rem] font-black uppercase tracking-widest text-slate-900">{user.name || user.email}</span>
+                    <span className="text-[0.45rem] font-bold uppercase tracking-wider text-primary">Nivel Activo</span>
+                  </div>
+                  <button 
+                    onClick={() => navigate(ViewState.DASHBOARD)}
+                    className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20 hover:border-primary transition-colors active:scale-95"
+                  >
+                    <img src={user.picture || `https://ui-avatars.com/api/?name=${user.email}&background=random`} alt="Usuario" className="w-full h-full object-cover" />
+                  </button>
+                </div>
+              );
+            }
+            return (
+              <Magnetic pullStrength={0.15}>
+                <a 
+                  href="/api/auth/login/google"
+                  className="group relative px-4 xs:px-5 md:px-7 py-2 md:py-3 overflow-hidden rounded-full transition-all active:scale-95 shadow-glow-primary/10 min-h-[44px] flex items-center bg-slate-900"
+                  aria-label="Iniciar sesión con Google"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/20 to-primary/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <span className="relative z-10 text-[0.55rem] xs:text-[0.6rem] md:text-[0.625rem] font-black uppercase tracking-[0.15em] md:tracking-[0.2em] text-white flex items-center gap-2">
+                    <svg className="w-3 h-3 md:w-4 md:h-4" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.73 17.1,6.73L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
+                    </svg>
+                    Entrar
+                  </span>
+                </a>
+              </Magnetic>
+            );
+          })()}
           
           <Magnetic pullStrength={0.15}>
             <button 

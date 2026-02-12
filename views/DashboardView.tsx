@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { ViewContainer, InteractionCard, ScrollReveal, GlassBadge, OptimizedImage, Magnetic, FloatingMonster } from '../components/MotionPrimitives';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DESIGN_SYSTEM } from '../types';
 import { useDataCache } from '../App';
+import { DropExplorer } from '../components/DropExplorer';
 
 interface User { id: string; email: string; }
 interface Drop { id: string; title: string; month: string; year: number; cover_image: string | null; is_unlocked: boolean; released_at: string; }
@@ -93,6 +95,8 @@ export const DashboardView: React.FC = () => {
     );
   }
 
+  const [selectedDropId, setSelectedDropId] = useState<string | null>(null);
+
   if (!user) {
     return (
       <div className="w-full min-h-[85vh] flex items-center justify-center p-4 relative overflow-hidden">
@@ -126,55 +130,73 @@ export const DashboardView: React.FC = () => {
 
   return (
     <div className="w-full min-h-screen pb-24 relative overflow-x-hidden">
-      <div className="absolute top-[8%] right-[2%] z-0 opacity-40 md:opacity-100"><FloatingMonster monster="POSITIVIN" size="size-32 md:size-48" /></div>
-      <ViewContainer className="relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
-          <div className="flex flex-col items-start px-4">
-            <ScrollReveal>
-              <GlassBadge icon="account_circle" colorClass="text-primary">Panel de Control</GlassBadge>
-              <h1 className={DESIGN_SYSTEM.typography.h2 + " mt-6"}>Tu Colección <span className="text-primary">JACI</span></h1>
-              <p className={DESIGN_SYSTEM.typography.body + " mt-4 max-w-xl"}>Bienvenido, <span className="font-bold text-slate-900">{user.email}</span>.</p>
-            </ScrollReveal>
-          </div>
-          <div className="px-4 w-full md:w-auto">
-            <ScrollReveal delay={0.2}>
-              <Magnetic pullStrength={0.1}><button onClick={handleLogout} className="w-full md:w-auto px-8 py-4 bg-slate-100 text-slate-500 rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center gap-2"><span className="material-symbols-outlined text-lg">logout</span>Cerrar Sesión</button></Magnetic>
-            </ScrollReveal>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
-          {drops.map((drop, idx) => (
-            <ScrollReveal key={drop.id} delay={idx * 0.1}>
-              <InteractionCard borderColor={drop.is_unlocked ? DESIGN_SYSTEM.colors.green : DESIGN_SYSTEM.colors.slate[800]} className="h-full !p-0 overflow-hidden group/card">
-                <div className="flex flex-col h-full">
-                  <div className="relative aspect-[16/11] overflow-hidden group/img">
-                    <OptimizedImage src={drop.cover_image || `https://placehold.co/800x600/f8fafc/64748b?text=${drop.title}`} alt={drop.title} className={`w-full h-full object-cover transition-transform duration-1000 ${drop.is_unlocked ? 'group-hover/img:scale-110' : 'grayscale opacity-60'}`} />
-                    {!drop.is_unlocked && (
-                      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[4px] flex items-center justify-center">
-                        <div className="size-14 bg-white rounded-full flex items-center justify-center shadow-2xl" aria-label="Contenido bloqueado">
-                          <span className="material-symbols-outlined text-slate-900 filled" aria-hidden="true">lock</span>
+      <AnimatePresence mode="wait">
+        {selectedDropId ? (
+          <DropExplorer 
+            key="explorer" 
+            dropId={selectedDropId} 
+            onBack={() => setSelectedDropId(null)} 
+          />
+        ) : (
+          <motion.div
+            key="grid"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute top-[8%] right-[2%] z-0 opacity-40 md:opacity-100"><FloatingMonster monster="POSITIVIN" size="size-32 md:size-48" /></div>
+            <ViewContainer className="relative z-10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
+                <div className="flex flex-col items-start px-4">
+                  <ScrollReveal>
+                    <GlassBadge icon="account_circle" colorClass="text-primary">Panel de Control</GlassBadge>
+                    <h1 className={DESIGN_SYSTEM.typography.h2 + " mt-6"}>Tu Colección <span className="text-primary">JACI</span></h1>
+                    <p className={DESIGN_SYSTEM.typography.body + " mt-4 max-w-xl"}>Bienvenido, <span className="font-bold text-slate-900">{user.email}</span>.</p>
+                  </ScrollReveal>
+                </div>
+                <div className="px-4 w-full md:w-auto">
+                  <ScrollReveal delay={0.2}>
+                    <Magnetic pullStrength={0.1}><button onClick={handleLogout} className="w-full md:w-auto px-8 py-4 bg-slate-100 text-slate-500 rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center gap-2"><span className="material-symbols-outlined text-lg">logout</span>Cerrar Sesión</button></Magnetic>
+                  </ScrollReveal>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
+                {drops.map((drop, idx) => (
+                  <ScrollReveal key={drop.id} delay={idx * 0.1}>
+                    <InteractionCard borderColor={drop.is_unlocked ? DESIGN_SYSTEM.colors.green : DESIGN_SYSTEM.colors.slate[800]} className="h-full !p-0 overflow-hidden group/card">
+                      <div className="flex flex-col h-full">
+                        <div className="relative aspect-[16/11] overflow-hidden group/img">
+                          <OptimizedImage src={drop.cover_image || `https://placehold.co/800x600/f8fafc/64748b?text=${drop.title}`} alt={drop.title} className={`w-full h-full object-cover transition-transform duration-1000 ${drop.is_unlocked ? 'group-hover/img:scale-110' : 'grayscale opacity-60'}`} />
+                          {!drop.is_unlocked && (
+                            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[4px] flex items-center justify-center">
+                              <div className="size-14 bg-white rounded-full flex items-center justify-center shadow-2xl" aria-label="Contenido bloqueado">
+                                <span className="material-symbols-outlined text-slate-900 filled" aria-hidden="true">lock</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-8 md:p-10 flex flex-col flex-1">
+                          <span className={DESIGN_SYSTEM.typography.label}>{drop.month} {drop.year}</span>
+                          <h3 className="text-xl md:text-2xl font-black font-display text-slate-900 mb-4 transition-colors group-hover/card:text-primary">{drop.title}</h3>
+                          <p className="text-slate-500 font-body text-sm mb-10 flex-1">{drop.is_unlocked ? "Contenido listo para descargar." : "Suscripción necesaria."}</p>
+                          <button 
+                            onClick={() => drop.is_unlocked && setSelectedDropId(drop.id)}
+                            className={`w-full py-4 rounded-full font-black text-[9px] uppercase tracking-[0.25em] transition-all flex items-center justify-center gap-2 ${drop.is_unlocked ? 'bg-slate-900 text-white hover:bg-jaci-green' : 'border-2 border-slate-100 text-slate-400'}`}
+                            aria-label={drop.is_unlocked ? `Explorar ${drop.title}` : `Suscribirse para desbloquear ${drop.title}`}
+                          >
+                            <span className="material-symbols-outlined text-lg">{drop.is_unlocked ? 'explore' : 'star'}</span>
+                            {drop.is_unlocked ? 'Explorar' : 'Suscribirme'}
+                          </button>
                         </div>
                       </div>
-                    )}
-                  </div>
-                  <div className="p-8 md:p-10 flex flex-col flex-1">
-                    <span className={DESIGN_SYSTEM.typography.label}>{drop.month} {drop.year}</span>
-                    <h3 className="text-xl md:text-2xl font-black font-display text-slate-900 mb-4 transition-colors group-hover/card:text-primary">{drop.title}</h3>
-                    <p className="text-slate-500 font-body text-sm mb-10 flex-1">{drop.is_unlocked ? "Contenido listo para descargar." : "Suscripción necesaria."}</p>
-                    <button 
-                      className={`w-full py-4 rounded-full font-black text-[9px] uppercase tracking-[0.25em] transition-all flex items-center justify-center gap-2 ${drop.is_unlocked ? 'bg-slate-900 text-white hover:bg-jaci-green' : 'border-2 border-slate-100 text-slate-400'}`}
-                      aria-label={drop.is_unlocked ? `Descargar ${drop.title}` : `Suscribirse para desbloquear ${drop.title}`}
-                    >
-                      <span className="material-symbols-outlined text-lg">{drop.is_unlocked ? 'cloud_download' : 'star'}</span>
-                      {drop.is_unlocked ? 'Descargar' : 'Suscribirme'}
-                    </button>
-                  </div>
-                </div>
-              </InteractionCard>
-            </ScrollReveal>
-          ))}
-        </div>
-      </ViewContainer>
+                    </InteractionCard>
+                  </ScrollReveal>
+                ))}
+              </div>
+            </ViewContainer>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
