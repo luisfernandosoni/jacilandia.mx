@@ -28,6 +28,13 @@ interface LocationConfig {
   fallbackImage: string;
 }
 
+// Helper to generate official Street View Static API URL
+const getStreetViewStaticUrl = (panoId: string, pov: { heading: number; pitch: number }) => {
+  const apiKey = (import.meta as any).env.VITE_GOOGLE_MAPS_API_KEY;
+  if (!apiKey) return 'https://placehold.co/640x360?text=JACI+Location'; // Fallback handle gracefully
+  return `https://maps.googleapis.com/maps/api/streetview?size=640x360&pano=${panoId}&heading=${pov.heading}&pitch=${pov.pitch}&fov=90&key=${apiKey}`;
+};
+
 const LOCATIONS: LocationConfig[] = [
   {
     id: 'centro',
@@ -42,7 +49,7 @@ const LOCATIONS: LocationConfig[] = [
     coordinates: { lat: 19.5277903, lng: -96.9263094 },
     pov: { heading: 207.86, pitch: 0 },
     panoId: 'eyodG-vx09zeo-Gz8qQARQ',
-    fallbackImage: 'https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=eyodG-vx09zeo-Gz8qQARQ&cb_client=search.gws-prod.gps&w=1200&h=800&yaw=207.86&pitch=0&thumbfov=90'
+    fallbackImage: '' // Populated dynamically
   },
   {
     id: 'americas',
@@ -57,9 +64,12 @@ const LOCATIONS: LocationConfig[] = [
     coordinates: { lat: 19.5361253, lng: -96.9127322 },
     pov: { heading: 43.44, pitch: 0 },
     panoId: '8xATB9rNU3yfDiqaNr4NoQ',
-    fallbackImage: 'https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=8xATB9rNU3yfDiqaNr4NoQ&cb_client=search.gws-prod.gps&w=1200&h=800&yaw=43.44&pitch=0&thumbfov=90'
+    fallbackImage: '' // Populated dynamically
   }
-];
+].map(loc => ({
+  ...loc,
+  fallbackImage: loc.panoId ? getStreetViewStaticUrl(loc.panoId, loc.pov) : loc.fallbackImage
+}));
 
 const StreetView: React.FC<{ location: LocationConfig }> = ({ location }) => {
   const containerRef = useRef<HTMLDivElement>(null);
