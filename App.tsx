@@ -222,7 +222,7 @@ const App: React.FC = () => {
               ref={mainContentRef} 
               className={`flex-grow relative overflow-x-clip outline-none transition-[min-height] duration-500 ease-in-out ${perfProfile === PerformanceProfile.HIGH ? 'min-h-[85vh]' : 'min-h-[70vh]'}`}
             >
-              <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo(0, 0)}>
+              <AnimatePresence mode="wait" onExitComplete={() => window.scrollTo(0, 0)}>
                 <motion.div
                   key={currentView}
                   initial={perfProfile === PerformanceProfile.HIGH ? { opacity: 0, y: 15, scale: 0.99, filter: 'blur(8px)' } : { opacity: 0 }}

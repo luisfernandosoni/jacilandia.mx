@@ -214,7 +214,7 @@ export const FloatingMonster: React.FC<{
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.9, y: 0, rotate: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ 
         delay: delay, 
