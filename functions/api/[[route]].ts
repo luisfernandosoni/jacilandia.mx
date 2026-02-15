@@ -57,6 +57,30 @@ const rateLimiter = (limit: number) => async (c: any, next: any) => {
   return next();
 };
 
+// --- HONO APP INITIALIZATION ---
+const app = new Hono<{ Bindings: Bindings; Variables: Variables }>().basePath('/api');
+
+// --- GLOBAL ERROR HANDLING & OBSERVABILITY (@observability-engineer) ---
+app.onError((err, c) => {
+  console.error(`[CRITICAL ERROR] ${c.req.method} ${c.req.url}:`, {
+    error: err.message,
+    stack: err.stack,
+    name: err.name
+  });
+  
+  if (err.message.includes("D1_ERROR")) {
+    return c.json({ 
+      error: "Error de sincronización de datos. Por favor, intenta de nuevo.", 
+      code: "DATABASE_ERROR" 
+    }, 500);
+  }
+  
+  return c.json({ 
+    error: "Ocurrió un error inesperado al procesar tu solicitud.",
+    code: "INTERNAL_SERVER_ERROR"
+  }, 500);
+});
+
 import { cors } from 'hono/cors';
 import { csrf } from 'hono/csrf';
 import { bodyLimit } from 'hono/body-limit';
@@ -86,7 +110,6 @@ type Variables = {
   lucia: Lucia;
 };
 
-const app = new Hono<{ Bindings: Bindings; Variables: Variables }>().basePath('/api');
 
 // --- MIDDLEWARE DE SEGURIDAD (DEVSECOPS SPRINT 1 & 3) ---
 app.use('*', secureHeaders()); 
@@ -395,32 +418,40 @@ app.post('/auth/register', rateLimiter(5), async (c) => {
   if (existingUser) return c.json({ error: "El correo ya está registrado." }, 400);
 
   const userId = crypto.randomUUID();
-  
-  // 🧪 EDGE COMPATIBLE HASHING (@cloudflare-dev-expert)
-  // Using hash-wasm for Argon2id (Native binary compatible)
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const hashedPassword = await argon2id({
-    password: password,
-    salt: salt,
-    parallelism: 1,
-    iterations: 2,
-    memorySize: 16384, // 16MB for Worker memory safety
-    hashLength: 32,
-    outputType: 'encoded'
-  });
-
   try {
+    console.log("[AUTH STEP] 1. Inicia Hashing");
+    // 🧪 EDGE COMPATIBLE HASHING (@cloudflare-dev-expert)
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const hashedPassword = await argon2id({
+      password: password,
+      salt: salt,
+      parallelism: 1,
+      iterations: 2,
+      memorySize: 16384, // 16MB for Worker memory safety
+      hashLength: 32,
+      outputType: 'encoded'
+    });
+    console.log("[AUTH STEP] 2. Hashing completado");
+
+    console.log("[AUTH STEP] 3. Insertando en D1");
     await db.prepare("INSERT INTO users (id, email, hashed_password, created_at) VALUES (?, ?, ?, ?)")
       .bind(userId, email.toLowerCase(), hashedPassword, Math.floor(Date.now() / 1000))
       .run();
+    console.log("[AUTH STEP] 4. D1 OK");
 
+    console.log("[AUTH STEP] 5. Creando sesión");
     const session = await lucia.createSession(userId, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
     c.header("Set-Cookie", sessionCookie.serialize(), { append: true });
+    console.log("[AUTH STEP] 6. Sesión creada");
     
     return c.json({ success: true, user: { id: userId, email } });
   } catch (e: any) {
-    console.error("[AUTH ERROR] Registration failed:", e);
+    console.error("[AUTH ERROR] Falla en flujo de registro:", {
+      message: e.message,
+      stack: e.stack,
+      cause: e.cause
+    });
     return c.json({ error: "No se pudo crear la cuenta. Intenta más tarde." }, 500);
   }
 });
