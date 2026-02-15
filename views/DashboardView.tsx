@@ -61,7 +61,7 @@ export const DashboardView: React.FC = () => {
       if (user && !cache.drops) {
         try {
           const res = await fetch('/api/drops');
-          if (!res.ok) throw new Error("No se pudierón cargar los contenidos.");
+          if (!res.ok) throw new Error("No se pudieron cargar los contenidos.");
           const data = await res.json() as Drop[];
           setCache('drops', data);
           setDrops(data);

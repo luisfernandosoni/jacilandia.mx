@@ -527,7 +527,7 @@ app.post('/auth/reset-password/verify', rateLimiter(3), async (c) => {
 // 1. LOGIN (Legacy/Dev Hardening [#46])
 app.post('/auth/login-dev', rateLimiter(5), async (c) => {
   // Solo permitir en desarrollo o si el usuario es explícitamente admin
-  const isDev = c.env.ENVIRONMENT === 'development' || (c.env.APP_URL && c.env.APP_URL.includes('localhost'));
+  const isDev = safeTrim(c.env.ENVIRONMENT) === 'development' || (safeTrim(c.env.APP_URL) && safeTrim(c.env.APP_URL).includes('localhost'));
   if (!isDev) {
     return c.json({ error: "Método no permitido en producción." }, 405);
   }
@@ -798,7 +798,7 @@ app.post('/webhooks/mercadopago', async (c) => {
       }
 
       if (!userId) {
-        console.error("[Webhook] No User ID found in external_reference");
+        console.error("[Webhook] No se encontró el ID de usuario en la referencia externa");
         return c.json({ status: "error", message: "no_user" });
       }
       
@@ -852,7 +852,7 @@ app.post('/webhooks/mercadopago', async (c) => {
     }
   } else if (body.type === "subscription_preapproval") {
       // Handle subscription-specific logic if needed (e.g. status updates)
-      console.log("[Webhook] Preapproval update received:", body.action);
+      console.log("[Webhook] Actualización de preaprobación recibida:", body.action);
   }
 
   return c.json({ status: "ok" });
