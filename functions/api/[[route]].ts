@@ -5,11 +5,15 @@ import { secureHeaders } from 'hono/secure-headers';
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
 import { MP_Service } from './mp-service';
+import { ResendService } from './resend-service';
 import adminHandler from './admin-upload';
+import { Argon2id } from "oslo/password";
 
 // --- SILICON VALLEY SECURITY UTILS (@api-security-best-practices) ---
 // Using @safe-vibe Rule #89: Never hardcode secrets. Fallback to dev string only for local testing.
 const SIGNING_SECRET_FALLBACK = "jaci_vault_secure_2026"; 
+
+const getSigningSecret = (env: Bindings) => env.SIGNING_SECRET?.trim() || SIGNING_SECRET_FALLBACK;
 
 async function getSignature(message: string, secret: string) {
   const enc = new TextEncoder();
@@ -69,6 +73,7 @@ type Bindings = {
   MP_WEBHOOK_SECRET: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
+  RESEND_API_KEY: string;
   APP_URL: string; // Base URL for callbacks
   SIGNING_SECRET?: string;
   ENVIRONMENT?: string;
@@ -166,6 +171,21 @@ export const adminMiddleware = async (c: any, next: any) => {
 // --- SCHEMAS ---
 const LoginSchema = z.object({
   email: z.string().email("Email inválido"),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
+});
+
+const RegisterSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
+});
+
+const ResetRequestSchema = z.object({
+  email: z.string().email("Email inválido"),
+});
+
+const ResetPasswordSchema = z.object({
+  token: z.string(),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 const SubscriptionSchema = z.object({
@@ -353,11 +373,130 @@ app.get('/auth/callback/google', async (c) => {
     // 🧪 observability: return specific error for remote debugging
     return c.json({ 
       error: "Authentication failed", 
-      step: e.message, // Expose step context
-      details: e.message || "Unknown error",
-      stack: e.stack?.split("\n").slice(0, 4) 
+      message: "Error de sincronización con Google."
     }, 500);
   }
+});
+
+// 1. REGISTER (Email/Pass)
+app.post('/auth/register', rateLimiter(5), async (c) => {
+  const body = await c.req.json();
+  const result = RegisterSchema.safeParse(body);
+  
+  if (!result.success) return c.json({ error: "Formato inválido", details: result.error.issues }, 400);
+
+  const { email, password } = result.data;
+  const db = c.env.DB;
+  const lucia = c.get('lucia');
+
+  // Check if user exists
+  const existingUser = await db.prepare("SELECT * FROM users WHERE email = ?").bind(email.toLowerCase()).first();
+  if (existingUser) return c.json({ error: "El correo ya está registrado." }, 400);
+
+  const userId = crypto.randomUUID();
+  const hashedPassword = await new Argon2id().hash(password);
+
+  try {
+    await db.prepare("INSERT INTO users (id, email, hashed_password, created_at) VALUES (?, ?, ?, ?)")
+      .bind(userId, email.toLowerCase(), hashedPassword, Math.floor(Date.now() / 1000))
+      .run();
+
+    const session = await lucia.createSession(userId, {});
+    const sessionCookie = lucia.createSessionCookie(session.id);
+    c.header("Set-Cookie", sessionCookie.serialize(), { append: true });
+    
+    return c.json({ success: true, user: { id: userId, email } });
+  } catch (e: any) {
+    console.error("[AUTH ERROR] Registration failed:", e);
+    return c.json({ error: "No se pudo crear la cuenta. Intenta más tarde." }, 500);
+  }
+});
+
+// 2. LOGIN (Email/Pass)
+app.post('/auth/login', rateLimiter(10), async (c) => {
+  const body = await c.req.json();
+  const result = LoginSchema.safeParse(body);
+  
+  if (!result.success) return c.json({ error: "Campos incompletos" }, 400);
+
+  const { email, password } = result.data;
+  const db = c.env.DB;
+  const lucia = c.get('lucia');
+
+  const user: any = await db.prepare("SELECT * FROM users WHERE email = ?").bind(email.toLowerCase()).first();
+  
+  if (!user || !user.hashed_password) {
+    return c.json({ error: "Credenciales inválidas" }, 400);
+  }
+
+  const validPassword = await new Argon2id().verify(user.hashed_password, password);
+  if (!validPassword) return c.json({ error: "Credenciales inválidas" }, 400);
+
+  const session = await lucia.createSession(user.id, {});
+  const sessionCookie = lucia.createSessionCookie(session.id);
+  c.header("Set-Cookie", sessionCookie.serialize(), { append: true });
+
+  return c.json({ success: true, user: { id: user.id, email: user.email } });
+});
+
+// 3. PASSWORD RESET - REQUEST
+app.post('/auth/reset-password/request', rateLimiter(3), async (c) => {
+  const body = await c.req.json();
+  const result = ResetRequestSchema.safeParse(body);
+  if (!result.success) return c.json({ error: "Email inválido" }, 400);
+
+  const email = result.data.email.toLowerCase();
+  const db = c.env.DB;
+
+  const user: any = await db.prepare("SELECT id FROM users WHERE email = ?").bind(email).first();
+  if (!user) {
+    // 🧪 SECURITY 360: Avoiding User Enumeration (@api-security-best-practices)
+    return c.json({ success: true, message: "Si el correo existe, recibirás un enlace." });
+  }
+
+  const token = crypto.randomUUID();
+  const expiresAt = Math.floor(Date.now() / 1000) + 3600; // 1 hour
+
+  await db.prepare("UPDATE users SET password_reset_token = ?, password_reset_expires = ? WHERE id = ?")
+    .bind(token, expiresAt, user.id)
+    .run();
+
+  const resend = new ResendService(c.env.RESEND_API_KEY.trim());
+  const resetUrl = `${getBaseUrl(c)}/?view=RESET_PASSWORD&token=${token}`;
+  
+  await resend.sendPasswordReset(email, resetUrl);
+
+  return c.json({ success: true, message: "Instrucciones enviadas al correo." });
+});
+
+// 4. PASSWORD RESET - VERIFY & UPDATE
+app.post('/auth/reset-password/verify', rateLimiter(3), async (c) => {
+  const body = await c.req.json();
+  const result = ResetPasswordSchema.safeParse(body);
+  if (!result.success) return c.json({ error: "Datos inválidos" }, 400);
+
+  const { token, password } = result.data;
+  const db = c.env.DB;
+  const lucia = c.get('lucia');
+
+  const user: any = await db.prepare("SELECT id FROM users WHERE password_reset_token = ? AND password_reset_expires > ?")
+    .bind(token, Math.floor(Date.now() / 1000))
+    .first();
+
+  if (!user) return c.json({ error: "El enlace ha expirado o es inválido." }, 400);
+
+  const hashedPassword = await new Argon2id().hash(password);
+  
+  await db.prepare("UPDATE users SET hashed_password = ?, password_reset_token = NULL, password_reset_expires = NULL WHERE id = ?")
+    .bind(hashedPassword, user.id)
+    .run();
+
+  // Create session immediately
+  const session = await lucia.createSession(user.id, {});
+  const sessionCookie = lucia.createSessionCookie(session.id);
+  c.header("Set-Cookie", sessionCookie.serialize(), { append: true });
+
+  return c.json({ success: true });
 });
 
 // 1. LOGIN (Legacy/Dev Hardening [#46])
@@ -541,7 +680,7 @@ app.get('/download/:assetId', async (c) => {
   // 2. Generate Signed URL (Rule 89)
   const expires = Math.floor(Date.now() / 1000) + 300; // 5 minute window
   const payload = `${asset.r2_key}:${expires}`;
-  const signature = await getSignature(payload, c.env.SIGNING_SECRET || SIGNING_SECRET_FALLBACK);
+  const signature = await getSignature(payload, getSigningSecret(c.env));
   
   return c.redirect(`/api/cdn/${asset.r2_key}?expires=${expires}&signature=${signature}`);
 });
@@ -556,7 +695,7 @@ app.get('/cdn/:key', async (c) => {
   if (parseInt(expires) < Math.floor(Date.now() / 1000)) return c.text("Forbidden: Link expired", 403);
   
   const payload = `${key}:${expires}`;
-  const isValid = await verifySignature(payload, signature, c.env.SIGNING_SECRET || SIGNING_SECRET_FALLBACK);
+  const isValid = await verifySignature(payload, signature, getSigningSecret(c.env));
   if (!isValid) return c.text("Forbidden: Invalid signature", 403);
 
   const object = await c.env.R2.get(key);

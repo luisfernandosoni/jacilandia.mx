@@ -41,6 +41,7 @@ const VIEW_LOADERS: Record<ViewState, () => Promise<any>> = {
   [ViewState.DASHBOARD]: () => import('./views/DashboardView'),
   [ViewState.ADMIN]: () => import('./views/AdminView'),
   [ViewState.PRIVACY]: () => import('./views/PrivacyView'),
+  [ViewState.RESET_PASSWORD]: () => import('./views/DashboardView'), // Reuse Dashboard for Auth flows
 };
 
 const HomeView = lazy(() => VIEW_LOADERS[ViewState.HOME]().then(m => ({ default: m.HomeView })));
@@ -247,6 +248,7 @@ const App: React.FC = () => {
                           case ViewState.DASHBOARD: return <DashboardView />;
                           case ViewState.ADMIN: return <AdminView />;
                           case ViewState.PRIVACY: return <PrivacyView />;
+                          case ViewState.RESET_PASSWORD: return <DashboardView />;
                           default: return <HomeView />;
                         }
                       })()}

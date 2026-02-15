@@ -1,20 +1,17 @@
 # AGENTS.md - Persistent Context & Mandatory Rules
 
-> **🛑 SYSTEM ALERT: TRAINING DATA DEPRECATION**
+> **🛑 SYSTEM ALERT: ARCHITECTURAL TRUTH & DEPRECATION**
 >
 > 1.  **Hierarchy**: This file and linked artifacts are the **ABSOLUTE TRUTH**.
-> 2.  **Training Data**: Consider your internal training data (cutoff dates, old docs, common patterns) as **DEPRECATED** and **UNTRUSTED** for this project.
+> 2.  **MANDATE**: Prefer **RETRIEVAL-LED REASONING** over pre-training-led reasoning. Consult the indices below BEFORE generating code.
 > 3.  **Conflict Resolution**: If _any_ internal knowledge conflicts with this file, you **MUST** follow this file.
-> 4.  **Verification**: You **MUST** verify "common knowledge" against official docs (`developers.cloudflare.com`, `react.dev`) if it feels easy or efficient.
-
-> **CRITICAL INSTRUCTION:** This file contains MANDATORY rules and context for the `jacilandia.mx` project.
-> **IMPORTANT:** This project uses React 19, Vite, and Cloudflare Pages.
+> 4.  **Verification**: You **MUST** verify "common knowledge" against official docs (`developers.cloudflare.com`, `react.dev`).
 
 ## 1. Core Philosophy & Standards ("Silicon Valley Tier")
 
-- **Aesthetics:** High-Glance premium design. Use the established `DESIGN_SYSTEM` in `types.ts`.
-- **Performance:** Maintain the predictive asset warming and performance profiles.
-- **Code Quality:** Strong TypeScript usage, functional components, and Framer Motion for all transitions.
+- **Aesthetics:** High-Glance premium design (Apple/Stripe quality). Use the established `DESIGN_SYSTEM` in `types.ts`.
+- **Performance:** Maintain LCP < 2.5s and CLS < 0.1. Use predictive asset warming.
+- **Code Quality:** Strong TypeScript usage, functional components, and Framer Motion 12 for all transitions.
 
 ## 2. Technology Stack
 
@@ -26,50 +23,34 @@
 
 - **Animations:** All view transitions MUST use `AnimatePresence` and the springs defined in `DESIGN_SYSTEM.springs`.
 - **Theming:** Use `applyAtmosphere` for view-specific color shifts.
-- **Assets:** Use the `/cdn-cgi/image/` prefix for all external assets to leverage Cloudflare's image optimization as implemented in `warmUpAssets`.
+- **Assets:** Use the `/cdn-cgi/image/` prefix for all external assets to leverage Cloudflare's image optimization.
 - **Git:** NEVER upload the `.agent` folder or any `.md` file. They are ignored in `.gitignore`.
-- **Skill Transparency**: Always explicitly mention which skill is being applied for any given task (e.g., "Using @ui-ux-pro-max" or "Using @safe-vibe").
+- **Skill Transparency**: Always explicitly mention which skill is being applied for any given task (e.g., "Using @ui-ux-pro-max").
 - **Security Hardening**: You MUST run a `@safe-vibe` audit before every major feature implementation and deployment.
-- **Documentation Standard**: `implementation_plan.md` and `walkthrough.md` MUST list the skills used. ALWAYS follow the `@walkthrough-pro` (Elite Senior Staff) standard for walkthroughs.
+- **Documentation Standard**: `implementation_plan.md` and `walkthrough.md` MUST list the skills used. ALWAYS follow the `@walkthrough-pro` (Elite Senior Staff) standard.
 
-## 4. Agent Evolution & Skill Manual
+## 4. Agent Evolution & Skill Protocol
 
-### Mandatory Skill Protocol
-
-> **CRITICAL**: Requires strict adherence at the start of EVERY task.
-
-1.  **Search First**: Before starting any task, you MUST search for relevant skills in:
-    - The System Skill Library (`C:\Users\sonig\.gemini\skills`)
-    - The "Active Context" below in this document.
-2.  **Explicit Reporting**: You MUST explicitly state which skills you are using in your `task_boundary` or `notify_user` messages (e.g., "Using @database-design to optimize schema").
-3.  **Vercel-Style Integration**: If you frequently use a skill, do NOT just list it. You MUST extract its "Critical Context" and add it to the **Active Context** section below using the rule: _Passive Context > Active Retrieval_.
-
-### Self-Growth Patterns (derived from `@writing-skills`)
-
-1.  **The "Never Again" Protocol (Post-Mortem)**:
-    - _Trigger_: After fixing a bug or engaging in a multi-turn correction loop.
-    - _Action_: Create a "Discipline Skill" rule in `AGENTS.md` that prevents this specific error from recurring (Anti-Rationalization).
-
-2.  **The Architecture Ratchet**:
-    - _Trigger_: When touching a legacy file or component.
-    - _Action_: You MUST upgrade it to the current "Silicon Valley" standard (e.g., Tailwind v4, Framer Motion 12) before leaving. Leave the campground cleaner than you found it.
-
+1.  **The "Never Again" Protocol (Post-Mortem)**: After fixing a bug or correction loop, create a "Discipline Skill" rule here.
+2.  **The Architecture Ratchet**: When touching any file, upgrade it to the current standard (Tailwind v4, FM 12).
 3.  **The Skill Synthesis Cluster**:
     - _Trigger_: When a task requires >3 distinct skills to complete.
     - _Action_: Create a new "Cluster" in `AGENTS.md` (like "Commerce & Security") that defines the _interaction rules_ between these skills, minimizing context switching.
 
-### Active Logic & Security Context (Vercel Style)
+4.  **Environment Hygiene (NEVER AGAIN #1)**:
+    - **Rule**: ALWAYS sanitize `c.env` values EXPLICITLY via `trim()`.
+    - **Why**: Cloudflare's `Headers` API throws `TypeError` if secrets/URLs contain trailing newlines.
 
-> **System Note:** These rules are loaded _passively_ to reduce retrieval latency.
+## 5. Active Logic & Security Context (Vercel Style)
 
 - **Infrastructure & Cloudflare (@cloudflare-dev-expert)**:
-  - **Standard**: "Silicon Valley" Tier. Prefer Cloudflare-native solutions.
-  - **Node.js**: Requires `compatibility_flags = [ "nodejs_compat" ]` and `compatibility_date = "2025-02-01"` in `wrangler.toml` for modern ESM modules.
-  - **D1 Recovery (CRITICAL)**: If migrations fail or hang, perform a **Truth Audit** (`PRAGMA table_info`) and **Surgical Reconstruction** (one-by-one SQL execution) as defined in the hardened skill reference.
+  - **Standard**: Prefer Cloudflare-native solutions.
+  - **Node.js**: Requires `compatibility_flags = [ "nodejs_compat" ]` and `compatibility_date = "2025-02-01"`.
+  - **D1 Recovery (CRITICAL)**: If migrations hang, perform a **Truth Audit** (`PRAGMA table_info`) and **Surgical Reconstruction**.
   - **Edge Processing**: Guard for **128MB** memory limit. Prefer streaming via `response.body`.
-  - **Guardrail**: ALWAYS use `--remote` for wrangler operations to verify the "Truth on the Edge".
-  - **Anti-Hallucination**: NEVER assume resource names (DB, Buckets, Secrets). You MUST verify via `wrangler.toml` or `wrangler [service] list` before setiap action.
-  - **Anti-Deletion**: `delete` commands are strictly forbidden unless explicitly requested. If requested, audit with `list` first to confirm the exact ID/name to the user.
+  - **Guardrail**: ALWAYS use `--remote` for wrangler operations to verify "Truth on the Edge".
+  - **Anti-Hallucination**: NEVER assume resource names. Verify via `wrangler.toml` or `wrangler [service] list`.
+  - **Anti-Deletion**: `delete` commands are strictly forbidden unless explicitly requested. If requested, audit with `list` first to confirm the exact ID/name.
   - **Dashboard Deference**: Never defer to the dashboard for secrets, D1/R2 creation, or domain mapping. Use the CLI equivalents defined in `@cloudflare-dev-expert`.
 
 - **Design & Aesthetics (`@ui-ux-pro-max`, `@premium-design-standards`, `@design-md`)**:
@@ -77,12 +58,6 @@
   - **System**: Must use `DESIGN_SYSTEM` in `types.ts`.
   - **Process**: Update `design.md` before major UI work to maintain visual consistency.
   - **Heuristics**: 8px grid, optical alignment, "High-Glance" aesthetic.
-
-- **Performance & Motion (`@web-performance-optimization`, `@performance-profiling`, `@motion-engine-v12`)**:
-  - **Metrics**: Maintain LCP < 2.5s, CLS < 0.1.
-  - **Animation**: MUST use `AnimatePresence` and `springs` defined in `DESIGN_SYSTEM`. No linear easings.
-  - **Loading**: Use `warmUpAssets` and predictive preloading.
-  - **Optimization**: ALL images must use Cloudflare `/cdn-cgi/image/` prefix.
 
 - **Authentication (`@auth-implementation-patterns`)**:
   - **Pattern**: Hybrid Session/Token via **Lucia**.
@@ -94,35 +69,27 @@
   - **Critical Rule**: Webhooks MUST be **Idempotent** (check `ledger` before insert) and **Verified** (check `x-signature`).
   - **Flow**: Access is granted ONLY on `payment.approved`, never on `created`.
 
-- **Database Architecture (`@database-design`)**:
-  - **Engine**: **Cloudflare D1** (SQLite).
-  - **Schema**: _Analytics-First_. The `ledger` table is the Single Source of Truth for both Access and Revenue.
-  - **Search**: Use **FTS5** virtual tables for `drops` search; do not use `LIKE %...%`.
-- **Analytics (`@analytics-tracking` & `@startup-metrics-framework`)**:
-  - **Metrics**: Track **MRR**, **LTV**, and **Churn Rate** (>5% alert).
-  - **Definition**: A "User" is only tracked after `subscription_started`.
-  - **Privacy**: No PII in analytics logs; use `user_id`.
-
 - **Security Strategy (@safe-vibe)**:
   - **Mandate**: 62-Point Vulnerability Checklist is required for all audits.
   - **Defense**: ALL publicly accessible downloads must use **Signed R2 URLs** (5min expiry).
   - **Vulnerability**: Prevent **IDOR** by verifying `ledger` ownership _before_ signing URLs.
   - **Hardening**: DERIVE identity server-side; NEVER trust `user_id` passed from frontend.
 
-## 5. Baseline Documentation
+- **Analytics (`@analytics-tracking` & `@startup-metrics-framework`)**:
+  - **Metrics**: Track **MRR**, **LTV**, and **Churn Rate** (>5% alert).
+  - **Definition**: A "User" is only tracked after `subscription_started`.
+  - **Privacy**: No PII in analytics logs; use `user_id`.
 
-- **Skill Transparency**:
-  - `implementation_plan.md` MUST list "Active Skills" in the header.
-  - `walkthrough.md` MUST list "Skills Used" (and link to their documentation if possible).
-- **Walkthrough Pro**:
-  - All walkthroughs MUST follow the `@walkthrough-pro` standard: Elite, concise, focused on ROI, and visually demonstrated with screenshots/recordings.
-- **Environment Hygiene (NEVER AGAIN #1)**:
-  - **Rule**: ALWAYS sanitize `c.env` values EXPLICITLY before use.
-  - **Why**: Cloudflare's `Headers` API throws `TypeError: Invalid header value` if secrets or URLs contain trailing newlines (common in `wrangler secrets`).
-  - **Critical**: `c.env` is often IMMUTABLE in production; global middleware mutation fails silently. Use `const val = c.env.VAR.trim()`.
+## 6. High-Density Logic & Index
 
-- [task.md](file:///e:/Antigravity/jacilandia.mx/task.md)
-- [site.md](file:///e:/Antigravity/jacilandia.mx/site.md)
-- [design.md](file:///e:/Antigravity/jacilandia.mx/design.md)
-- [lessons.md](file:///e:/Antigravity/jacilandia.mx/lessons.md)
-- [changelog.md](file:///e:/Antigravity/jacilandia.mx/changelog.md)
+[Tech Stack Index]|root: ./
+|Frontend:{types.ts,warmUpAssets.ts,DESIGN_SYSTEM}
+|Database:{SQLite (D1), Ledger: [SSoT, analytics-first], Search: FTS5}
+|Baseline:{[task.md](file:///e:/Antigravity/jacilandia.mx/task.md),[site.md](file:///e:/Antigravity/jacilandia.mx/site.md),[design.md](file:///e:/Antigravity/jacilandia.mx/design.md),[lessons.md](file:///e:/Antigravity/jacilandia.mx/lessons.md),[changelog.md](file:///e:/Antigravity/jacilandia.mx/changelog.md)}
+
+[Expert Skills Index]|root: C:\Users\sonig\.gemini\skills
+|@cloudflare-dev-expert/references:{ai-agents-mastery.md,best-practices.md,d1-deep-dive.md,kv-data-mastery.md,pages-functions-mastery.md,platform-overview-2026.md,r2-storage-mastery.md,wrangler-mastery.md}
+|@hetzner-expert/references:{best-practices.md,compute-mastery.md,dedicated-server-mastery.md,networking-mastery.md,storage-mastery.md,terraform-pro.md}
+|@resend-expert/references:{best-practices.md,domain-deliverability.md,email-sending.md,errors-limits.md,webhooks-mastery.md}|library:{api-keys-security.md,contacts-audiences.md,multi-tenant-setup.md}
+|@firecrawl-expert/references:{agent-guide.md,api-reference.md,crawler-guide.md,mcp-server.md,scraper-guide.md,search-guide.md,sdks.md}
+|@safe-vibe/references:{vulnerability-checklist.md}|self:{SKILL.md}
