@@ -9,11 +9,12 @@ import { ResendService } from './resend-service';
 import adminHandler from './admin-upload';
 import { argon2id, argon2Verify } from 'hash-wasm';
 
-// --- SILICON VALLEY SECURITY UTILS (@api-security-best-practices) ---
-// Using @safe-vibe Rule #89: Never hardcode secrets. Fallback to dev string only for local testing.
+// 🧪 SILICON VALLEY SECURITY UTILS (@api-security-best-practices)
+const safeTrim = (val: string | undefined | null) => val?.trim() || "";
+
 const SIGNING_SECRET_FALLBACK = "jaci_vault_secure_2026"; 
 
-const getSigningSecret = (env: Bindings) => env.SIGNING_SECRET?.trim() || SIGNING_SECRET_FALLBACK;
+const getSigningSecret = (env: Bindings) => safeTrim(env.SIGNING_SECRET) || SIGNING_SECRET_FALLBACK;
 
 async function getSignature(message: string, secret: string) {
   const enc = new TextEncoder();
@@ -51,7 +52,7 @@ const rateLimiter = (limit: number) => async (c: any, next: any) => {
   rateLimitMap.set(ip, record);
 
   if (record.count > limit) {
-    return c.json({ error: "Too many requests. Please try again later.", code: "RATE_LIMIT_EXCEEDED" }, 429);
+    return c.json({ error: "Demasiadas solicitudes. Por favor, intenta más tarde.", code: "RATE_LIMIT_EXCEEDED" }, 429);
   }
   return next();
 };
@@ -104,7 +105,7 @@ app.use('*', csrf());
 // 🧪 SECURITY 360: Body Limit for DoS Protection (@api-fuzzing-bug-bounty)
 app.use('*', bodyLimit({
   maxSize: 64 * 1024, // 64KB limit for all payloads
-  onError: (c) => c.json({ error: "Payload too large", code: "PAYLOAD_TOO_LARGE" }, 413)
+  onError: (c) => c.json({ error: "Carga demasiado grande.", code: "PAYLOAD_TOO_LARGE" }, 413)
 }));
 
 // --- FACTORY DE LUCIA AUTH ---
@@ -157,13 +158,13 @@ app.use('*', async (c, next) => {
 // --- ADMIN SECURITY MIDDLEWARE (@api-security-best-practices) ---
 export const adminMiddleware = async (c: any, next: any) => {
   const user = c.get('user');
-  if (!user) return c.json({ error: "Unauthorized" }, 401);
+  if (!user) return c.json({ error: "No autorizado" }, 401);
   
   const db = c.env.DB;
   const dbUser: any = await db.prepare("SELECT role FROM users WHERE id = ?").bind(user.id).first();
   
   if (!dbUser || dbUser.role !== 'admin') {
-    return c.json({ error: "Forbidden: Admin access required" }, 403);
+    return c.json({ error: "Acceso denegado: Se requiere permiso de administrador." }, 403);
   }
   return next();
 };
@@ -208,8 +209,8 @@ const getBaseUrl = (c: any) => {
 // 1. Google OAuth (Arctic)
 app.get('/auth/login/google', rateLimiter(10), async (c) => {
   const google = new Google(
-    c.env.GOOGLE_CLIENT_ID.trim(),
-    c.env.GOOGLE_CLIENT_SECRET.trim(),
+    safeTrim(c.env.GOOGLE_CLIENT_ID),
+    safeTrim(c.env.GOOGLE_CLIENT_SECRET),
     `${getBaseUrl(c)}/api/auth/callback/google`
   );
   console.log(`[AUTH DEBUG] Login Redirect URI: ${getBaseUrl(c)}/api/auth/callback/google`);
@@ -245,12 +246,12 @@ app.get('/auth/callback/google', async (c) => {
   const codeVerifier = getCookie(c, "google_code_verifier");
 
   if (!code || !state || !storedState || !codeVerifier || state !== storedState) {
-    return c.json({ error: "Invalid state or code" }, 400);
+    return c.json({ error: "Estado o código inválido" }, 400);
   }
 
   const google = new Google(
-    c.env.GOOGLE_CLIENT_ID.trim(),
-    c.env.GOOGLE_CLIENT_SECRET.trim(),
+    safeTrim(c.env.GOOGLE_CLIENT_ID),
+    safeTrim(c.env.GOOGLE_CLIENT_SECRET),
     `${getBaseUrl(c)}/api/auth/callback/google`
   );
   console.log(`[AUTH DEBUG] Callback Redirect URI: ${getBaseUrl(c)}/api/auth/callback/google`);
@@ -269,7 +270,7 @@ app.get('/auth/callback/google', async (c) => {
     }
     
     // 🧪 Truth Audit: Verify if secrets or tokens are malformed (@cloudflare-dev-expert)
-    const secret = c.env.GOOGLE_CLIENT_SECRET;
+    const secret = safeTrim(c.env.GOOGLE_CLIENT_SECRET);
     console.log(`[AUTH AUDIT] Secret Len: ${secret.length}, First: ${secret.charCodeAt(0)}, Last: ${secret.charCodeAt(secret.length - 1)}`);
     
     // 🔍 STEP 2: User Info
@@ -372,7 +373,7 @@ app.get('/auth/callback/google', async (c) => {
     console.error("[OAuth Error] Callback failed:", e);
     // 🧪 observability: return specific error for remote debugging
     return c.json({ 
-      error: "Authentication failed", 
+      error: "Error de autenticación", 
       message: "Error de sincronización con Google."
     }, 500);
   }
@@ -476,7 +477,7 @@ app.post('/auth/reset-password/request', rateLimiter(3), async (c) => {
     .bind(token, expiresAt, user.id)
     .run();
 
-  const resend = new ResendService(c.env.RESEND_API_KEY.trim());
+  const resend = new ResendService(safeTrim(c.env.RESEND_API_KEY));
   const resetUrl = `${getBaseUrl(c)}/?view=RESET_PASSWORD&token=${token}`;
   
   await resend.sendPasswordReset(email, resetUrl);
@@ -526,9 +527,9 @@ app.post('/auth/reset-password/verify', rateLimiter(3), async (c) => {
 // 1. LOGIN (Legacy/Dev Hardening [#46])
 app.post('/auth/login-dev', rateLimiter(5), async (c) => {
   // Solo permitir en desarrollo o si el usuario es explícitamente admin
-  const isDev = c.env.ENVIRONMENT === 'development' || c.env.APP_URL?.includes('localhost');
+  const isDev = c.env.ENVIRONMENT === 'development' || (c.env.APP_URL && c.env.APP_URL.includes('localhost'));
   if (!isDev) {
-    return c.json({ error: "Method not allowed in production." }, 405);
+    return c.json({ error: "Método no permitido en producción." }, 405);
   }
 
   const body = await c.req.json();
@@ -568,15 +569,16 @@ app.onError((err, c) => {
   console.error(`[CRITICAL ERROR] ${c.req.method} ${c.req.url}:`, err);
   
   // 🧪 SECURITY 360: Production Secret Guard (@production-code-audit)
-  if (!c.env.SIGNING_SECRET && c.env.ENVIRONMENT === 'production') {
+  const secret = safeTrim(c.env.SIGNING_SECRET);
+  if (!secret && c.env.ENVIRONMENT === 'production') {
     return c.json({ 
-      error: "Critical infrastructure failure. Please contact administrator.", 
+      error: "Falla crítica de infraestructura. Por favor, contacta al administrador.", 
       code: "INTERNAL_SERVER_ERROR" 
     }, 500);
   }
 
   return c.json({ 
-    error: "An unexpected error occurred. Please contact support if this persists.",
+    error: "Ocurrió un error inesperado. Por favor, contacta a soporte si esto persiste.",
     code: "INTERNAL_SERVER_ERROR" 
   }, 500);
 });
@@ -606,34 +608,34 @@ app.get('/user', (c) => {
 
 app.post('/checkout/subscription', rateLimiter(10), async (c) => {
   const user = c.get('user');
-  if (!user) return c.json({ error: "Unauthorized" }, 401);
+  if (!user) return c.json({ error: "No autorizado" }, 401);
 
-  const mp = new MP_Service(c.env.MP_ACCESS_TOKEN.trim(), c.env.MP_WEBHOOK_SECRET.trim());
+  const mp = new MP_Service(safeTrim(c.env.MP_ACCESS_TOKEN), safeTrim(c.env.MP_WEBHOOK_SECRET));
   const data = await mp.createSubscription(user.id, (user as any).email, c.env.APP_URL);
   
   if (data.init_point) {
     return c.json({ init_point: data.init_point });
   }
-  return c.json({ error: "Checkout error", details: data }, 500);
+  return c.json({ error: "Error al procesar el pago", details: data }, 500);
 });
 
 // NEW: One-off Checkout Handler (@payment-integration)
 app.post('/checkout/buy/:dropId', rateLimiter(10), async (c) => {
   const user = c.get('user');
   const dropId = c.req.param('dropId');
-  if (!user) return c.json({ error: "Unauthorized" }, 401);
+  if (!user) return c.json({ error: "No autorizado" }, 401);
 
   const db = c.env.DB;
   const drop: any = await db.prepare("SELECT title FROM drops WHERE id = ?").bind(dropId).first();
-  if (!drop) return c.json({ error: "Drop not found" }, 404);
+  if (!drop) return c.json({ error: "Contenido no encontrado" }, 404);
 
-  const mp = new MP_Service(c.env.MP_ACCESS_TOKEN.trim(), c.env.MP_WEBHOOK_SECRET.trim());
+  const mp = new MP_Service(safeTrim(c.env.MP_ACCESS_TOKEN), safeTrim(c.env.MP_WEBHOOK_SECRET));
   const data = await mp.createOneOffPreference(user.id, dropId, drop.title, c.env.APP_URL);
 
   if (data.init_point) {
     return c.json({ init_point: data.init_point });
   }
-  return c.json({ error: "Preference error", details: data }, 500);
+  return c.json({ error: "Error de preferencia", details: data }, 500);
 });
 
 app.get('/drops', async (c) => {
@@ -656,7 +658,7 @@ app.get('/drops', async (c) => {
 app.get('/drops/:id', async (c) => {
   const user = c.get('user');
   const dropId = c.req.param('id');
-  if (!user) return c.json({ error: "Unauthorized" }, 401);
+  if (!user) return c.json({ error: "No autorizado" }, 401);
 
   const db = c.env.DB;
 
@@ -666,7 +668,7 @@ app.get('/drops/:id', async (c) => {
     FROM drops d WHERE d.id = ?
   `).bind(user.id, dropId).first();
 
-  if (!drop) return c.json({ error: "Drop not found" }, 404);
+  if (!drop) return c.json({ error: "Contenido no encontrado" }, 404);
 
   // 2. Get Assets (Hardened RLS Simulation [#6])
   // Restrict masters if locked or USER DOES NOT OWN DROP
@@ -687,7 +689,7 @@ app.get('/drops/:id', async (c) => {
 app.get('/download/:assetId', async (c) => {
   const user = c.get('user');
   const assetId = c.req.param('assetId');
-  if (!user) return c.json({ error: "Unauthorized" }, 401);
+  if (!user) return c.json({ error: "No autorizado" }, 401);
 
   const db = c.env.DB;
   
@@ -715,15 +717,15 @@ app.get('/cdn/:key', async (c) => {
   const expires = c.req.query('expires');
   const signature = c.req.query('signature');
 
-  if (!expires || !signature) return c.text("Forbidden: Missing credentials", 403);
-  if (parseInt(expires) < Math.floor(Date.now() / 1000)) return c.text("Forbidden: Link expired", 403);
+  if (!expires || !signature) return c.text("Prohibido: Faltan credenciales", 403);
+  if (parseInt(expires) < Math.floor(Date.now() / 1000)) return c.text("Prohibido: Enlace expirado", 403);
   
   const payload = `${key}:${expires}`;
   const isValid = await verifySignature(payload, signature, getSigningSecret(c.env));
-  if (!isValid) return c.text("Forbidden: Invalid signature", 403);
+  if (!isValid) return c.text("Prohibido: Firma inválida", 403);
 
   const object = await c.env.R2.get(key);
-  if (!object) return c.text("Not Found", 404);
+  if (!object) return c.text("No encontrado", 404);
 
   const headers = new Headers();
   object.writeHttpMetadata(headers as any);
@@ -741,7 +743,7 @@ app.get('/assets/:key', async (c) => {
   // Simple check: only allow if it starts with previews/ or similar if configured
   // For now, we trust the drop logic that only returns preview keys to guests
   const object = await c.env.R2.get(key);
-  if (!object) return c.text("Not Found", 404);
+  if (!object) return c.text("No encontrado", 404);
 
   const headers = new Headers();
   object.writeHttpMetadata(headers as any);
@@ -758,14 +760,14 @@ app.post('/webhooks/mercadopago', async (c) => {
 
   // 1. Signature Verification (@payment-integration Rule 76)
   const dataId = body.data?.id;
-  if (!dataId) return c.json({ error: "Invalid payload" }, 400);
+  if (!dataId) return c.json({ error: "Carga inválida" }, 400);
 
-  const mp = new MP_Service(c.env.MP_ACCESS_TOKEN.trim(), c.env.MP_WEBHOOK_SECRET.trim());
+  const mp = new MP_Service(safeTrim(c.env.MP_ACCESS_TOKEN), safeTrim(c.env.MP_WEBHOOK_SECRET));
   const isValid = await mp.verifySignature(xSignature, xRequestId, dataId);
 
   if (!isValid) {
     console.error("[Webhook] Invalid x-signature");
-    return c.json({ error: "Unauthorized" }, 401);
+    return c.json({ error: "No autorizado" }, 401);
   }
 
   // 2. Event Type Dispatcher

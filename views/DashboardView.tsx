@@ -26,7 +26,7 @@ export const DashboardView: React.FC = () => {
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'reset-request' | 'reset-verify'>('login');
 
   // 🔍 Filter & Search State
-  const [activeCategory, setActiveCategory] = useState<'All' | 'Series' | 'Single' | 'Workshop'>('All');
+  const [activeCategory, setActiveCategory] = useState<'Todos' | 'Series' | 'Sencillos' | 'Talleres'>('Todos');
   const [searchQuery, setSearchQuery] = useState('');
 
   // 🔍 Filter Logic
@@ -368,6 +368,20 @@ export const DashboardView: React.FC = () => {
                   </ScrollReveal>
                 </div>
 
+                <div className="flex flex-col md:flex-row gap-6 w-full md:w-auto px-4">
+                  <div className="flex bg-slate-100 p-1 rounded-2xl">
+                    {(['Todos', 'Series', 'Sencillos', 'Talleres'] as const).map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setActiveCategory(cat)}
+                        className={`px-6 py-2.5 text-[9px] font-black uppercase tracking-widest rounded-xl transition-all ${activeCategory === cat ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Membership Upsell Banner (@marketing-psychology) */}
                 {!drops.some(d => d.is_unlocked) && (
                   <ScrollReveal delay={0.3} className="w-full px-4 mb-12">
@@ -415,7 +429,7 @@ export const DashboardView: React.FC = () => {
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
                     <input 
                       type="text"
-                      placeholder="Buscar drops..."
+                      placeholder="Buscar contenidos..."
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                       className="w-full h-12 pl-11 pr-4 bg-slate-50 border border-slate-100 rounded-xl focus:border-primary focus:outline-none transition-all text-xs font-medium"

@@ -166,7 +166,7 @@ const App: React.FC = () => {
       .then(data => setCacheValue(key, data))
       .catch(err => {
         console.error(`[DataCache] Prefetch failed for ${key}:`, err);
-        setCacheValue(key, { error: err.message || "Failed to fetch" });
+        setCacheValue(key, { error: err.message || "Error al obtener datos" });
       });
   }, [dataCache, setCacheValue]);
 
@@ -209,7 +209,7 @@ const App: React.FC = () => {
                       />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-primary text-[0.6rem] mb-1">Success Unlocked</span>
+                      <span className="text-primary text-[0.6rem] mb-1">Éxito Desbloqueado</span>
                       {successMessage}
                     </div>
                   </motion.div>
