@@ -81,18 +81,30 @@ export const HomeView: React.FC = () => {
           </ScrollReveal>
         </div>
 
-        {/* Action Button - Linked to Methodology */}
+        {/* Action Buttons - Distinct paths for School and Digital */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1 }}
+          className="flex flex-col sm:flex-row gap-6 mt-4"
         >
           <Magnetic pullStrength={0.15}>
             <button 
-              onClick={() => navigateTo(ViewState.METHODOLOGY)}
-              className="px-10 py-5 bg-slate-900 text-white rounded-full text-lg font-bold shadow-2xl hover:bg-slate-800 transition-all transform hover:scale-105 active:scale-95 font-display"
+              onClick={() => navigateTo(ViewState.REGISTER)}
+              className="px-10 py-5 bg-slate-900 text-white rounded-full text-lg font-bold shadow-2xl hover:bg-slate-800 transition-all transform hover:scale-105 active:scale-95 font-display flex items-center gap-3"
             >
-              Conoce el Método JACI
+              <span className="material-symbols-outlined">school</span>
+              Admisiones 2026
+            </button>
+          </Magnetic>
+
+          <Magnetic pullStrength={0.12}>
+            <button 
+              onClick={() => navigateTo(ViewState.PRICING)}
+              className="px-10 py-5 bg-white border-2 border-primary/20 text-slate-800 rounded-full text-lg font-bold shadow-soft hover:border-primary/40 transition-all transform hover:scale-105 active:scale-95 font-display flex items-center gap-3"
+            >
+              <span className="material-symbols-outlined text-primary filled">rocket_launch</span>
+              Club Monstruomentes
             </button>
           </Magnetic>
         </motion.div>

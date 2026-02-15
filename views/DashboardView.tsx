@@ -171,11 +171,54 @@ export const DashboardView: React.FC = () => {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
                 <div className="flex flex-col items-start px-4">
                   <ScrollReveal>
-                    <GlassBadge icon="account_circle" colorClass="text-primary">Panel de Control</GlassBadge>
+                    <GlassBadge icon="account_circle" colorClass="text-primary">Bóveda Digital</GlassBadge>
                     <h1 className={DESIGN_SYSTEM.typography.h2 + " mt-6"}>Tu Colección <span className="text-primary">JACI</span></h1>
-                    <p className={DESIGN_SYSTEM.typography.body + " mt-4 max-w-xl"}>Bienvenido, <span className="font-bold text-slate-900">{user.email}</span>.</p>
+                    <p className={DESIGN_SYSTEM.typography.body + " mt-4 max-w-xl"}>Bienvenido a tu espacio creativo, <span className="font-bold text-slate-900">{user.email}</span>.</p>
                   </ScrollReveal>
                 </div>
+
+                {/* Membership Upsell Banner (@marketing-psychology) */}
+                {!drops.some(d => d.is_unlocked) && (
+                  <ScrollReveal delay={0.3} className="w-full px-4 mb-12">
+                     <motion.div 
+                       whileHover={{ y: -5 }}
+                       className="relative w-full overflow-hidden rounded-[2.5rem] bg-slate-900 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10 shadow-2xl"
+                     >
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -z-10 translate-x-1/2 -translate-y-1/2" />
+                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-jaci-pink/10 rounded-full blur-[60px] -z-10 -translate-x-1/2 translate-y-1/2" />
+                        
+                        <div className="flex flex-col items-start text-center md:text-left">
+                          <div className="inline-flex items-center gap-2 bg-primary/20 px-4 py-2 rounded-full mb-6">
+                            <span className="material-symbols-outlined text-sm text-primary filled">auto_awesome</span>
+                            <span className="text-primary font-black text-[10px] uppercase tracking-widest">JACI en Casa</span>
+                          </div>
+                          <h2 className="text-3xl md:text-4xl font-black font-display text-white mb-4">Únete al Club Monstruomentes</h2>
+                          <p className="text-white/60 font-body text-sm md:text-base max-w-lg">
+                            Desbloquea el acceso ilimitado a toda la bóveda y recibe un nuevo pack de recursos educativos cada mes.
+                          </p>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row items-center gap-6">
+                           <div className="flex flex-col items-center">
+                              <span className="text-3xl font-black font-display text-white">$99 <span className="text-xs text-white/40">MXN/mes</span></span>
+                              <span className="text-[10px] font-bold text-primary uppercase tracking-widest mt-1">Cancela cuando quieras</span>
+                           </div>
+                           <Magnetic pullStrength={0.15}>
+                             <button 
+                               onClick={() => window.location.href = '/?view=PRICING'}
+                               className="px-10 py-5 bg-primary text-white rounded-full font-black font-display text-[10px] uppercase tracking-[0.25em] shadow-glow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                             >
+                               Comenzar ahora
+                             </button>
+                           </Magnetic>
+                        </div>
+
+                        <div className="absolute -bottom-6 -right-6 opacity-20 pointer-events-none">
+                          <FloatingMonster monster="POMPIN" size="size-40" />
+                        </div>
+                     </motion.div>
+                  </ScrollReveal>
+                )}
                 <div className="px-4 w-full md:w-auto flex flex-col md:flex-row gap-4">
                   <div className="relative group min-w-[240px]">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
@@ -210,7 +253,7 @@ export const DashboardView: React.FC = () => {
                         <div className="p-8 md:p-10 flex flex-col flex-1">
                           <span className={DESIGN_SYSTEM.typography.label}>{drop.month} {drop.year}</span>
                           <h3 className="text-xl md:text-2xl font-black font-display text-slate-900 mb-4 transition-colors group-hover/card:text-primary">{drop.title}</h3>
-                          <p className="text-slate-500 font-body text-sm mb-10 flex-1">{drop.is_unlocked ? "Contenido listo para descargar." : "Suscripción necesaria."}</p>
+                          <p className="text-slate-500 font-body text-sm mb-10 flex-1">{drop.is_unlocked ? "Contenido listo para descargar." : "Disponible en el Club Monstruomentes."}</p>
                           
                           <div className="flex flex-col gap-3">
                             <button 

@@ -43,11 +43,11 @@ export const PricingView: React.FC = () => {
           <ScrollReveal>
             <GlassBadge icon="verified" colorClass="text-jaci-pink">Acceso Premium Monstruomente</GlassBadge>
             <h1 className={DESIGN_SYSTEM.typography.h1 + " mt-8"}>
-              Desbloquea la <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-jaci-pink to-jaci-purple">Magia Completa</span>
+              JACI en Casa: <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-jaci-pink to-jaci-purple">Club Monstruomentes</span>
             </h1>
             <p className={`${DESIGN_SYSTEM.typography.body} mt-10`}>
-              Únete a nuestra membresía y recibe packs exclusivos de material educativo diseñados para potenciar el genio de tus hijos cada mes.
+              Lleva la magia de JACI a tu hogar con la membresía mensual de recursos educativos diseñados para potenciar el genio de tus hijos.
             </p>
           </ScrollReveal>
         </div>
@@ -65,10 +65,10 @@ export const PricingView: React.FC = () => {
                 
                 <div className="flex flex-col items-center text-center mt-4">
                   <div className="size-20 rounded-[2rem] bg-jaci-pink-soft text-jaci-pink flex items-center justify-center mb-8 border border-jaci-pink/20">
-                    <span className="material-symbols-outlined text-4xl filled">rocket_launch</span>
+                    <span className="material-symbols-outlined text-4xl filled">auto_awesome</span>
                   </div>
                   
-                  <h3 className="text-3xl font-black font-display text-slate-900 mb-4">Suscripción Mensual</h3>
+                  <h3 className="text-3xl font-black font-display text-slate-900 mb-4">Membresía Digital</h3>
                   
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-6xl md:text-7xl font-black font-display text-slate-900">$99</span>
