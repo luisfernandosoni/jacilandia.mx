@@ -14,10 +14,10 @@
     "@types/jszip": "^3.4.0",
     "arctic": "^3.7.0",
     "framer-motion": "^12.0.0",
+    "hash-wasm": "^4.12.0",
     "hono": "^4.0.0",
     "jszip": "^3.10.1",
     "lucia": "^3.0.1",
-    "oslo": "^1.1.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "zod": "^4.3.6"

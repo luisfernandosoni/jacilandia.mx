@@ -7,7 +7,7 @@ import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 import { MP_Service } from './mp-service';
 import { ResendService } from './resend-service';
 import adminHandler from './admin-upload';
-import { Argon2id } from "oslo/password";
+import { argon2id, argon2Verify } from 'hash-wasm';
 
 // --- SILICON VALLEY SECURITY UTILS (@api-security-best-practices) ---
 // Using @safe-vibe Rule #89: Never hardcode secrets. Fallback to dev string only for local testing.
@@ -394,7 +394,19 @@ app.post('/auth/register', rateLimiter(5), async (c) => {
   if (existingUser) return c.json({ error: "El correo ya está registrado." }, 400);
 
   const userId = crypto.randomUUID();
-  const hashedPassword = await new Argon2id().hash(password);
+  
+  // 🧪 EDGE COMPATIBLE HASHING (@cloudflare-dev-expert)
+  // Using hash-wasm for Argon2id (Native binary compatible)
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hashedPassword = await argon2id({
+    password: password,
+    salt: salt,
+    parallelism: 1,
+    iterations: 2,
+    memorySize: 16384, // 16MB for Worker memory safety
+    hashLength: 32,
+    outputType: 'encoded'
+  });
 
   try {
     await db.prepare("INSERT INTO users (id, email, hashed_password, created_at) VALUES (?, ?, ?, ?)")
@@ -429,7 +441,10 @@ app.post('/auth/login', rateLimiter(10), async (c) => {
     return c.json({ error: "Credenciales inválidas" }, 400);
   }
 
-  const validPassword = await new Argon2id().verify(user.hashed_password, password);
+  const validPassword = await argon2Verify({
+    password: password,
+    hash: user.hashed_password
+  });
   if (!validPassword) return c.json({ error: "Credenciales inválidas" }, 400);
 
   const session = await lucia.createSession(user.id, {});
@@ -485,7 +500,16 @@ app.post('/auth/reset-password/verify', rateLimiter(3), async (c) => {
 
   if (!user) return c.json({ error: "El enlace ha expirado o es inválido." }, 400);
 
-  const hashedPassword = await new Argon2id().hash(password);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hashedPassword = await argon2id({
+    password: password,
+    salt: salt,
+    parallelism: 1,
+    iterations: 2,
+    memorySize: 16384,
+    hashLength: 32,
+    outputType: 'encoded'
+  });
   
   await db.prepare("UPDATE users SET hashed_password = ?, password_reset_token = NULL, password_reset_expires = NULL WHERE id = ?")
     .bind(hashedPassword, user.id)
