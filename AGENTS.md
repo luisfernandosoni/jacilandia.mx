@@ -35,44 +35,58 @@
 > **Task Initialization**: You MUST start EVERY task by searching for and identifying at least **5 relevant skills** from the System Skill Library (`C:\Users\sonig\.gemini\skills`).
 >
 > - **Audit**: Perform a "Deep Audit" of these candidates to select the most relevant experts.
-> - **Continuous Transparency**: You MUST inform the user of **EVERY SINGLE SKILL USE** at the very time it is being applied. At all times.
+> - **Continuous Transparency**: You MUST inform the user of **EVERY SINGLE SKILL USE** at the very time it is being applied.
 >   - **Technique**: Update `TaskStatus` and tool descriptions to reflect the active expert continuously.
 
 1.  **The "Never Again" Protocol (Post-Mortem)**: After fixing a bug or correction loop, create a "Discipline Skill" rule here.
-2.  **The Architecture Ratchet**: When touching any file, upgrade it to the current standard (Tailwind v4, FM 12).
+2.  **The Architecture Ratchet**: When touching any file, upgrade it to current standard (Tailwind v4, FM 12).
 3.  **The Skill Synthesis Cluster**: Interaction rules for tasks requiring >3 skills.
-4.  **Environment Hygiene (NEVER AGAIN #1)**: ALWAYS sanitize `c.env` values via `trim()`.
+4.  **The Persistence Mandate**: Deleting rules or simplifying granular logic in this file is STRICTLY FORBIDDEN. Preserve all technical constraints.
 
-## 5. Active Logic & Security Context (Detailed)
+## 5. Active Logic & Security Context (High Density)
+
+> **System Note:** These rules are loaded _passively_ to reduce retrieval latency.
 
 - **Infrastructure & Cloudflare (@cloudflare-dev-expert)**:
   - **D1 Recovery (CRITICAL)**: Truth Audit (`PRAGMA table_info`) + Surgical Reconstruction.
-  - **Edge Processing**: 128MB limit. Prefer streaming.
-  - **Guardrail**: ALWAYS use `--remote` for wrangler operations.
-  - **Anti-Deletion**: strictly forbidden unless explicitly requested.
-  - **Dashboard Deference**: Use CLI equivalents for secrets/mapping.
+  - **Node.js**: MUST have `compatibility_flags = [ "nodejs_compat" ]` in `wrangler.toml` for `fs/path/os`.
+  - **Edge Processing**: Guard for **128MB** memory limit. Prefer streaming.
+  - **R2 Security**: Public assets MUST use **Signed URLs (5min)** or **HMAC Proxying**.
+  - **Guardrail**: ALWAYS use `--remote` for wrangler operations to ensure truth. Anti-Deletion is strictly mandated.
 
 - **Design & Aesthetics (@ui-ux-pro-max, @premium-design-standards, @design-md)**:
+  - **Standard**: "Silicon Valley" Tier. No basic UI. Must use `DESIGN_SYSTEM` in `types.ts`.
   - **Heuristics**: 8px grid, optical alignment, "High-Glance" aesthetic. Update `design.md` before UI work.
 
-- **Authentication (@auth-implementation-patterns)**:
-  - **Pattern**: Hybrid Session/Token via Lucia + arctic Google OAuth. Cookies: `HttpOnly`, `Secure`, `SameSite=Lax`.
+- **Performance & Motion (@web-performance-optimization, @motion-engine-v12)**:
+  - **Metrics**: LCP < 2.5s, CLS < 0.1. No linear easings; absolute Framer Motion mastery.
+  - **Loading**: Use `warmUpAssets` and predictive preloading. Images MUST use `/cdn-cgi/image/` prefix.
+
+- **Authentication (@auth-implementation-patterns, @luciaauth-expert)**:
+  - **Pattern**: Hybrid Session/Token via **Lucia**. Use **Arctic** for OAuth.
+  - **Security**: Cookies MUST be `HttpOnly`, `Secure`, `SameSite=Lax`. CSRF verification via `verifyRequestOrigin()` is mandatory.
 
 - **Payments (@payment-integration)**:
-  - **Provider**: MercadoPago. Webhooks: Idempotent + Verified (`x-signature`). Approved status only.
+  - **Provider**: **MercadoPago**. Webhooks MUST be **Idempotent** (ledger check) and **Verified** (`x-signature`).
+  - **Logic**: Grant access ONLY on `payment.approved`.
+
+- **Database Architecture (@database-design)**:
+  - **Engine**: Cloudflare D1 (SQLite).
+  - **Schema**: _Analytics-First_. The `ledger` table is the Single Source of Truth for both Access and Revenue.
+  - **Search**: Use **FTS5** virtual tables; NO `LIKE %...%`.
+
+- **Analytics & Strategy (@analytics-tracking, @startup-metrics-framework)**:
+  - **Metrics**: Track **MRR**, **LTV**, and **Churn Rate**. No PII; use `user_id`.
 
 - **Security Strategy (@safe-vibe)**:
-  - **Mandate**: 62-Point Vulnerability Checklist. Signed R2 URLs (5min). IDOR protection. Server-side identity derivation.
-
-- **Analytics (@analytics-tracking, @startup-metrics-framework)**:
-  - **Metrics**: Track MRR, LTV, Churn Rate. No PII.
+  - **Defensive Strategy**: 62-Point Vulnerability Checklist. signed R2 URLs (5min). IDOR protection via ledger verify. Server-side identity derivation.
 
 ## 6. High-Density Logic & Index
 
 [Tech Stack Index]|root: ./
 |Frontend:{types.ts,warmUpAssets.ts,DESIGN_SYSTEM}
 |Database:{SQLite (D1), Ledger: [SSoT, analytics-first], Search: FTS5}
-|Baseline:{[task.md](file:///e:/Antigravity/jacilandia.mx/task.md),[site.md](file:///e:/Antigravity/jacilandia.mx/site.md),[design.md](file:///e:/Antigravity/jacilandia.mx/design.md),[lessons.md](file:///e:/Antigravity/jacilandia.mx/lessons.md)}
+|Baseline:{[task.md](file:///e:/Antigravity/jacilandia.mx/task.md),[site.md](file:///e:/Antigravity/jacilandia.mx/site.md),[design.md](file:///e:/Antigravity/jacilandia.mx/design.md),[lessons.md](file:///e:/Antigravity/jacilandia.mx/lessons.md),[changelog.md](file:///e:/Antigravity/jacilandia.mx/changelog.md)}
 
 [Expert Skills Reference]|root: C:\Users\sonig\.gemini\skills
 |@cloudflare-dev-expert:{ai-agents-mastery,d1-deep-dive,kv-data-mastery,pages-functions,r2-storage,wrangler-mastery}
@@ -90,6 +104,8 @@
 |Essentials Pack:{concise-planning,lint-and-validate,git-pushing,kaizen,systematic-debugging}
 |Security Pack/Engineer:{ethical-hacking-methodology,burp-suite-testing,top-web-vulnerabilities,linux-privilege-escalation,cloud-penetration-testing,security-auditor,vulnerability-scanner}
 |Security Pack/Developer:{api-security-best-practices,auth-implementation-patterns,backend-security-coder,frontend-security-coder,cc-skill-security-review,pci-compliance}
+|Identity Pack:{luciaauth-expert,arctic-oauth,auth-implementation-patterns,identity-management-mastery}
+
 |Web Pack/Wizard:{frontend-design,react-best-practices,react-patterns,nextjs-best-practices,tailwind-patterns,form-cro,seo-audit}
 |Web Pack/Designer:{ui-ux-pro-max,3d-web-experience,canvas-design,mobile-design,scroll-experience}
 |Full-Stack Pack:{senior-fullstack,frontend-developer,backend-dev-guidelines,api-patterns,database-design,stripe-integration}
