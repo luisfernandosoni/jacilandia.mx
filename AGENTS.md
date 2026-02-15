@@ -29,7 +29,14 @@
 - **Security Hardening**: You MUST run a `@safe-vibe` audit before every major feature implementation and deployment.
 - **Documentation Standard**: `implementation_plan.md` and `walkthrough.md` MUST list the skills used. ALWAYS follow the `@walkthrough-pro` (Elite Senior Staff) standard.
 
-## 4. Agent Evolution & Skill Protocol
+## 4. Mandatory Skill Protocol & Evolution
+
+> [!IMPORTANT]
+> **Task Initialization**: You MUST start EVERY task by searching for and identifying at least **5 relevant skills** from the System Skill Library (`C:\Users\sonig\.gemini\skills`).
+>
+> - **Audit**: Perform a "Deep Audit" of these candidates to select the most relevant experts.
+> - **Usage**: Implement solutions using the audited skills.
+> - **Transparency**: You MUST explicitly report which skills are active in EVERY `task_boundary` and `notify_user` message.
 
 1.  **The "Never Again" Protocol (Post-Mortem)**: After fixing a bug or correction loop, create a "Discipline Skill" rule here.
 2.  **The Architecture Ratchet**: When touching any file, upgrade it to the current standard (Tailwind v4, FM 12).
