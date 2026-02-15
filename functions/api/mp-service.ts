@@ -73,7 +73,7 @@ export class MP_Service {
       body: JSON.stringify({
         back_url: `${appUrl}/dashboard`,
         reason: "JACI Squad Monthly Membership",
-        external_reference: userId,
+        external_reference: `SUB:${userId}`,
         auto_recurring: {
           frequency: 1,
           frequency_type: "months",
@@ -81,6 +81,7 @@ export class MP_Service {
           currency_id: "MXN"
         },
         payer_email: email,
+        statement_descriptor: "JACILANDIA",
         status: "pending"
       })
     });
@@ -107,7 +108,8 @@ export class MP_Service {
           unit_price: 99,
           currency_id: "MXN"
         }],
-        external_reference: userId,
+        external_reference: `ONE_OFF:${userId}:${dropId}`,
+        statement_descriptor: "JACILANDIA",
         back_urls: {
           success: `${appUrl}/dashboard?status=success`,
           pending: `${appUrl}/dashboard?status=pending`,

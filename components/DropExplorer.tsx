@@ -143,7 +143,7 @@ export const DropExplorer: React.FC<DropExplorerProps> = ({ dropId, onBack }) =>
                       const data = await res.json();
                       if (data.init_point) window.location.href = data.init_point;
                     }}
-                    className="w-full py-4 bg-primary text-white rounded-full text-[0.65rem] font-black uppercase tracking-[0.2em] shadow-button active:scale-95 transition-all"
+                    className="w-full py-4 bg-primary text-white rounded-full text-[0.65rem] font-black uppercase tracking-[0.2em] shadow-button active:scale-95 transition-all mb-4"
                   >
                     Desbloquear Drop ($99 MXN)
                   </button>
@@ -198,8 +198,15 @@ export const DropExplorer: React.FC<DropExplorerProps> = ({ dropId, onBack }) =>
 
             {drop.is_unlocked && (
               <Magnetic pullStrength={0.1}>
-                <button className="w-full mt-8 py-4 bg-slate-900 text-white rounded-full text-[0.65rem] font-black uppercase tracking-[0.2em] shadow-button active:scale-95 transition-all">
-                  Descargar Tudo (ZIP)
+                <button 
+                  onClick={() => {
+                    const zip = drop.assets.find(a => a.type === 'zip_bundle');
+                    if (zip) window.location.href = `/api/download/${zip.id}`;
+                    else alert("ZIP no disponible aún.");
+                  }}
+                  className="w-full mt-8 py-4 bg-slate-900 text-white rounded-full text-[0.65rem] font-black uppercase tracking-[0.2em] shadow-button active:scale-95 transition-all"
+                >
+                  Descargar Todo (ZIP)
                 </button>
               </Magnetic>
             )}

@@ -19,6 +19,28 @@ export const DashboardView: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  
+  // 🔍 Filter & Search State
+  const [activeCategory, setActiveCategory] = useState<'All' | 'Series' | 'Single' | 'Workshop'>('All');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // 🔍 Filter Logic
+  const filteredDrops = drops.filter(drop => {
+    const matchesSearch = drop.title.toLowerCase().includes(searchQuery.toLowerCase());
+    // In this MVP, tags are not yet in the DB model returned by API, we'll default to matches.
+    // If tags exist in Drop interface, we'd use: const matchesCategory = activeCategory === 'All' || drop.tags?.includes(activeCategory);
+    return matchesSearch;
+  });
+
+  const handleOneOffPurchase = async (dropId: string) => {
+    try {
+      const res = await fetch(`/api/checkout/buy/${dropId}`, { method: 'POST' });
+      const data = await res.json();
+      if (data.init_point) window.location.href = data.init_point;
+    } catch (e) {
+      console.error("Purchase failed", e);
+    }
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -154,14 +176,24 @@ export const DashboardView: React.FC = () => {
                     <p className={DESIGN_SYSTEM.typography.body + " mt-4 max-w-xl"}>Bienvenido, <span className="font-bold text-slate-900">{user.email}</span>.</p>
                   </ScrollReveal>
                 </div>
-                <div className="px-4 w-full md:w-auto">
+                <div className="px-4 w-full md:w-auto flex flex-col md:flex-row gap-4">
+                  <div className="relative group min-w-[240px]">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                    <input 
+                      type="text"
+                      placeholder="Buscar drops..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className="w-full h-12 pl-11 pr-4 bg-slate-50 border border-slate-100 rounded-xl focus:border-primary focus:outline-none transition-all text-xs font-medium"
+                    />
+                  </div>
                   <ScrollReveal delay={0.2}>
-                    <Magnetic pullStrength={0.1}><button onClick={handleLogout} className="w-full md:w-auto px-8 py-4 bg-slate-100 text-slate-500 rounded-full font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center gap-2"><span className="material-symbols-outlined text-lg">logout</span>Cerrar Sesión</button></Magnetic>
+                    <Magnetic pullStrength={0.1}><button onClick={handleLogout} className="w-full md:w-auto px-8 py-3 bg-slate-100 text-slate-500 rounded-full font-black text-[9px] uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center gap-2"><span className="material-symbols-outlined text-lg">logout</span>Salir</button></Magnetic>
                   </ScrollReveal>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
-                {drops.map((drop, idx) => (
+                {filteredDrops.map((drop, idx) => (
                   <ScrollReveal key={drop.id} delay={idx * 0.1}>
                     <InteractionCard borderColor={drop.is_unlocked ? DESIGN_SYSTEM.colors.green : DESIGN_SYSTEM.colors.slate[800]} className="h-full !p-0 overflow-hidden group/card">
                       <div className="flex flex-col h-full">
@@ -179,14 +211,26 @@ export const DashboardView: React.FC = () => {
                           <span className={DESIGN_SYSTEM.typography.label}>{drop.month} {drop.year}</span>
                           <h3 className="text-xl md:text-2xl font-black font-display text-slate-900 mb-4 transition-colors group-hover/card:text-primary">{drop.title}</h3>
                           <p className="text-slate-500 font-body text-sm mb-10 flex-1">{drop.is_unlocked ? "Contenido listo para descargar." : "Suscripción necesaria."}</p>
-                          <button 
-                            onClick={() => drop.is_unlocked && setSelectedDropId(drop.id)}
-                            className={`w-full py-4 rounded-full font-black text-[9px] uppercase tracking-[0.25em] transition-all flex items-center justify-center gap-2 ${drop.is_unlocked ? 'bg-slate-900 text-white hover:bg-jaci-green' : 'border-2 border-slate-100 text-slate-400'}`}
-                            aria-label={drop.is_unlocked ? `Explorar ${drop.title}` : `Suscribirse para desbloquear ${drop.title}`}
-                          >
-                            <span className="material-symbols-outlined text-lg">{drop.is_unlocked ? 'explore' : 'star'}</span>
-                            {drop.is_unlocked ? 'Explorar' : 'Suscribirme'}
-                          </button>
+                          
+                          <div className="flex flex-col gap-3">
+                            <button 
+                              onClick={() => drop.is_unlocked && setSelectedDropId(drop.id)}
+                              className={`w-full py-4 rounded-full font-black text-[9px] uppercase tracking-[0.25em] transition-all flex items-center justify-center gap-2 ${drop.is_unlocked ? 'bg-slate-900 text-white hover:bg-jaci-green' : 'bg-slate-100 text-slate-400'}`}
+                            >
+                              <span className="material-symbols-outlined text-lg">{drop.is_unlocked ? 'explore' : 'lock'}</span>
+                              {drop.is_unlocked ? 'Explorar' : 'Bloqueado'}
+                            </button>
+
+                            {!drop.is_unlocked && (
+                              <button 
+                                onClick={() => handleOneOffPurchase(drop.id)}
+                                className="w-full py-4 bg-slate-900 text-white rounded-full font-black text-[9px] uppercase tracking-[0.25em] hover:bg-primary transition-all flex items-center justify-center gap-2"
+                              >
+                                <span className="material-symbols-outlined text-lg">payments</span>
+                                Comprar Drop ($99)
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </InteractionCard>

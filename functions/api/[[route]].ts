@@ -5,6 +5,7 @@ import { secureHeaders } from 'hono/secure-headers';
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
 import { MP_Service } from './mp-service';
+import adminHandler from './admin-upload';
 
 // --- SILICON VALLEY SECURITY UTILS (@api-security-best-practices) ---
 // Using @safe-vibe Rule #89: Never hardcode secrets. Fallback to dev string only for local testing.
@@ -149,7 +150,7 @@ app.use('*', async (c, next) => {
 });
 
 // --- ADMIN SECURITY MIDDLEWARE (@api-security-best-practices) ---
-const adminMiddleware = async (c: any, next: any) => {
+export const adminMiddleware = async (c: any, next: any) => {
   const user = c.get('user');
   if (!user) return c.json({ error: "Unauthorized" }, 401);
   
@@ -606,44 +607,82 @@ app.post('/webhooks/mercadopago', async (c) => {
 
   // 2. Event Type Dispatcher
   // Flow (@payment-integration Rule 77): Only process approved status
-  if (body.type === "payment" && body.action === "payment.created") {
+  if (body.type === "payment" && (body.action === "payment.created" || body.action === "payment.updated")) {
     // Re-verify directly from provider API for security hardening
     const payment = await mp.getPayment(dataId);
     
     if (payment.status === 'approved') {
-      const userId = payment.external_reference;
+      const externalRef = payment.external_reference || "";
+      let userId: string | null = null;
+      let targetDropId: string | null = null;
+      let source: 'subscription' | 'one_off' = 'subscription';
+
+      // 🔍 Parse Composite Reference (@payment-integration)
+      if (externalRef.startsWith("ONE_OFF:")) {
+        const parts = externalRef.split(":");
+        userId = parts[1];
+        targetDropId = parts[2];
+        source = 'one_off';
+      } else if (externalRef.startsWith("SUB:")) {
+        userId = externalRef.split(":")[1];
+        source = 'subscription';
+      } else {
+        // Legacy fallback
+        userId = externalRef;
+        source = 'subscription';
+      }
+
+      if (!userId) {
+        console.error("[Webhook] No User ID found in external_reference");
+        return c.json({ status: "error", message: "no_user" });
+      }
       
-      // 3. Idempotency Check (Rule 76: Check ledger before insert)
+      // 3. Idempotency Check (Rule 76: Check ledger before insert using payment_ref)
+      // We also check (user_id, drop_id) uniqueness in schema, but this prevents double-charging/logging.
       const existing = await db.prepare("SELECT 1 FROM ledger WHERE payment_ref = ?")
         .bind(dataId.toString()).first();
       
       if (existing) return c.json({ status: "ok", detail: "idempotent" });
 
-      // Grant Access
-      const dateApproved = new Date(payment.date_approved);
-      const month = dateApproved.getMonth() + 1;
-      const year = dateApproved.getFullYear();
-      
-      const drop: any = await db.prepare(
-        "SELECT id FROM drops WHERE month = ? AND year = ?"
-      ).bind(month, year).first();
+      // 4. Resolve Drop to Unlock
+      if (source === 'subscription') {
+        const dateApproved = new Date(payment.date_approved || Date.now());
+        const month = dateApproved.getMonth() + 1;
+        const year = dateApproved.getFullYear();
+        
+        const drop: any = await db.prepare(
+          "SELECT id FROM drops WHERE month = ? AND year = ?"
+        ).bind(month, year).first();
+        
+        if (drop) {
+          targetDropId = drop.id;
+        }
+      }
 
-      if (drop && userId) {
+      if (targetDropId) {
         const amount = payment.transaction_amount || 0;
         await db.prepare(`
           INSERT INTO ledger (id, user_id, drop_id, source, amount, payment_ref, month, year, unlocked_at, payment_status)
-          VALUES (?, ?, ?, 'subscription', ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
           crypto.randomUUID(), 
           userId, 
-          drop.id, 
+          targetDropId, 
+          source,
           amount, 
           dataId.toString(),
-          month,
-          year,
+          new Date(payment.date_approved).getMonth() + 1,
+          new Date(payment.date_approved).getFullYear(),
           Date.now(),
-          payment.status // 🧪 SECURITY 360: Auditability improvement
+          payment.status
         ).run();
+
+        // If it was a subscription, also ensure the subscription record is updated
+        if (source === 'subscription') {
+          // You might want to update the 'subscriptions' table here if preapproval_id is known
+        }
+      } else {
+        console.warn("[Webhook] Could not resolve drop for payment:", dataId);
       }
     }
   } else if (body.type === "subscription_preapproval") {
@@ -713,5 +752,7 @@ app.get('/admin/stats', adminMiddleware, async (c) => {
     total_users_base: userStats?.total_users || 0
   });
 });
+
+app.route('/admin', adminHandler);
 
 export const onRequest = handle(app);

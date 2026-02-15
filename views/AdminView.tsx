@@ -21,10 +21,25 @@ interface Stats {
   }>;
 }
 
+// Import JSZip for client-side processing
+import JSZip from 'jszip';
+
 export const AdminView: React.FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // CMS State
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [newDrop, setNewDrop] = useState({
+    title: '',
+    description: '',
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+    slug: ''
+  });
+  const [pendingAssets, setPendingAssets] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -41,6 +56,108 @@ export const AdminView: React.FC = () => {
     };
     fetchStats();
   }, []);
+
+  const handleZipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const zip = await JSZip.loadAsync(file);
+      
+      const assets: any[] = [];
+      const filePromises: Promise<void>[] = [];
+
+      zip.forEach((relativePath: string, zipEntry: any) => {
+        if (!zipEntry.dir) {
+          filePromises.push(zipEntry.async('blob').then((blob: Blob) => {
+            assets.push({
+              id: crypto.randomUUID(),
+              filename: relativePath.split('/').pop() || 'unknown',
+              blob,
+              type: relativePath.includes('preview') ? 'preview' : 
+                    relativePath.includes('master') ? 'master' : 
+                    relativePath.includes('print') ? 'print_ready' : 'master',
+              size: blob.size,
+              mime: blob.type
+            });
+          }));
+        }
+      });
+
+      await Promise.all(filePromises);
+      setPendingAssets(assets);
+      
+      // Auto-fill title from ZIP name
+      setNewDrop(prev => ({ ...prev, title: file.name.replace('.zip', ''), slug: file.name.replace('.zip', '').toLowerCase().replace(/\s+/g, '-') }));
+
+    } catch (e) {
+      alert("Error al procesar el ZIP");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const publishDrop = async () => {
+    if (!newDrop.title || pendingAssets.length === 0) return;
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const uploadedAssets = [];
+      let count = 0;
+
+      // 1. Upload each asset to R2 vía Worker Proxy
+      for (const asset of pendingAssets) {
+        const intentRes = await fetch('/api/admin/upload-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: asset.filename, contentType: asset.mime })
+        });
+        const { uploadUrl, key } = await intentRes.json();
+
+        // Subida directa al Worker Proxy (@api-upload-security)
+        const uploadRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: asset.blob
+        });
+
+        if (!uploadRes.ok) throw new Error(`Error subiendo ${asset.filename}`);
+
+        uploadedAssets.push({
+          type: asset.type,
+          r2_key: key,
+          filename: asset.filename,
+          mime_type: asset.mime,
+          file_size: asset.size,
+          sort_order: count
+        });
+
+        count++;
+        setUploadProgress(Math.round((count / pendingAssets.length) * 100));
+      }
+
+      // 2. Publish to D1
+      const res = await fetch('/api/admin/publish-drop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...newDrop,
+          assets: uploadedAssets,
+          thumbnail_key: uploadedAssets.find(a => a.type === 'preview')?.r2_key || uploadedAssets[0].r2_key
+        })
+      });
+
+      if (res.ok) {
+        alert("Drop publicado con éxito!");
+        setPendingAssets([]);
+      }
+    } catch (e) {
+      alert("Error al publicar el drop");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -77,6 +194,91 @@ export const AdminView: React.FC = () => {
             <p className={DESIGN_SYSTEM.typography.body + " mt-4 max-w-2xl"}>Análisis en tiempo real de la economía de Jacilandia. Métricas críticas y rendimiento de contenidos.</p>
           </ScrollReveal>
         </header>
+
+        {/* CMS Uploader (@file-uploads) */}
+        <div className="px-4 mb-20">
+          <ScrollReveal delay={0.2}>
+            <InteractionCard borderColor={DESIGN_SYSTEM.colors.primary} className="border-2 border-primary/20">
+              <div className="flex flex-col md:flex-row gap-12">
+                <div className="flex-1 space-y-8">
+                  <h3 className="text-2xl font-black font-display text-slate-900 uppercase">Cargar Nuevo Drop</h3>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 pl-4">Título</label>
+                      <input 
+                        className="w-full h-14 px-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-primary focus:outline-none transition-all"
+                        value={newDrop.title}
+                        onChange={e => setNewDrop({...newDrop, title: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 pl-4">Slug</label>
+                      <input 
+                        className="w-full h-14 px-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-primary focus:outline-none transition-all"
+                        value={newDrop.slug}
+                        onChange={e => setNewDrop({...newDrop, slug: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative group">
+                    <input 
+                      type="file" 
+                      accept=".zip" 
+                      onChange={handleZipUpload}
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                    />
+                    <div className="w-full py-12 border-4 border-dashed border-slate-100 rounded-[2rem] flex flex-col items-center justify-center group-hover:border-primary/50 group-hover:bg-primary/5 transition-all">
+                      <span className="material-symbols-outlined text-4xl text-slate-300 group-hover:text-primary mb-4 transition-colors">cloud_upload</span>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Arrastra el ZIP del Drop aquí</p>
+                    </div>
+                  </div>
+
+                  {pendingAssets.length > 0 && (
+                     <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <p className="text-[10px] font-black uppercase text-slate-400">{pendingAssets.length} Archivos detectados</p>
+                          {isUploading && <span className="text-primary font-black">{uploadProgress}%</span>}
+                        </div>
+                        <div className="max-h-48 overflow-y-auto space-y-2 pr-4 custom-scrollbar">
+                           {pendingAssets.map(a => (
+                             <div key={a.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                               <span className="text-xs font-bold text-slate-700 truncate max-w-[200px]">{a.filename}</span>
+                               <span className={`text-[8px] font-black uppercase px-3 py-1 rounded-full ${
+                                 a.type === 'preview' ? 'bg-jaci-pink/10 text-jaci-pink' : 
+                                 a.type === 'print_ready' ? 'bg-jaci-green/10 text-jaci-green' : 'bg-primary/10 text-primary'
+                               }`}>{a.type}</span>
+                             </div>
+                           ))}
+                        </div>
+                        
+                        <button 
+                          onClick={publishDrop}
+                          disabled={isUploading}
+                          className="w-full py-6 bg-slate-900 text-white rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all disabled:bg-slate-300"
+                        >
+                          {isUploading ? 'Subiendo contenido...' : 'PUBLICAR DROP'}
+                        </button>
+                     </div>
+                  )}
+                </div>
+
+                <div className="w-full md:w-80 space-y-6">
+                  <div className="p-8 bg-slate-900 text-white rounded-[2.5rem] space-y-4">
+                    <h4 className="text-xs font-black uppercase tracking-widest">Protocolo de Archivos</h4>
+                    <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
+                      El sistema detecta automáticamente los tipos basandose en carpetas:<br/>
+                      - <span className="text-jaci-pink">/preview</span>: Imágenes para galería.<br/>
+                      - <span className="text-jaci-green">/print</span>: PDFs para impresión.<br/>
+                      - <span className="text-primary">Raíz</span>: Archivos maestros.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </InteractionCard>
+          </ScrollReveal>
+        </div>
 
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-4 mb-20">
